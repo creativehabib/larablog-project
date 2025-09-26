@@ -52,10 +52,7 @@ class Profile extends Component
             $message = 'Profile updated successfully!';
 
             session()->flash('message', $message);
-            $this->dispatchBrowserEvent('showToastr', [
-                'type'    => 'success',
-                'message' => $message,
-            ]);
+            $this->dispatch('showToastr', type: 'success', message: $message);
         }
     }
     public function render()
