@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme.min.css')}}" data-skin="default">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/theme-dark.min.css')}}" data-skin="dark">
     <link rel="stylesheet" href="{{ asset('assets/stylesheets/custom.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-HzAa3eAiZyz6dVQb8sFZahuyN9KPh4Mx5BdfAa0AXf9DibKqMfcxwF94h1+NbXH1+X0N82djr1YG8G0dX4k5mQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
         var skin = localStorage.getItem('skin') || 'default';
         var disabledSkinStylesheet = document.querySelector('link[data-skin]:not([data-skin="' + skin + '"])');
@@ -746,22 +747,14 @@
 <script src="{{ asset('assets/vendor/flatpickr/flatpickr.min.js') }}"></script>
 <script src="{{ asset('assets/vendor/easy-pie-chart/jquery.easypiechart.min.js')}}"></script>
 <script src="{{ asset('assets/vendor/chart.js/Chart.min.js')}}"></script> <!-- END PLUGINS JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-3z9R4lYFtrFgt5SuvrL18BMo/6IKxhpcJn/qdNqxabWWMwBLT1R59OAqxCLv7saEh1PQuIrn7Z0eR0kL6xC/Aw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- BEGIN THEME JS -->
 <script src="{{ asset('assets/javascript/theme.min.js')}}"></script> <!-- END THEME JS -->
 <!-- BEGIN PAGE LEVEL JS -->
 <script src="{{ asset('assets/javascript/pages/dashboard-demo.js')}}"></script> <!-- END PAGE LEVEL JS -->
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116692175-1"></script>
-<script>
-    document.addEventListener('livewire:load', function () {
-        @if (session()->has('message'))
-        var toast = new bootstrap.Toast(document.getElementById('liveToast'),{
-            delay:5000
-        });
-        toast.show();
-        @endif
-    });
-</script>
+@include('components.toastr')
 @stack('scripts')
 </body>
 </html>
