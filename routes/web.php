@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
@@ -29,6 +30,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::controller(AdminController::class)->group(function(){
               Route::get('/dashboard', 'dashboard')->name('dashboard');
               Route::post('/logout', 'logout')->name('logout');
+              Route::get('/profile', 'profile')->name('profile');
        });
+        Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     });
 });

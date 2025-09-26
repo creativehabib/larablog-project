@@ -1,0 +1,185 @@
+<div>
+    <div class="row flex-lg-nowrap">
+        <div class="col">
+            <div class="row">
+                <div class="col mb-3">
+                    <div class="card">
+
+                        <div class="card-body">
+                            <div class="e-profile">
+                                <div class="row">
+                                    <div class="col-12 col-sm-auto mb-3">
+                                        <div class="mx-auto" style="width: 140px;">
+                                            <div class="d-flex justify-content-center align-items-center rounded" style="height: 140px; background-color: #e9ecef;">
+                                                @if(auth()->user()->avatar)
+                                                    <img src="{{ $user->avatar }}" alt="Profile" class="img-fluid rounded" style="max-height: 140px;">
+                                                @else
+                                                    <span style="color: #a6a8aa; font: bold 8pt Arial;">140x140</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col d-flex flex-column flex-sm-row justify-content-between mb-3">
+                                        <div class="text-center text-sm-left mb-2 mb-sm-0">
+                                            <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap">{{ auth()->user()->name }}</h4>
+                                            <p class="mb-0">{{ '@' . auth()->user()->username }}</p>
+                                            <div class="text-muted">
+                                                <small>Last seen {{ auth()->user()->updated_at?->diffForHumans() ?? 'N/A' }}</small>
+                                            </div>
+                                            <div class="mt-2">
+                                                <button class="btn btn-primary" type="button" id="changeAvatarBtn">
+                                                    <i class="fa fa-fw fa-camera"></i> <span>Change Photo</span>
+                                                </button>
+                                                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <div class="text-center text-sm-right">
+                                            <span class="badge badge-secondary">{{ auth()->user()->type ?? 'User' }}</span>
+                                            <div class="text-muted">
+                                                <small>Joined {{ auth()->user()->created_at->format('d M Y') }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tabs -->
+                                <ul class="nav nav-tabs">
+                                    <li class="nav-item">
+                                        <a wire:click="selectTab('personal_info')" data-toggle="tab" class="nav-link {{ $tab == 'personal_info' ? 'show active' : '' }}" href="#personal_info">Profile</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a wire:click="selectTab('change_password')" data-toggle="tab" class="nav-link {{ $tab == 'change_password' ? 'show active' : '' }}">Change Password</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a wire:click="selectTab('edit')" data-toggle="tab" class="nav-link cursor-pointer {{ $tab == 'edit' ? 'show active' : '' }}">Edit</a>
+                                    </li>
+                                </ul>
+
+                                <!-- Tab Content -->
+                                <div class="tab-content pt-3">
+                                    <!-- Profile Tab -->
+                                    <div class="tab-pane fade {{ $tab == 'personal_info' ? 'show active' : '' }}" id="personal_info" role="tabpanel">
+                                        <h5 class="mb-3">User Profile</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>About</h6>
+                                                <p>{{ auth()->user()->bio ?? 'No bio yet.' }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Recent Badges</h6>
+                                                <a href="#" class="badge badge-dark badge-pill">html5</a>
+                                                <a href="#" class="badge badge-dark badge-pill">react</a>
+                                                <a href="#" class="badge badge-dark badge-pill">bootstrap</a>
+                                                <hr>
+                                                <span class="badge badge-primary"><i class="fa fa-user"></i> 900 Followers</span>
+                                                <span class="badge badge-success"><i class="fa fa-cog"></i> 43 Forks</span>
+                                                <span class="badge badge-danger"><i class="fa fa-eye"></i> 245 Views</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Change Password Tab -->
+                                    <div class="tab-pane fade {{ $tab == 'change_password' ? 'show active' : '' }}" id="change_password" role="tabpanel">
+                                        <form method="POST" action="">
+                                            @csrf
+                                            <div class="row">
+                                                <div class="col-12 col-sm-6 mb-3">
+                                                    <div class="form-group">
+                                                        <label>Current Password</label>
+                                                        <input class="form-control" type="password" name="current_password">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>New Password</label>
+                                                        <input class="form-control" type="password" name="password">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Confirm Password</label>
+                                                        <input class="form-control" type="password" name="password_confirmation">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col d-flex justify-content-end">
+                                                    <button class="btn btn-primary" type="submit">Update Password</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Edit Tab -->
+                                    <div class="tab-pane fade {{ $tab == 'edit' ? 'show active' : ''}}" id="edit" role="edit">
+                                        <form class="form" wire:submit.prevent="updatePersonalInfo">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Full Name</label>
+                                                        <input class="form-control" wire:model="name" type="text" value="{{ old('name', $name) }}" placeholder="Enter name">
+                                                        @error('name') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Username</label>
+                                                        <input class="form-control" wire:model="username" type="text" value="{{ old('username', $username) }}" placeholder="Enter username">
+                                                        @error('username') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Email</label>
+                                                        <input class="form-control" wire:model="email" type="email" value="{{ old('email', $email) }}" placeholder="Enter email">
+                                                        @error('email') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>About</label>
+                                                        <textarea class="form-control" rows="5" wire:model="bio">{{ old('bio', $bio) }}</textarea>
+                                                        @error('bio') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col d-flex justify-content-end">
+                                                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div><!-- /tab-content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-12 col-md-3 mb-3">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button class="btn btn-block btn-secondary" type="submit">
+                                    <i class="fa fa-sign-out"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title font-weight-bold">Support</h6>
+                            <p class="card-text">Get fast, free help from our support team.</p>
+                            <button type="button" class="btn btn-primary">Contact Us</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /row -->
+</div>
+
+@push('scripts')
+    <script type="text/javascript" src="/path/to/toastr.js"></script>
+
+    @if(session("status")) <script type="text/javascript"> toastr.info("{{ session("status") }}"); <script> @endif
+@endpush

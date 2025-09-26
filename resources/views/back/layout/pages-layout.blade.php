@@ -4,8 +4,9 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><!-- End Required meta tags -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Begin SEO tag -->
-    <title> Dashboard | Looper - Bootstrap 4 Admin Theme </title>
+    <title> @yield('pageTitle') | Looper - Bootstrap 4 Admin Theme </title>
     <meta property="og:title" content="Dashboard">
     <meta name="author" content="Beni Arisandi">
     <meta property="og:locale" content="en_US">
@@ -37,6 +38,7 @@
         // add loading class to html immediately
         document.querySelector('html').classList.add('loading');
     </script><!-- END THEME STYLES -->
+    @stack('styles')
 </head>
 <body>
 <!-- .app -->
@@ -320,11 +322,12 @@
                     </ul><!-- /.nav -->
                     <!-- .btn-account -->
                     <div class="dropdown d-none d-md-flex">
-                        <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ asset('assets/images/avatars/profile.jpg') }}" alt=""></span> <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">Beni Arisandi</span> <span class="account-description">Marketing Manager</span></span></button> <!-- .dropdown-menu -->
+                        <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ auth()->user()->avatar }}" alt=""></span>
+                            <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->type }}</span></span></button> <!-- .dropdown-menu -->
                         <div class="dropdown-menu">
                             <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
                             <div class="dropdown-arrow ml-3 d-none d-lg-block"></div>
-                            <h6 class="dropdown-header d-none d-md-block d-lg-none"> Beni Arisandi </h6><a class="dropdown-item" href="user-profile.html"><span class="dropdown-icon oi oi-person"></span> Profile</a>
+                            <h6 class="dropdown-header d-none d-md-block d-lg-none"> Beni Arisandi </h6><a class="dropdown-item" href="{{ route('admin.profile') }}"><span class="dropdown-icon oi oi-person"></span> Profile</a>
                             <a class="dropdown-item" href="{{ route('admin.logout') }}"
                                onclick="event.preventDefault(); document.getElementById('logout_form').submit();">
                                 <span class="dropdown-icon oi oi-account-logout"></span> Logout
@@ -352,7 +355,9 @@
                 <div id="dropdown-aside" class="dropdown-aside collapse">
                     <!-- dropdown-items -->
                     <div class="pb-3">
-                        <a class="dropdown-item" href="user-profile.html"><span class="dropdown-icon oi oi-person"></span> Profile</a> <a class="dropdown-item" href="{{ route('admin.logout') }}" onclick="event.preventDefault();document.getElementById('logout_form')"><span class="dropdown-icon oi oi-account-logout"></span> Logout</a>
+                        <a class="dropdown-item" href="{{ route('admin.profile') }}"><span class="dropdown-icon oi oi-person"></span> Profile</a>
+                        <a class="dropdown-item" href="{{ route('admin.logout') }}" onclick="event.preventDefault();document.getElementById('logout_form')">
+                            <span class="dropdown-icon oi oi-account-logout"></span> Logout</a>
                         <form action="{{ route('admin.logout') }}" id="logout_form" method="POST">@csrf</form>
                         <div class="dropdown-divider"></div><a class="dropdown-item" href="#">Help Center</a> <a class="dropdown-item" href="#">Ask Forum</a> <a class="dropdown-item" href="#">Keyboard Shortcuts</a>
                     </div><!-- /dropdown-items -->
@@ -490,7 +495,7 @@
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a> <!-- child menu -->
                             <ul class="menu">
                                 <li class="menu-item">
-                                    <a href="user-profile.html" class="menu-link">Profile</a>
+                                    <a href="{{ route('admin.profile') }}" class="menu-link">Profile</a>
                                 </li>
                                 <li class="menu-item">
                                     <a href="user-activities.html" class="menu-link">Activities</a>
@@ -748,14 +753,15 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116692175-1"></script>
 <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag()
-    {
-        dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-    gtag('config', 'UA-116692175-1');
+    document.addEventListener('livewire:load', function () {
+        @if (session()->has('message'))
+        var toast = new bootstrap.Toast(document.getElementById('liveToast'),{
+            delay:5000
+        });
+        toast.show();
+        @endif
+    });
 </script>
+@stack('scripts')
 </body>
 </html>
