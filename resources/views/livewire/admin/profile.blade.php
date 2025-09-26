@@ -178,8 +178,3 @@
     </div> <!-- /row -->
 </div>
 
-@push('scripts')
-    <script type="text/javascript" src="/path/to/toastr.js"></script>
-
-    @if(session("status")) <script type="text/javascript"> toastr.info("{{ session("status") }}"); <script> @endif
-@endpush

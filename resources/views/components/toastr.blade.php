@@ -18,26 +18,61 @@
 @endphp
 @if($hasSessionToastr || (isset($errors) && $errors->any()))
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "newestOnTop": true,
-                "timeOut": "5000",
-                "extendedTimeOut": "2000"
+        (function () {
+            const toastOptions = {
+                closeButton: true,
+                progressBar: true,
+                newestOnTop: true,
+                timeOut: '5000',
+                extendedTimeOut: '2000',
             };
 
-            @foreach($toastrSessionMap as $sessionKey => $toastType)
-                @if(session()->has($sessionKey))
-                    toastr.{{ $toastType }}(@json(session()->get($sessionKey)));
-                @endif
-            @endforeach
+            const showQueuedToasts = () => {
+                if (typeof toastr === 'undefined') {
+                    return;
+                }
 
-            @if(isset($errors) && $errors->any())
-                @foreach($errors->all() as $error)
-                    toastr.error(@json($error));
+                toastr.options = toastOptions;
+
+                @foreach($toastrSessionMap as $sessionKey => $toastType)
+                    @if(session()->has($sessionKey))
+                        toastr.{{ $toastType }}(@json(session()->get($sessionKey)));
+                    @endif
                 @endforeach
-            @endif
-        });
+
+                @if(isset($errors) && $errors->any())
+                    @foreach($errors->all() as $error)
+                        toastr.error(@json($error));
+                    @endforeach
+                @endif
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', showQueuedToasts);
+            } else {
+                showQueuedToasts();
+            }
+
+            window.addEventListener('showToastr', function (event) {
+                if (typeof toastr === 'undefined') {
+                    return;
+                }
+
+                const detail = event.detail || {};
+                const type = detail.type || 'info';
+                const message = detail.message || '';
+
+                if (!message) {
+                    return;
+                }
+
+                toastr.options = toastOptions;
+                if (typeof toastr[type] === 'function') {
+                    toastr[type](message);
+                } else {
+                    toastr.info(message);
+                }
+            });
+        })();
     </script>
 @endif

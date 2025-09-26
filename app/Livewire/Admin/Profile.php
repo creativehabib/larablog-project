@@ -46,8 +46,17 @@ class Profile extends Component
         $user->bio = $this->bio;
         $updated = $user->save();
 
-        sleep(0.5);
-        session()->flash('message', 'Profile updated successfully!');
+        if ($updated) {
+            sleep(0.5);
+
+            $message = 'Profile updated successfully!';
+
+            session()->flash('message', $message);
+            $this->dispatchBrowserEvent('showToastr', [
+                'type'    => 'success',
+                'message' => $message,
+            ]);
+        }
     }
     public function render()
     {
