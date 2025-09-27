@@ -754,7 +754,7 @@
 <script src="{{ asset('assets/javascript/pages/dashboard-demo.js')}}"></script> <!-- END PAGE LEVEL JS -->
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116692175-1"></script>
-@include('components.toastr')
+<x-toastr></x-toastr>
 @stack('scripts')
 </body>
 </html>

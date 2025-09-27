@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Profile extends Component
@@ -12,7 +11,11 @@ class Profile extends Component
     public $tabname = 'personal_info';
     protected $queryString = ['tab' => ['keep' => true]];
 
-    public $name, $email, $username, $bio;
+    public $name, $email, $username, $website, $bio;
+
+    protected $listeners = [
+        'updatePersonalInfo' => '$refresh',
+    ];
 
     public function selectTab($tab)
     {
@@ -26,6 +29,7 @@ class Profile extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->username = $user->username;
+        $this->website = $user->website;
         $this->bio = $user->bio;
     }
 
@@ -37,12 +41,14 @@ class Profile extends Component
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+            'website'  => 'nullable|string|max:255',
             'bio'    => 'nullable|string',
         ]);
         //Update User info
         $user->name = $this->name;
         $user->username = $this->username;
         $user->email = $this->email;
+        $user->website = $this->website;
         $user->bio = $this->bio;
         $updated = $user->save();
 

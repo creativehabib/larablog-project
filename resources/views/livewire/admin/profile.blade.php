@@ -45,13 +45,13 @@
                                 <!-- Tabs -->
                                 <ul class="nav nav-tabs">
                                     <li class="nav-item">
-                                        <a wire:click="selectTab('personal_info')" data-toggle="tab" class="nav-link {{ $tab == 'personal_info' ? 'show active' : '' }}" href="#personal_info">Profile</a>
+                                        <a wire:click="selectTab('personal_info')" data-toggle="tab" class="nav-link {{ $tab == 'personal_info' ? 'active' : '' }}" href="#personal_info">Profile</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a wire:click="selectTab('change_password')" data-toggle="tab" class="nav-link {{ $tab == 'change_password' ? 'show active' : '' }}">Change Password</a>
+                                        <a wire:click="selectTab('change_password')" data-toggle="tab" class="nav-link {{ $tab == 'change_password' ? 'active' : '' }}" href="#change_password">Change Password</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a wire:click="selectTab('edit')" data-toggle="tab" class="nav-link cursor-pointer {{ $tab == 'edit' ? 'show active' : '' }}">Edit</a>
+                                        <a wire:click="selectTab('edit')" data-toggle="tab" class="nav-link {{ $tab == 'edit' ? 'active' : '' }}" href="#edit">Edit</a>
                                     </li>
                                 </ul>
 
@@ -117,18 +117,25 @@
                                                         @error('name') <span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label>Username</label>
                                                         <input class="form-control" wire:model="username" type="text" value="{{ old('username', $username) }}" placeholder="Enter username">
                                                         @error('username') <span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label>Email</label>
                                                         <input class="form-control" wire:model="email" type="email" value="{{ old('email', $email) }}" placeholder="Enter email">
                                                         @error('email') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Website</label>
+                                                        <input class="form-control" wire:model="website" type="text" value="{{ old('website', $website) }}" placeholder="Enter your website">
+                                                        @error('website') <span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
