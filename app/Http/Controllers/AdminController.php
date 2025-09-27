@@ -43,7 +43,17 @@ class AdminController extends Controller
         $path = 'images/users';
         $file = $request->file('avatar');
         $old_picture = $user->getAttributes()['avatar'];
-        $filename = 'IMG_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $extension = $file->getClientOriginalExtension();
+
+        if (empty($extension)) {
+            $extension = $file->extension();
+        }
+
+        if (empty($extension)) {
+            $extension = 'jpg';
+        }
+
+        $filename = 'IMG_'.uniqid().'.'.strtolower($extension);
 
         $upload = Kropify::getFile($file, $filename)
             ->setDisk('public')
