@@ -11,7 +11,7 @@
         const cropper = new Kropify('#avatarInputFile', {
             aspectRatio: 1,
             preview: '#profilePicturePreview',
-            processURL: '{{ route("admin.update.profile") }}', // or processURL:'/crop'
+            processURL: '{{ route("admin.profile.avatar") }}', // or processURL:'/crop'
             allowedExtensions: ['jpg', 'jpeg', 'png'],
             showLoader: true,
             animationClass: 'pulse',
@@ -19,13 +19,41 @@
             cancelButtonText:'Cancel',
             maxWoH:500,
             onError: function (msg) {
-                alert(msg);
-                // toastr.error(msg);
+                window.dispatchEvent(new CustomEvent('showToastr', {
+                    detail: {
+                        type: 'error',
+                        message: msg || 'Failed to upload avatar.'
+                    }
+                }));
             },
             onDone: function(response){
-                alert(response.message);
-                console.log(response.data);
-                // toastr.success(response.message);
+                const isSuccess = response?.status === 'success';
+                const message = response?.message || (isSuccess ? 'Avatar updated successfully!' : 'Unable to update avatar.');
+                const avatarUrl = response?.avatar_url;
+                const cacheBustingUrl = isSuccess && avatarUrl ? `${avatarUrl}?${Date.now()}` : null;
+
+                if (cacheBustingUrl) {
+                    const previewImage = document.getElementById('profilePicturePreview');
+                    if (previewImage) {
+                        previewImage.setAttribute('src', cacheBustingUrl);
+                    }
+
+                    const topbarAvatar = document.getElementById('topbarUserAvatar');
+                    if (topbarAvatar) {
+                        topbarAvatar.setAttribute('src', cacheBustingUrl);
+                    }
+                }
+
+                if (isSuccess && window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                    window.Livewire.dispatch('topbarUserAvatar');
+                }
+
+                window.dispatchEvent(new CustomEvent('showToastr', {
+                    detail: {
+                        type: isSuccess ? 'success' : 'error',
+                        message: message
+                    }
+                }));
             }
         });
 
