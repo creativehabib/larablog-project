@@ -65,6 +65,8 @@ class AdminController extends Controller
             }
 
             $user->update(['avatar' => $path . '/' . $filename]);
+            $user->refresh();
+            Auth::setUser($user);
 
             return response()->json([
                 'status'=>1,

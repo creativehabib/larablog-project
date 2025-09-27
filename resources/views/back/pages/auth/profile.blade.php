@@ -26,9 +26,57 @@
                 // toastr.error(msg);
             },
             onDone: function(response){
-                // alert(response.message);
-                console.log(response);
-                // toastr.success(response.message);
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                } catch (error) {
+                    console.error('Failed to parse avatar upload response.', error);
+                    if (typeof window.toastr !== 'undefined') {
+                        window.toastr.error('Something went wrong while updating your profile picture.');
+                    } else {
+                        alert('Something went wrong while updating your profile picture.');
+                    }
+                    return;
+                }
+
+                const status = Number(response?.status ?? 0);
+                const message = response?.message ?? 'Profile updated.';
+                const avatarUrl = response?.avatar_url ?? null;
+
+                if (status === 1) {
+                    const cacheBustedUrl = avatarUrl
+                        ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
+                        : null;
+
+                    if (cacheBustedUrl) {
+                        const previewImage = document.getElementById('profilePicturePreview');
+                        if (previewImage) {
+                            previewImage.setAttribute('src', cacheBustedUrl);
+                        }
+
+                        const topbarAvatar = document.getElementById('topbarUserAvatar');
+                        if (topbarAvatar) {
+                            topbarAvatar.setAttribute('src', cacheBustedUrl);
+                        }
+                    }
+
+                    if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                        Livewire.dispatch('topbarUserAvatar');
+                    }
+
+                    if (typeof window.toastr !== 'undefined') {
+                        window.toastr.success(message);
+                    } else {
+                        alert(message);
+                    }
+                } else {
+                    if (typeof window.toastr !== 'undefined') {
+                        window.toastr.error(message);
+                    } else {
+                        alert(message);
+                    }
+                }
             }
         });
 
