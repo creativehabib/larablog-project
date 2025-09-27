@@ -39,6 +39,7 @@
         // add loading class to html immediately
         document.querySelector('html').classList.add('loading');
     </script><!-- END THEME STYLES -->
+    @kropifyStyles
     @stack('styles')
 </head>
 <body>
@@ -755,6 +756,7 @@
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116692175-1"></script>
 <x-toastr></x-toastr>
+@kropifyScripts
 @stack('scripts')
 </body>
 </html>

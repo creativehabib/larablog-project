@@ -12,7 +12,7 @@
                                         <div class="mx-auto" style="width: 140px;">
                                             <div class="d-flex justify-content-center align-items-center rounded" style="height: 140px; background-color: #e9ecef;">
                                                 @if(auth()->user()->avatar)
-                                                    <img src="{{ $user->avatar }}" alt="Profile" class="img-fluid rounded" style="max-height: 140px;">
+                                                    <img src="{{ $user->avatar }}" alt="Profile" class="img-fluid rounded" id="profilePicturePreview" style="max-height: 140px;">
                                                 @else
                                                     <span style="color: #a6a8aa; font: bold 8pt Arial;">140x140</span>
                                                 @endif
@@ -27,10 +27,10 @@
                                                 <small>Last seen {{ auth()->user()->updated_at?->diffForHumans() ?? 'N/A' }}</small>
                                             </div>
                                             <div class="mt-2">
-                                                <button class="btn btn-primary" type="button" id="changeAvatarBtn">
+                                                <button class="btn btn-primary" type="button" id="changeAvatarBtn" onclick="event.preventDefault();document.getElementById('avatarInputFile').click()">
                                                     <i class="fa fa-fw fa-camera"></i> <span>Change Photo</span>
                                                 </button>
-                                                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none;">
+                                                <input type="file" id="avatarInputFile" name="avatar" accept="image/*" style="display: none;">
                                             </div>
                                         </div>
                                         <div class="text-center text-sm-right">

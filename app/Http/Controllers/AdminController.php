@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use SawaStacks\Utils\Kropify;
 
 class AdminController extends Controller
 {
@@ -29,5 +32,29 @@ class AdminController extends Controller
             'pageTitle' => 'Profile',
         ];
         return view('back.pages.auth.profile', $data);
+    }
+
+    public function updateProfile(Request $request){
+        $user = User::findOrFail(Auth::id());
+        $path = 'images/users/';
+        $file = $request->file('profilePictureFile');
+        $old_picture = $user->getAttributes()['avatar'];
+        $filename = 'IMG_'.uniqid().'.'.$file->getClientOriginalExtension();
+
+        $upload = Kropify::getFile($file, $filename)
+            ->setDisk('public')
+            ->setPath($path)
+            ->save();
+        if($upload){
+            if($old_picture != null && File::exists($path.$old_picture)){
+                File::delete($path.$old_picture);
+            }
+
+            $user->update(['avatar' => $filename]);
+
+            return response()->json(['status'=>1,'success' => 'Profile updated successfully.']);
+        }else{
+            return response()->json(['status'=>0,'success' => 'Something went wrong.']);
+        }
     }
 }
