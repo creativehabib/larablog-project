@@ -68,11 +68,11 @@ class AdminController extends Controller
 
             return response()->json([
                 'status'=>1,
-                'success' => 'Profile updated successfully.',
+                'message' => 'Profile updated successfully.',
                 'avatar_url' => $user->avatar,
             ]);
         }else{
-            return response()->json(['status'=>0,'success' => 'Something went wrong.']);
+            return response()->json(['status'=>0,'message' => 'Something went wrong.']);
         }
     }
 }
