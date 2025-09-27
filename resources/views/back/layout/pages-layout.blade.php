@@ -324,7 +324,7 @@
                     </ul><!-- /.nav -->
                     <!-- .btn-account -->
                     <div class="dropdown d-none d-md-flex">
-                        <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ auth()->user()->avatar }}" alt=""></span>
+                        <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ auth()->user()->avatar }}" alt="" id="topbarUserAvatar"></span>
                             <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->type }}</span></span></button> <!-- .dropdown-menu -->
                         <div class="dropdown-menu">
                             <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
