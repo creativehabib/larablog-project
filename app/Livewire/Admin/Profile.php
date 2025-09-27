@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Profile extends Component
@@ -53,6 +54,7 @@ class Profile extends Component
         $updated = $user->save();
 
         if ($updated) {
+            Auth::setUser($user->fresh());
             sleep(0.5);
 
             $message = 'Profile updated successfully!';
