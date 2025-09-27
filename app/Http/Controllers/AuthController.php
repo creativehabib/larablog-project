@@ -64,7 +64,7 @@ class AuthController extends Controller
                 return redirect()->route('admin.login')->with('fail', 'Your account is currently pending. Please contact your administrator.');
             }
             // Redirect use to dashboard
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.dashboard')->with('success', 'Welcome back');
         } else {
             return redirect()->route('admin.login')->withInput()->with('fail', 'Invalid credentials');
         }

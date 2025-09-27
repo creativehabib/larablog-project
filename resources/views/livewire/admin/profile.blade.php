@@ -51,10 +51,10 @@
                                         <a wire:click="selectTab('change_password')" data-toggle="tab" class="nav-link {{ $tab == 'change_password' ? 'active' : '' }}" href="#change_password">Change Password</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a wire:click="selectTab('edit')" data-toggle="tab" class="nav-link {{ $tab == 'edit' ? 'active' : '' }}" href="#edit">Edit</a>
+                                        <a wire:click="selectTab('account')" data-toggle="tab" class="nav-link {{ $tab == 'account' ? 'active' : '' }}" href="#account">Account</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="social_links" wire:click="selectTab('social_links')" data-toggle="tab" class="nav-link {{ $tab == 'social_links' ? 'active' : '' }}">Social links</a>
+                                        <a href="social_links" wire:click="selectTab('social_links')" data-toggle="tab" class="nav-link {{ $tab == 'social_links' ? 'active' : '' }}">Social Networks</a>
                                     </li>
                                 </ul>
 
@@ -111,8 +111,8 @@
                                         </form>
                                     </div>
 
-                                    <!-- Edit Tab -->
-                                    <div class="tab-pane fade {{ $tab == 'edit' ? 'show active' : ''}}" id="edit" role="edit">
+                                    <!-- Account Tab -->
+                                    <div class="tab-pane fade {{ $tab == 'account' ? 'show active' : ''}}" id="account" role="account">
                                         <form class="form" wire:submit.prevent="updatePersonalInfo">
                                             <div class="row">
                                                 <div class="col-md-12">
@@ -164,50 +164,103 @@
                                     <div class="tab-pane fade {{ $tab == 'social_links' ? 'show active' : '' }}" id="social_links" role="social_links">
                                         <form wire:submit.prevent="updateSocialLinkInfo">
                                             <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Facebook</label>
-                                                        <input class="form-control" type="text" wire:model="facebook" value="{{ old('facebook', auth()->user()->facebook) }}" placeholder="https://facebook.com/example">
-                                                        @error('facebook') <span class="text-danger">{{ $message }}</span> @enderror
+                                                <div class="list-group list-group-flush mt-3 mb-0">
+                                                    <!-- .list-group-item -->
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-facebook">
+                                                                        <i class="fab fa-facebook"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="facebook" value="{{ old('facebook', auth()->user()->facebook) }}" placeholder="Facebook Username">
+                                                                    @error('facebook') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-twitter">
+                                                                        <i class="fab fa-twitter"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="twitter" value="{{ old('twitter', auth()->user()->twitter) }}" placeholder="@Username">
+                                                                    @error('twitter') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-linkedin">
+                                                                        <i class="fab fa-linkedin"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="linkedin" value="{{ old('linkedin', auth()->user()->linkedin) }}" placeholder="Linkedin Username">
+                                                                    @error('linkedin') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-github">
+                                                                        <i class="fab fa-github"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="github" value="{{ old('github', auth()->user()->github) }}" placeholder="Github Username">
+                                                                    @error('github') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-instagram">
+                                                                        <i class="fab fa-instagram"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="instagram" value="{{ old('instagram', auth()->user()->instagram) }}" placeholder="Instagram Username">
+                                                                    @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="list-group-item">
+                                                                <!-- .list-group-item-figure -->
+                                                                <div class="list-group-item-figure">
+                                                                    <div class="tile tile-md bg-youtube">
+                                                                        <i class="fab fa-youtube"></i>
+                                                                    </div>
+                                                                </div><!-- /.list-group-item-figure -->
+                                                                <!-- .list-group-item-body -->
+                                                                <div class="list-group-item-body">
+                                                                    <input class="form-control" type="text" wire:model="youtube" value="{{ old('youtube', auth()->user()->youtube) }}" placeholder="@Username">
+                                                                    @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
+                                                                </div><!-- /.list-group-item-body -->
+                                                            </div><!-- /.list-group-item -->
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Twitter</label>
-                                                        <input class="form-control" type="text" wire:model="twitter" value="{{ old('twitter', auth()->user()->twitter) }}" placeholder="https://twitter.com/example">
-                                                        @error('twitter') <span class="text-danger">{{ $message }}</span> @enderror
-                                                    </div>
-                                                </div>
 
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>LinkedIn</label>
-                                                        <input class="form-control" type="text" wire:model="linkedin" value="{{ old('linkedin', auth()->user()->linkedin) }}" placeholder="https://linkedin.com/example">
-                                                        @error('linkedin') <span class="text-danger">{{ $message }}</span> @enderror
-                                                    </div>
-                                                </div>
+                                                </div><!-- /.list-group -->
 
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>GitHub</label>
-                                                        <input class="form-control" type="text" wire:model="github" value="{{ old('github', auth()->user()->github) }}" placeholder="https://github.com/example">
-                                                        @error('github') <span class="text-danger">{{ $message }}</span> @enderror
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Instagram</label>
-                                                        <input class="form-control" type="text" wire:model="instagram" value="{{ old('instagram', auth()->user()->instagram) }}" placeholder="https://instagram.com/example">
-                                                        @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Youtube</label>
-                                                        <input class="form-control" type="text" wire:model="youtube" value="{{ old('youtube', auth()->user()->youtube) }}" placeholder="https://youtube.com/@example">
-                                                        @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
-                                                    </div>
-                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col d-flex justify-content-end">

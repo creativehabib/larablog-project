@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import '@fortawesome/fontawesome-free/css/all.css';
+@import 'pace-progress/themes/blue/pace-theme-minimal.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

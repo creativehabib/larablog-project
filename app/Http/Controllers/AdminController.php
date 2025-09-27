@@ -23,7 +23,7 @@ class AdminController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('admin.login')->with('success', 'You have been logged out.');
+        return redirect()->route('admin.login')->with('success', 'You have successfully logged out.');
     }
 
     public function profile()
@@ -76,5 +76,14 @@ class AdminController extends Controller
         }else{
             return response()->json(['status'=>0,'message' => 'Something went wrong.']);
         }
+    }
+
+    //Setting
+    public function generalSettings(Request $request)
+    {
+        $data = [
+            'pageTitle' => 'General Settings',
+        ];
+        return view('back.pages.settings.general_settings', $data);
     }
 }

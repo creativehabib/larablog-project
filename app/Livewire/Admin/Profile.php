@@ -126,12 +126,12 @@ class Profile extends Component
     public function updateSocialLinkInfo()
     {
         $this->validate([
-            'facebook' => 'nullable|url',
-            'twitter' => 'nullable|url',
-            'instagram' => 'nullable|url',
-            'youtube' => 'nullable|url',
-            'github' => 'nullable|url',
-            'linkedin' => 'nullable|url',
+            'facebook' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
+            'github' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
         ]);
 
         //Get User Details
