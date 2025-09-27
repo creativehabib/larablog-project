@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use SawaStacks\Utils\Kropify;
 
 class AdminController extends Controller
@@ -35,24 +35,32 @@ class AdminController extends Controller
     }
 
     public function updateProfile(Request $request){
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
         $user = User::findOrFail(Auth::id());
-        $path = 'images/users/';
-        $file = $request->file('profilePictureFile');
+        $path = 'images/users';
+        $file = $request->file('avatar');
         $old_picture = $user->getAttributes()['avatar'];
         $filename = 'IMG_'.uniqid().'.'.$file->getClientOriginalExtension();
 
         $upload = Kropify::getFile($file, $filename)
             ->setDisk('public')
-            ->setPath($path)
+            ->setPath($path . '/')
             ->save();
         if($upload){
-            if($old_picture != null && File::exists($path.$old_picture)){
-                File::delete($path.$old_picture);
+            if($old_picture != null && Storage::disk('public')->exists($old_picture)){
+                Storage::disk('public')->delete($old_picture);
             }
 
-            $user->update(['avatar' => $filename]);
+            $user->update(['avatar' => $path . '/' . $filename]);
 
-            return response()->json(['status'=>1,'success' => 'Profile updated successfully.']);
+            return response()->json([
+                'status'=>1,
+                'success' => 'Profile updated successfully.',
+                'avatar_url' => $user->avatar,
+            ]);
         }else{
             return response()->json(['status'=>0,'success' => 'Something went wrong.']);
         }
