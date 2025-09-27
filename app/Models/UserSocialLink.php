@@ -13,7 +13,7 @@ class UserSocialLink extends Model
         'instagram',
         'linkedin',
         'github',
-        'linkedin',
+        'youtube',
     ];
 
 

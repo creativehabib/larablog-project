@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -63,11 +63,8 @@ class User extends Authenticatable
         return $value ? asset('/storage/' . $value) : asset('/demo-user.jpg');
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function social_links(): BelongsTo
+    public function social_links(): HasOne
     {
-        return $this->belongsTo(UserSocialLink::class);
+        return $this->hasOne(UserSocialLink::class);
     }
 }

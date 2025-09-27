@@ -4,7 +4,6 @@ namespace App\Livewire\Admin;
 
 use App\Helpers\CMail;
 use App\Models\User;
-use App\Models\UserSocialLink;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -136,24 +135,35 @@ class Profile extends Component
         ]);
 
         //Get User Details
-        $user = User::findOrFail(auth()->id());
-        $data = array(
+        $user = User::with('social_links')->findOrFail(auth()->id());
+
+        $data = collect([
             'facebook' => $this->facebook,
             'twitter' => $this->twitter,
             'instagram' => $this->instagram,
             'youtube' => $this->youtube,
             'github' => $this->github,
             'linkedin' => $this->linkedin,
-        );
+        ])->map(fn ($value) => filled($value) ? $value : null)
+            ->toArray();
 
-        if( ! is_null($user->social_links)) {
-            //Update records
+        if (collect($data)->filter()->isEmpty()) {
+            if ($user->social_links) {
+                $user->social_links()->delete();
+                $this->dispatch('showToastr', type: 'success', message: 'Social links removed successfully.');
+            } else {
+                $this->dispatch('showToastr', type: 'info', message: 'No social links provided.');
+            }
+
+            return;
+        }
+
+        if ($user->social_links) {
             $query = $user->social_links()->update($data);
         } else {
-            //Insert new data
-            $data['user_id'] = auth()->id();
-            $query = UserSocialLink::insert($data);
+            $query = (bool) $user->social_links()->create($data);
         }
+
         if ($query) {
             $this->dispatch('showToastr', type: 'success', message: 'Social links updated successfully.');
         } else {
