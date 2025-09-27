@@ -16,6 +16,7 @@ class Profile extends Component
 
     protected $listeners = [
         'updatePersonalInfo' => '$refresh',
+        'topbarUserAvatar' => '$refresh',
     ];
 
     public function selectTab($tab)
