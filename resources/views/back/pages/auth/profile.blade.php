@@ -32,57 +32,90 @@
 
 
 
-        document.getElementById('changeAvatarBtn').addEventListener('click', function () {
-            document.getElementById('avatarInput').click();
-        });
+        const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+        const avatarInput = document.getElementById('avatarInputFile');
 
-        document.getElementById('avatarInput').addEventListener('change', function () {
-            let formData = new FormData();
-            formData.append('avatar', this.files[0]);
-            formData.append('_token', '{{ csrf_token() }}');
+        if (changeAvatarBtn && avatarInput) {
+            changeAvatarBtn.addEventListener('click', function () {
+                avatarInput.click();
+            });
 
-            // Temporary loading state (optional)
-            let preview = document.getElementById('avatarPreview');
-            if (preview) {
-                preview.style.opacity = '0.5';  // Optional: For loading effect
-            }
+            avatarInput.addEventListener('change', function () {
+                if (!this.files.length) {
+                    return;
+                }
 
-            // Send the form data via Ajax (using fetch)
-            fetch("{{ route('admin.profile.avatar') }}", {
-                method: "POST",
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // If there's an existing avatar, remove the placeholder
-                        const placeholder = document.getElementById('avatarPlaceholder');
-                        if (placeholder) {
-                            placeholder.remove();
-                        }
+                let formData = new FormData();
+                formData.append('avatar', this.files[0]);
+                formData.append('_token', '{{ csrf_token() }}');
 
-                        // If the avatar preview already exists, update the image source
-                        if (preview) {
-                            preview.src = data.avatar_url + '?' + new Date().getTime();  // Cache busting by adding a timestamp
-                            preview.style.opacity = '1';  // Reset opacity after loading
-                        } else {
-                            // If the avatar preview doesn't exist, create and insert it
-                            preview = document.createElement('img');
-                            preview.id = 'avatarPreview';
-                            preview.src = data.avatar_url + '?' + new Date().getTime();  // Cache busting
-                            preview.className = 'img-fluid rounded';
-                            preview.style.maxHeight = '140px';
-                            document.querySelector('.d-flex.justify-content-center').prepend(preview);
-                        }
-                    } else {
-                        alert("Upload failed!");
-                    }
+                // Temporary loading state (optional)
+                let preview = document.getElementById('avatarPreview');
+                if (preview) {
+                    preview.style.opacity = '0.5';  // Optional: For loading effect
+                }
+
+                // Send the form data via Ajax (using fetch)
+                fetch("{{ route('admin.profile.avatar') }}", {
+                    method: "POST",
+                    body: formData
                 })
-                .catch(err => {
-                    console.error(err);
-                    alert("Something went wrong!");
-                });
-        });
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const newAvatarSrc = data.avatar_url + '?' + new Date().getTime();
+
+                            // If there's an existing avatar, remove the placeholder
+                            const placeholder = document.getElementById('avatarPlaceholder');
+                            if (placeholder) {
+                                placeholder.remove();
+                            }
+
+                            // If the avatar preview already exists, update the image source
+                            if (preview) {
+                                preview.src = newAvatarSrc;  // Cache busting by adding a timestamp
+                                preview.style.opacity = '1';  // Reset opacity after loading
+                            } else {
+                                // If the avatar preview doesn't exist, create and insert it
+                                preview = document.createElement('img');
+                                preview.id = 'avatarPreview';
+                                preview.src = newAvatarSrc;  // Cache busting
+                                preview.className = 'img-fluid rounded';
+                                preview.style.maxHeight = '140px';
+                                document.querySelector('.d-flex.justify-content-center').prepend(preview);
+                            }
+
+                            const topbarAvatar = document.getElementById('topbarUserAvatar');
+                            if (topbarAvatar) {
+                                topbarAvatar.src = newAvatarSrc;
+                            }
+
+                            window.dispatchEvent(new CustomEvent('showToastr', {
+                                detail: {
+                                    type: 'success',
+                                    message: data.message || 'Avatar updated successfully!'
+                                }
+                            }));
+                        } else {
+                            window.dispatchEvent(new CustomEvent('showToastr', {
+                                detail: {
+                                    type: 'error',
+                                    message: data.message || 'Upload failed!'
+                                }
+                            }));
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        window.dispatchEvent(new CustomEvent('showToastr', {
+                            detail: {
+                                type: 'error',
+                                message: 'Something went wrong!'
+                            }
+                        }));
+                    });
+            });
+        }
 
     </script>
 
