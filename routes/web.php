@@ -15,7 +15,7 @@ Route::view('/example-auth', 'example-auth');
 // Admin route
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware(['guest'])->group(function () {
+    Route::middleware(['guest','preventBackHistory'])->group(function () {
        Route::controller(AuthController::class)->group(function(){
               Route::get('/login', 'loginForm')->name('login');
               Route::post('/login', 'login')->name('login.submit');
@@ -26,7 +26,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
        });
     });
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth','preventBackHistory'])->group(function () {
        Route::controller(AdminController::class)->group(function(){
               Route::get('/dashboard', 'dashboard')->name('dashboard');
               Route::post('/logout', 'logout')->name('logout');

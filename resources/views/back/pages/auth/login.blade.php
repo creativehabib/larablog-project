@@ -21,7 +21,7 @@
 
         <div class="form-group mb-4 text-left">
             <label class="d-block text-left" for="inputPassword">Password</label>
-            <input type="password" id="inputPassword" name="password" value="{{ old('password') }}" class="form-control form-control-lg">
+            <input type="password" id="inputPassword" name="password" value="{{ old('password') }}" class="form-control form-control-lg" placeholder="Enter password">
             @error('password')<span class="text-danger">{{ $message }}</span>@enderror
         </div>
 

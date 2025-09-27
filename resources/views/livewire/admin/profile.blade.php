@@ -53,6 +53,9 @@
                                     <li class="nav-item">
                                         <a wire:click="selectTab('edit')" data-toggle="tab" class="nav-link {{ $tab == 'edit' ? 'active' : '' }}" href="#edit">Edit</a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="social_links" wire:click="selectTab('social_links')" data-toggle="tab" class="nav-link {{ $tab == 'social_links' ? 'active' : '' }}">Social links</a>
+                                    </li>
                                 </ul>
 
                                 <!-- Tab Content -->
@@ -80,21 +83,23 @@
 
                                     <!-- Change Password Tab -->
                                     <div class="tab-pane fade {{ $tab == 'change_password' ? 'show active' : '' }}" id="change_password" role="tabpanel">
-                                        <form method="POST" action="">
-                                            @csrf
+                                        <form wire:submit="updatePassword">
                                             <div class="row">
                                                 <div class="col-12 col-sm-6 mb-3">
                                                     <div class="form-group">
                                                         <label>Current Password</label>
-                                                        <input class="form-control" type="password" name="current_password">
+                                                        <input class="form-control" type="password" wire:model="current_password" placeholder="Enter current password">
+                                                        @error('current_password')<span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                     <div class="form-group">
                                                         <label>New Password</label>
-                                                        <input class="form-control" type="password" name="password">
+                                                        <input class="form-control" type="password" wire:model="new_password" placeholder="Enter new password">
+                                                        @error('new_password')<span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                     <div class="form-group">
                                                         <label>Confirm Password</label>
-                                                        <input class="form-control" type="password" name="password_confirmation">
+                                                        <input class="form-control" type="password" wire:model="new_password_confirmation" placeholder="Enter confirm password">
+                                                        @error('new_password_confirmation')<span class="text-danger">{{ $message }}</span> @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -147,6 +152,63 @@
                                                 </div>
                                             </div>
 
+                                            <div class="row">
+                                                <div class="col d-flex justify-content-end">
+                                                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    {{--Social Links--}}
+                                    <div class="tab-pane fade {{ $tab == 'social_links' ? 'show active' : '' }}" id="social_links" role="social_links">
+                                        <form wire:submit.prevent="updateSocialLinkInfo">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Facebook</label>
+                                                        <input class="form-control" type="text" wire:model="facebook" value="{{ old('facebook', auth()->user()->facebook) }}" placeholder="https://facebook.com/example">
+                                                        @error('facebook') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Twitter</label>
+                                                        <input class="form-control" type="text" wire:model="twitter" value="{{ old('twitter', auth()->user()->twitter) }}" placeholder="https://twitter.com/example">
+                                                        @error('twitter') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>LinkedIn</label>
+                                                        <input class="form-control" type="text" wire:model="linkedin" value="{{ old('linkedin', auth()->user()->linkedin) }}" placeholder="https://linkedin.com/example">
+                                                        @error('linkedin') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>GitHub</label>
+                                                        <input class="form-control" type="text" wire:model="github" value="{{ old('github', auth()->user()->github) }}" placeholder="https://github.com/example">
+                                                        @error('github') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Instagram</label>
+                                                        <input class="form-control" type="text" wire:model="instagram" value="{{ old('instagram', auth()->user()->instagram) }}" placeholder="https://instagram.com/example">
+                                                        @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Youtube</label>
+                                                        <input class="form-control" type="text" wire:model="youtube" value="{{ old('youtube', auth()->user()->youtube) }}" placeholder="https://youtube.com/@example">
+                                                        @error('instagram') <span class="text-danger">{{ $message }}</span> @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="row">
                                                 <div class="col d-flex justify-content-end">
                                                     <button class="btn btn-primary" type="submit">Save Changes</button>

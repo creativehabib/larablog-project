@@ -70,7 +70,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'status'=>1,
-                'message' => 'Profile updated successfully.',
+                'message' => 'Profile Picture updated successfully.',
                 'avatar_url' => $user->avatar,
             ]);
         }else{

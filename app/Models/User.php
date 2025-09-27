@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -60,5 +61,13 @@ class User extends Authenticatable
     public function getAvatarAttribute($value)
     {
         return $value ? asset('/storage/' . $value) : asset('/demo-user.jpg');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function social_links(): BelongsTo
+    {
+        return $this->belongsTo(UserSocialLink::class);
     }
 }
