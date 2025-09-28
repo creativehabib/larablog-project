@@ -147,21 +147,21 @@
 
             let editorInstance = null;
             const editorState = {
-                componentId: null,
                 hiddenField: null,
                 lastSetValue: '',
             };
 
-            const syncHiddenField = (value, shouldDispatch = false) => {
+            const syncHiddenField = (value) => {
                 if (!editorState.hiddenField) {
                     return;
                 }
 
-                editorState.hiddenField.value = value;
-
-                if (shouldDispatch) {
-                    editorState.hiddenField.dispatchEvent(new Event('input', { bubbles: true }));
+                if (editorState.hiddenField.value === value) {
+                    return;
                 }
+
+                editorState.hiddenField.value = value;
+                editorState.hiddenField.dispatchEvent(new Event('input', { bubbles: true }));
             };
 
             const syncToLivewire = (data) => {
@@ -172,16 +172,7 @@
                 }
 
                 editorState.lastSetValue = normalized;
-                syncHiddenField(normalized, !editorState.componentId);
-
-                if (!editorState.componentId) {
-                    return;
-                }
-
-                const component = Livewire.find(editorState.componentId);
-                if (component) {
-                    component.set('description', normalized);
-                }
+                syncHiddenField(normalized);
             };
 
             const destroyEditor = () => {
@@ -190,7 +181,6 @@
                 }
 
                 editorInstance = null;
-                editorState.componentId = null;
                 editorState.hiddenField = null;
                 editorState.lastSetValue = '';
             };
@@ -211,12 +201,10 @@
                     return;
                 }
 
-                const componentId = container.closest('[wire\\:id]')?.getAttribute('wire:id');
                 const hiddenField = document.getElementById('postDescriptionData');
 
                 textarea.dataset.initialized = 'true';
 
-                editorState.componentId = componentId || null;
                 editorState.hiddenField = hiddenField || null;
                 editorState.lastSetValue = hiddenField?.value || '';
 
