@@ -17,6 +17,7 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
+                            <th>Author</th>
                             <th>Category</th>
                             <th>Featured</th>
                             <th>Comments</th>
@@ -34,6 +35,12 @@
                                     <div class="text-muted small"><code>{{ $post->slug }}</code></div>
                                     @if ($post->meta_title)
                                         <div class="text-muted small">Meta: {{ Str::limit($post->meta_title, 45) }}</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div>{{ $post->author?->name ?? 'Unknown' }}</div>
+                                    @if ($post->author)
+                                        <div class="text-muted small">{{ $post->author->email }}</div>
                                     @endif
                                 </td>
                                 <td>
@@ -65,7 +72,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted">No posts found.</td>
+                                <td colspan="9" class="text-center text-muted">No posts found.</td>
                             </tr>
                         @endforelse
                     </tbody>
