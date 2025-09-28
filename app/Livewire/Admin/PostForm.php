@@ -149,7 +149,9 @@ class PostForm extends Component
             $data['thumbnail_path'] = $this->thumbnail->store('posts', 'public');
         }
 
-        if ($this->post) {
+        unset($data['thumbnail']);
+
+        if ($this->post && $this->post->exists) {
             $this->post->update($data);
             $message = 'Post updated successfully.';
         } else {
