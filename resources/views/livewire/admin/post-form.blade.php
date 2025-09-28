@@ -21,8 +21,6 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="postCategory">Category <span class="text-danger">*</span></label>
-                    <input type="search" class="form-control mb-2" placeholder="Search categories..."
-                        wire:model.debounce.300ms="categorySearch">
                     <select id="postCategory" class="form-control @error('category_id') is-invalid @enderror" wire:model="category_id">
                         <option value="">Select category</option>
                         @foreach ($this->categories as $category)
@@ -35,8 +33,6 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="postSubCategory">Sub Category</label>
-                    <input type="search" class="form-control mb-2" placeholder="Search sub categories..."
-                        wire:model.debounce.300ms="subCategorySearch" @disabled(! $category_id)>
                     <select id="postSubCategory" class="form-control @error('sub_category_id') is-invalid @enderror" wire:model="sub_category_id">
                         <option value="">None</option>
                         @foreach ($this->availableSubCategories as $subCategory)

@@ -32,9 +32,6 @@ class PostForm extends Component
     public $thumbnail;
     public ?string $existingThumbnail = null;
 
-    public string $categorySearch = '';
-    public string $subCategorySearch = '';
-
     public bool $autoGenerateSlug = true;
 
     protected ?string $lastSyncedDescription = null;
@@ -79,11 +76,8 @@ class PostForm extends Component
     {
         if ($value === null || $value === '') {
             $this->sub_category_id = '';
-            $this->subCategorySearch = '';
             return;
         }
-
-        $this->subCategorySearch = '';
 
         if ($this->sub_category_id) {
             $isValid = SubCategory::where('id', $this->sub_category_id)
@@ -221,15 +215,7 @@ class PostForm extends Component
     #[Computed]
     public function categories()
     {
-        $categorySearchTerm = trim($this->categorySearch);
-
         $categories = Category::query()
-            ->when($categorySearchTerm !== '', function ($query) use ($categorySearchTerm) {
-                $query->where(function ($nested) use ($categorySearchTerm) {
-                    $nested->where('name', 'like', '%'.$categorySearchTerm.'%')
-                        ->orWhere('slug', 'like', '%'.$categorySearchTerm.'%');
-                });
-            })
             ->orderBy('name')
             ->get();
 
@@ -252,16 +238,8 @@ class PostForm extends Component
             return collect();
         }
 
-        $subCategorySearchTerm = trim($this->subCategorySearch);
-
         $subCategories = SubCategory::query()
             ->where('category_id', $this->category_id)
-            ->when($subCategorySearchTerm !== '', function ($query) use ($subCategorySearchTerm) {
-                $query->where(function ($nested) use ($subCategorySearchTerm) {
-                    $nested->where('name', 'like', '%'.$subCategorySearchTerm.'%')
-                        ->orWhere('slug', 'like', '%'.$subCategorySearchTerm.'%');
-                });
-            })
             ->orderBy('name')
             ->get();
 
