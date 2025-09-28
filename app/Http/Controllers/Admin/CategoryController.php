@@ -12,25 +12,10 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $search = trim($request->query('search', ''));
-
-        $categories = Category::withCount('subCategories')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('slug', 'like', "%{$search}%");
-                });
-            })
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
-
         return view('back.pages.categories.index', [
             'pageTitle' => 'Categories',
-            'categories' => $categories,
-            'search' => $search,
         ]);
     }
 
