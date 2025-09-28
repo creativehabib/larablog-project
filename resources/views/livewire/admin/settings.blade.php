@@ -52,41 +52,53 @@
                         <div class="tab-pane {{ $tab == 'general_settings' ? 'active show' : '' }}" id="general_settings">
                             <h6>GENERAL SETTINGS</h6>
                             <hr>
-                            <form wire:submit="updateSiteInfo()">
+                            <form wire:submit.prevent="updateSiteInfo()">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for=""><b>Site title</b></label>
-                                            <input type="text" class="form-control" wire:model="site_title" placeholder="Enter site title">
+                                            <input type="text" class="form-control" wire:model.defer="site_title" placeholder="Enter site title">
                                             @error('site_title')<span class="text-danger">{{ $message }}</span>@enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for=""><b>Site email</b></label>
-                                            <input type="text" class="form-control" wire:model="site_email" placeholder="Enter site email">
+                                            <input type="email" class="form-control" wire:model.defer="site_email" placeholder="Enter site email">
                                             @error('site_email')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for=""><b>Site description</b> <small>(Optional)</small></label>
+                                            <textarea class="form-control" rows="3" wire:model.defer="site_description" placeholder="Write a short description about your site..."></textarea>
+                                            @error('site_description')<span class="text-danger">{{ $message }}</span>@enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for=""><b>Site phone number</b></label>
-                                            <input type="text" class="form-control" wire:model="site_phone" placeholder="Enter site contact phone">
+                                            <input type="text" class="form-control" wire:model.defer="site_phone" placeholder="Enter site contact phone">
                                             @error('site_phone')<span class="text-danger">{{ $message }}</span>@enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for=""><b>Site Meta keywords</b> <small>(Optional)</small></label>
-                                            <input type="text" class="form-control" wire:model="site_meta_keywords" placeholder="Eg: ecommerce, free api, laravel">
+                                            <input type="text" class="form-control" wire:model.defer="site_meta_keywords" placeholder="Eg: ecommerce, free api, laravel">
                                             @error('site_meta_keywords')<span class="text-danger">{{ $message }}</span>@enderror
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for=""><b>Site Meta Description</b> <small>(Optional)</small></label>
-                                    <textarea class="form-control" cols="4" rows="4" name="site_meta_description" placeholder="Type site meta description..."></textarea>
+                                    <textarea class="form-control" cols="4" rows="4" wire:model.defer="site_meta_description" placeholder="Type site meta description..."></textarea>
                                     @error('site_meta_description')<span class="text-danger">{{ $message }}</span>@enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for=""><b>Site Copyright text</b> <small>(Optional)</small></label>
+                                    <input type="text" class="form-control" wire:model.defer="site_copyright" placeholder="Eg: © {{ date('Y') }} LaraBlog. All rights reserved.">
+                                    @error('site_copyright')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                                 <button type="submit" class="btn btn-primary">Save changes</button>
                             </form>
@@ -95,7 +107,49 @@
                         <div class="tab-pane {{ $tab == 'logo_favicon' ? 'active show' : '' }}" id="logo_favicon">
                             <h6>LOGO & FAVICON</h6>
                             <hr>
-                            <p>Content for logo & favicon goes here...</p>
+                            <form wire:submit.prevent="updateBranding()">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site logo</b></label>
+                                            <input type="file" class="form-control-file" wire:model="site_logo_upload" accept="image/*">
+                                            <small class="form-text text-muted">Upload PNG, JPG, SVG or WEBP image up to 2MB.</small>
+                                            @error('site_logo_upload')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                        @if ($site_logo_upload)
+                                            <div class="border rounded p-2 text-center">
+                                                <small class="d-block text-muted mb-2">Preview</small>
+                                                <img src="{{ $site_logo_upload->temporaryUrl() }}" alt="Site logo preview" class="img-fluid" style="max-height: 120px;">
+                                            </div>
+                                        @elseif ($site_logo_path)
+                                            <div class="border rounded p-2 text-center">
+                                                <small class="d-block text-muted mb-2">Current logo</small>
+                                                <img src="{{ asset('storage/' . $site_logo_path) }}" alt="Current site logo" class="img-fluid" style="max-height: 120px;">
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site favicon</b></label>
+                                            <input type="file" class="form-control-file" wire:model="site_favicon_upload" accept="image/*">
+                                            <small class="form-text text-muted">Upload PNG, JPG, ICO, SVG or WEBP image up to 1MB.</small>
+                                            @error('site_favicon_upload')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                        @if ($site_favicon_upload)
+                                            <div class="border rounded p-2 text-center">
+                                                <small class="d-block text-muted mb-2">Preview</small>
+                                                <img src="{{ $site_favicon_upload->temporaryUrl() }}" alt="Site favicon preview" class="img-fluid" style="max-height: 80px; width: auto;">
+                                            </div>
+                                        @elseif ($site_favicon_path)
+                                            <div class="border rounded p-2 text-center">
+                                                <small class="d-block text-muted mb-2">Current favicon</small>
+                                                <img src="{{ asset('storage/' . $site_favicon_path) }}" alt="Current site favicon" class="img-fluid" style="max-height: 80px; width: auto;">
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Update branding</button>
+                            </form>
                         </div>
 
                         <div class="tab-pane {{ $tab == 'security_settings' ? 'active show' : '' }}" id="security_settings">
