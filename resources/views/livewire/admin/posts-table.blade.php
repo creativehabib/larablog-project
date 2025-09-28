@@ -4,7 +4,7 @@
         <div class="card-body">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
                 <div class="w-100 w-md-50">
-                    <input type="search" wire:model.debounce.500ms="search" class="form-control" placeholder="Search posts by title, slug or meta title">
+                    <input type="search" wire:model.debounce.500ms="search" class="form-control" placeholder="Search posts by title, slug, meta title, category or sub category">
                 </div>
                 <div class="text-muted small">
                     Showing {{ $posts->firstItem() ?? 0 }} - {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} posts

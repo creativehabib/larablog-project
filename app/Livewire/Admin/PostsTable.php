@@ -15,6 +15,11 @@ class PostsTable extends Component
 
     public string $search = '';
 
+    public function updatedSearch(): void
+    {
+        $this->search = trim($this->search);
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -62,11 +67,19 @@ class PostsTable extends Component
     public function render()
     {
         $posts = Post::with(['category', 'subCategory'])
-            ->when($this->search, function ($query) {
-                $query->where(function ($nested) {
-                    $nested->where('title', 'like', '%'.$this->search.'%')
-                        ->orWhere('slug', 'like', '%'.$this->search.'%')
-                        ->orWhere('meta_title', 'like', '%'.$this->search.'%');
+            ->when($this->search !== '', function ($query) {
+                $searchTerm = '%'.$this->search.'%';
+
+                $query->where(function ($nested) use ($searchTerm) {
+                    $nested->where('title', 'like', $searchTerm)
+                        ->orWhere('slug', 'like', $searchTerm)
+                        ->orWhere('meta_title', 'like', $searchTerm)
+                        ->orWhereHas('category', function ($categoryQuery) use ($searchTerm) {
+                            $categoryQuery->where('name', 'like', $searchTerm);
+                        })
+                        ->orWhereHas('subCategory', function ($subCategoryQuery) use ($searchTerm) {
+                            $subCategoryQuery->where('name', 'like', $searchTerm);
+                        });
                 });
             })
             ->orderByDesc('created_at')
