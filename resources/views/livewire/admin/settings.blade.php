@@ -1,6 +1,5 @@
 <div>
     @php
-        // Define navigation items in one place to avoid repetition (DRY Principle)
         $navItems = [
             'general_settings' => ['icon' => 'user', 'label' => 'General Settings'],
             'logo_favicon' => ['icon' => 'settings', 'label' => 'Logo & Favicon'],
@@ -53,7 +52,44 @@
                         <div class="tab-pane {{ $tab == 'general_settings' ? 'active show' : '' }}" id="general_settings">
                             <h6>GENERAL SETTINGS</h6>
                             <hr>
-                            <p>Content for general settings goes here...</p>
+                            <form wire:submit="updateSiteInfo()">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site title</b></label>
+                                            <input type="text" class="form-control" wire:model="site_title" placeholder="Enter site title">
+                                            @error('site_title')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site email</b></label>
+                                            <input type="text" class="form-control" wire:model="site_email" placeholder="Enter site email">
+                                            @error('site_email')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site phone number</b></label>
+                                            <input type="text" class="form-control" wire:model="site_phone" placeholder="Enter site contact phone">
+                                            @error('site_phone')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for=""><b>Site Meta keywords</b> <small>(Optional)</small></label>
+                                            <input type="text" class="form-control" wire:model="site_meta_keywords" placeholder="Eg: ecommerce, free api, laravel">
+                                            @error('site_meta_keywords')<span class="text-danger">{{ $message }}</span>@enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for=""><b>Site Meta Description</b> <small>(Optional)</small></label>
+                                    <textarea class="form-control" cols="4" rows="4" name="site_meta_description" placeholder="Type site meta description..."></textarea>
+                                    @error('site_meta_description')<span class="text-danger">{{ $message }}</span>@enderror
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                            </form>
                         </div>
 
                         <div class="tab-pane {{ $tab == 'logo_favicon' ? 'active show' : '' }}" id="logo_favicon">
