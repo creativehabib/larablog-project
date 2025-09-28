@@ -372,68 +372,62 @@
                 <nav id="stacked-menu" class="stacked-menu">
                     <!-- .menu -->
                     <ul class="menu">
-                        <!-- .menu-item -->
-                        <li class="menu-item has-active">
+                        @php
+                            $adminUser = auth()->user();
+                            $canManageContent = $adminUser?->hasPermission('manage_content');
+                            $canAccessPosts = $adminUser?->hasAnyPermission('manage_content', 'publish_posts', 'edit_any_post', 'create_posts', 'submit_posts');
+                            $canViewSettings = $adminUser?->hasAnyPermission('manage_content', 'manage_users');
+                            $canManageUsers = $adminUser?->hasPermission('manage_users');
+                        @endphp
+
+                        <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'has-active' : '' }}">
                             <a href="{{ route('admin.dashboard') }}" class="menu-link"><span class="menu-icon fas fa-home"></span> <span class="menu-text">Dashboard</span></a>
-                        </li><!-- /.menu-item -->
-                        <li class="menu-header">Blog Management</li>
-                        <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
-                            <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-icon oi oi-folder"></span> <span class="menu-text">Categories</span></a>
                         </li>
-                        <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
-                            <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
-                            <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
-                        </li>
-                        <!-- .menu-item -->
-                        <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
-                            <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a> <!-- child menu -->
-                            <ul class="menu">
-                                <li class="menu-item {{ request()->routeIs('admin.settings') ? 'has-active' : '' }}">
-                                    <a href="{{ route('admin.settings') }}" class="menu-link">General Setting</a>
+
+                        @if ($canManageContent || $canAccessPosts)
+                            <li class="menu-header">Blog Management</li>
+
+                            @if ($canManageContent)
+                                <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-icon oi oi-folder"></span> <span class="menu-text">Categories</span></a>
                                 </li>
-                            </ul><!-- /child menu -->
-                        </li><!-- /.menu-item -->
-                        <!-- .menu-item -->
-                        <li class="menu-item has-child">
-                            <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a> <!-- child menu -->
+                                <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
+                                </li>
+                            @endif
+
+                            @if ($canAccessPosts)
+                                <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
+                                </li>
+                            @endif
+                        @endif
+
+                        @if ($canViewSettings)
+                            <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
+                                <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a>
+                                <ul class="menu">
+                                    <li class="menu-item {{ request()->routeIs('admin.settings') ? 'has-active' : '' }}">
+                                        <a href="{{ route('admin.settings') }}" class="menu-link">General Setting</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
+
+                        <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') ? 'has-active' : '' }}">
+                            <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a>
                             <ul class="menu">
-                                <li class="menu-item">
+                                <li class="menu-item {{ request()->routeIs('admin.profile') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.profile') }}" class="menu-link">Profile</a>
                                 </li>
 
-                                <li class="menu-item">
-                                    <a href="user-notification-settings.html" class="menu-link">Notification Settings</a>
-                                </li>
-                            </ul><!-- /child menu -->
-                        </li><!-- /.menu-item -->
-                        <!-- .menu-item -->
-                        <li class="menu-item has-child">
-                            <a href="#" class="menu-link"><span class="menu-icon oi oi-browser"></span> <span class="menu-text">Layouts</span> <span class="badge badge-subtle badge-success">+4</span></a> <!-- child menu -->
-                            <ul class="menu">
-                                <li class="menu-item">
-                                    <a href="layout-blank.html" class="menu-link">Blank Page</a>
-                                </li>
-
-                            </ul><!-- /child menu -->
-                        </li><!-- /.menu-item -->
-                        <!-- .menu-item -->
-                        <li class="menu-item">
-                            <a href="landing-page.html" class="menu-link"><span class="menu-icon fas fa-rocket"></span> <span class="menu-text">Landing Page</span></a>
-                        </li><!-- /.menu-item -->
-                        <!-- .menu-header -->
-                        <li class="menu-header">Interfaces </li><!-- /.menu-header -->
-                        <!-- .menu-item -->
-                        <li class="menu-item has-child">
-                            <a href="#" class="menu-link"><span class="menu-icon oi oi-puzzle-piece"></span> <span class="menu-text">Components</span></a> <!-- child menu -->
-                            <ul class="menu">
-                                <li class="menu-item">
-                                    <a href="component-general.html" class="menu-link">General</a>
-                                </li>
-
-                            </ul><!-- /child menu -->
-                        </li><!-- /.menu-item -->
+                                @if ($canManageUsers)
+                                    <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'has-active' : '' }}">
+                                        <a href="{{ route('admin.users.index') }}" class="menu-link">User Management</a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
                     </ul><!-- /.menu -->
                 </nav><!-- /.stacked-menu -->
             </div><!-- /.aside-menu -->

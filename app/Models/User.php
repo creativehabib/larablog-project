@@ -126,6 +126,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the current status key for the user.
+     */
+    public function statusKey(): string
+    {
+        if ($this->status instanceof UserStatus) {
+            return $this->status->value;
+        }
+
+        if (is_string($this->status) && $this->status !== '') {
+            return $this->status;
+        }
+
+        return UserStatus::Pending->value;
+    }
+
+    /**
+     * Get the human readable label for the user's status.
+     */
+    public function statusLabel(): string
+    {
+        return ucfirst(str_replace('_', ' ', $this->statusKey()));
+    }
+
+    /**
      * Get the permissions granted to the user's role.
      *
      * @return list<string>
