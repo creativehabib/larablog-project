@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\SubCategoryController;
 
 Route::get('/', function () {
@@ -39,5 +40,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
        Route::resource('categories', CategoryController::class)->except(['show']);
        Route::resource('subcategories', SubCategoryController::class)->except(['show']);
+       Route::resource('posts', PostController::class)->only(['index', 'create', 'edit']);
     });
 });
