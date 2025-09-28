@@ -29,17 +29,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
        });
     });
 
-    Route::middleware(['auth','preventBackHistory'])->group(function () {
+    Route::middleware(['auth','preventBackHistory','permission:access_admin_panel'])->group(function () {
        Route::controller(AdminController::class)->group(function(){
               Route::get('/dashboard', 'dashboard')->name('dashboard');
               Route::post('/logout', 'logout')->name('logout');
               Route::get('/profile', 'profile')->name('profile');
               Route::post('/update-profile', 'updateProfile')->name('update.profile');
-              Route::get('/settings', 'generalSettings')->name('settings');
+              Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:manage_content,manage_users');
        });
 
-       Route::resource('categories', CategoryController::class)->except(['show']);
-       Route::resource('subcategories', SubCategoryController::class)->except(['show']);
-       Route::resource('posts', PostController::class)->only(['index', 'create', 'edit']);
+       Route::resource('categories', CategoryController::class)
+           ->except(['show'])
+           ->middleware('permission:manage_content');
+
+       Route::resource('subcategories', SubCategoryController::class)
+           ->except(['show'])
+           ->middleware('permission:manage_content');
+
+       Route::resource('posts', PostController::class)
+           ->only(['index', 'create', 'edit'])
+           ->middleware('permission:manage_content,publish_posts,edit_any_post,create_posts,submit_posts');
     });
 });

@@ -67,4 +67,113 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserSocialLink::class);
     }
+
+    /**
+     * Get the current role key for the user.
+     */
+    public function roleKey(): string
+    {
+        if ($this->type instanceof UserType) {
+            return $this->type->value;
+        }
+
+        if (is_string($this->type) && $this->type !== '') {
+            return $this->type;
+        }
+
+        return UserType::Subscriber->value;
+    }
+
+    /**
+     * Retrieve the role definition from the configuration.
+     *
+     * @return array{label?: string, summary?: string|null, permissions?: array<int, string>}
+     */
+    public function roleDefinition(): array
+    {
+        $roles = config('roles', []);
+        $key = $this->roleKey();
+
+        if (array_key_exists($key, $roles)) {
+            return $roles[$key];
+        }
+
+        return $roles[UserType::Subscriber->value] ?? [
+            'label' => ucfirst(str_replace('_', ' ', $key)),
+            'summary' => null,
+            'permissions' => [],
+        ];
+    }
+
+    /**
+     * Get the translated label for the user's role.
+     */
+    public function roleLabel(): string
+    {
+        $definition = $this->roleDefinition();
+
+        return $definition['label'] ?? ucfirst(str_replace('_', ' ', $this->roleKey()));
+    }
+
+    /**
+     * Get the summary/description for the user's role.
+     */
+    public function roleSummary(): ?string
+    {
+        $definition = $this->roleDefinition();
+
+        return $definition['summary'] ?? null;
+    }
+
+    /**
+     * Get the permissions granted to the user's role.
+     *
+     * @return list<string>
+     */
+    public function permissions(): array
+    {
+        $definition = $this->roleDefinition();
+
+        return $definition['permissions'] ?? [];
+    }
+
+    /**
+     * Determine if the user has the provided permission.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->permissions();
+
+        if (in_array('*', $permissions, true)) {
+            return true;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
+    /**
+     * Determine if the user has any of the provided permissions.
+     */
+    public function hasAnyPermission(string ...$permissions): bool
+    {
+        if (empty($permissions)) {
+            return $this->hasPermission('access_admin_panel');
+        }
+
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the user can access the admin panel.
+     */
+    public function canAccessAdminPanel(): bool
+    {
+        return $this->hasPermission('access_admin_panel');
+    }
 }
