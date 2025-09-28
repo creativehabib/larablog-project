@@ -13,13 +13,28 @@ use Illuminate\View\View;
 
 class SubCategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $subCategories = SubCategory::with('category')->latest()->paginate(15);
+        $search = trim($request->query('search', ''));
+
+        $subCategories = SubCategory::with('category')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                            $categoryQuery->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('back.pages.sub_categories.index', [
             'pageTitle' => 'Sub Categories',
             'subCategories' => $subCategories,
+            'search' => $search,
         ]);
     }
 
