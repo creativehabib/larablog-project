@@ -440,6 +440,24 @@
                             </ul><!-- /child menu -->
                         </li><!-- /.menu-item -->
                         <!-- .menu-item -->
+                        <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.post-categories.*') || request()->routeIs('admin.post-subcategories.*') ? 'has-active' : '' }}">
+                            <a href="#" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">পোস্ট</span></a>
+                            <ul class="menu">
+                                <li class="menu-item {{ request()->routeIs('admin.posts.index') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.posts.index') }}" class="menu-link">সব পোস্ট</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('admin.posts.create') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.posts.create') }}" class="menu-link">নতুন পোস্ট</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('admin.post-categories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.post-categories.index') }}" class="menu-link">ক্যাটাগরি</a>
+                                </li>
+                                <li class="menu-item {{ request()->routeIs('admin.post-subcategories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.post-subcategories.index') }}" class="menu-link">সাব-ক্যাটাগরি</a>
+                                </li>
+                            </ul><!-- /child menu -->
+                        </li><!-- /.menu-item -->
+                        <!-- .menu-item -->
                         <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a> <!-- child menu -->
                             <ul class="menu">
