@@ -19,6 +19,22 @@
 
         <div class="card card-fluid">
             <div class="card-body">
+                <form method="GET" action="{{ route('admin.subcategories.index') }}" class="mb-3">
+                    <div class="form-row align-items-center">
+                        <div class="col-sm-6 my-1">
+                            <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                                placeholder="Search sub categories...">
+                        </div>
+                        <div class="col-auto my-1">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                        @if (request('search'))
+                            <div class="col-auto my-1">
+                                <a href="{{ route('admin.subcategories.index') }}" class="btn btn-outline-secondary">Clear</a>
+                            </div>
+                        @endif
+                    </div>
+                </form>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
