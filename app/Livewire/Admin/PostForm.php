@@ -18,11 +18,11 @@ class PostForm extends Component
 
     public ?Post $post = null;
 
-    public string $title = '';
-    public string $slug = '';
-    public string $description = '';
-    public string $category_id = '';
-    public string $sub_category_id = '';
+    public ?string $title = '';
+    public ?string $slug = '';
+    public ?string $description = '';
+    public ?string $category_id = '';
+    public ?string $sub_category_id = '';
     public bool $is_featured = false;
     public bool $allow_comments = true;
     public bool $is_indexable = true;
