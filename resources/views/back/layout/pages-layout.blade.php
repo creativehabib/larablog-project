@@ -383,6 +383,9 @@
                         <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                             <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
                         </li>
+                        <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
+                            <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
+                        </li>
                         <!-- .menu-item -->
                         <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a> <!-- child menu -->
