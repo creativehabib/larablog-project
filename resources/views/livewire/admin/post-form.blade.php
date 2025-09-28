@@ -45,9 +45,12 @@
                 </div>
             </div>
 
-            <div class="form-group" wire:ignore>
+            <div class="form-group">
                 <label for="postDescription">Post Description <span class="text-danger">*</span></label>
-                <textarea id="postDescription" class="form-control @error('description') is-invalid @enderror">{!! $description !!}</textarea>
+                <div wire:ignore data-post-description-editor>
+                    <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
+                </div>
+                <input type="hidden" id="postDescriptionData" wire:model="description">
                 @error('description')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
@@ -128,75 +131,184 @@
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
         document.addEventListener('livewire:init', () => {
-            const initializeEditor = () => {
-                const textarea = document.getElementById('postDescription');
-                if (!textarea || textarea.dataset.initialized) {
+            const debounce = (callback, wait = 300) => {
+                let timeoutId;
+
+                return (...args) => {
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+
+                    timeoutId = setTimeout(() => {
+                        callback(...args);
+                    }, wait);
+                };
+            };
+
+            let editorInstance = null;
+            const editorState = {
+                componentId: null,
+                hiddenField: null,
+                lastSetValue: '',
+            };
+
+            const syncHiddenField = (value, shouldDispatch = false) => {
+                if (!editorState.hiddenField) {
                     return;
                 }
 
-                textarea.dataset.initialized = 'true';
+                editorState.hiddenField.value = value;
+
+                if (shouldDispatch) {
+                    editorState.hiddenField.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            };
+
+            const syncToLivewire = (data) => {
+                const normalized = data || '';
+
+                if (normalized === editorState.lastSetValue) {
+                    return;
+                }
+
+                editorState.lastSetValue = normalized;
+                syncHiddenField(normalized, !editorState.componentId);
+
+                if (!editorState.componentId) {
+                    return;
+                }
+
+                const component = Livewire.find(editorState.componentId);
+                if (component) {
+                    component.set('description', normalized);
+                }
+            };
+
+            const destroyEditor = () => {
+                if (editorInstance && editorInstance.status === 'ready') {
+                    editorInstance.destroy();
+                }
+
+                editorInstance = null;
+                editorState.componentId = null;
+                editorState.hiddenField = null;
+                editorState.lastSetValue = '';
+            };
+
+            const initializeEditor = () => {
+                const container = document.querySelector('[data-post-description-editor]');
+                if (!container) {
+                    return;
+                }
+
+                const textarea = container.querySelector('#postDescription');
+                if (!textarea || textarea.dataset.initialized) {
+                    return;
+                }
 
                 if (typeof CKEDITOR === 'undefined') {
                     console.error('CKEditor 4 is not loaded.');
                     return;
                 }
 
-                const componentId = textarea.closest('[wire\\:id]')?.getAttribute('wire:id');
-                if (!componentId) {
-                    return;
-                }
+                const componentId = container.closest('[wire\\:id]')?.getAttribute('wire:id');
+                const hiddenField = document.getElementById('postDescriptionData');
 
-                const editor = CKEDITOR.replace('postDescription', {
+                textarea.dataset.initialized = 'true';
+
+                editorState.componentId = componentId || null;
+                editorState.hiddenField = hiddenField || null;
+                editorState.lastSetValue = hiddenField?.value || '';
+
+                editorInstance = CKEDITOR.replace(textarea.id, {
                     height: 360,
                     removePlugins: 'easyimage,cloudservices',
                     extraAllowedContent: '*(*){*}',
                 });
 
-                editor.on('change', () => {
-                    const data = editor.getData();
-                    const component = Livewire.find(componentId);
-                    if (component) {
-                        component.set('description', data);
-                    }
-                });
-
-                Livewire.on('syncPostEditor', (content) => {
-                    if (editor.status !== 'ready') {
-                        editor.on('instanceReady', () => {
-                            if (editor.getData() !== content) {
-                                editor.setData(content || '');
-                            }
-                        });
+                const emitChange = debounce(() => {
+                    if (!editorInstance) {
                         return;
                     }
 
-                    if (editor.getData() !== content) {
-                        editor.setData(content || '');
-                    }
+                    const data = editorInstance.getData();
+                    syncToLivewire(data);
                 });
 
-                window.addEventListener('beforeunload', () => {
-                    if (editor && editor.status === 'ready') {
-                        editor.destroy();
-                    }
+                editorInstance.on('change', emitChange);
+                editorInstance.on('instanceReady', () => {
+                    emitChange();
                 });
+
+                if (!window.__postDescriptionBeforeUnloadBound) {
+                    window.addEventListener('beforeunload', () => {
+                        const instance = CKEDITOR.instances.postDescription;
+                        if (instance && instance.status === 'ready') {
+                            instance.destroy();
+                        }
+                    });
+                    window.__postDescriptionBeforeUnloadBound = true;
+                }
             };
 
-            initializeEditor();
+            const handleSyncEvent = (content) => {
+                const normalized = content || '';
+
+                if (!editorInstance) {
+                    return;
+                }
+
+                if (editorInstance.status !== 'ready') {
+                    editorInstance.on('instanceReady', () => {
+                        handleSyncEvent(normalized);
+                    });
+                    return;
+                }
+
+                const currentData = editorInstance.getData();
+                if (currentData === normalized) {
+                    editorState.lastSetValue = normalized;
+                    syncHiddenField(normalized);
+                    return;
+                }
+
+                editorState.lastSetValue = normalized;
+                syncHiddenField(normalized);
+                editorInstance.setData(normalized);
+            };
+
+            if (!window.__postDescriptionSyncListener) {
+                Livewire.on('syncPostEditor', handleSyncEvent);
+                window.__postDescriptionSyncListener = true;
+            }
 
             Livewire.hook('element.removed', ({ el }) => {
-                if (el && el.id === 'postDescription' && el.dataset.initialized) {
+                if (!el) {
+                    return;
+                }
+
+                let textarea = null;
+                if (el.id === 'postDescription') {
+                    textarea = el;
+                } else if (typeof el.querySelector === 'function') {
+                    textarea = el.querySelector('#postDescription');
+                }
+
+                if (textarea && textarea.dataset.initialized) {
                     const instance = CKEDITOR.instances.postDescription;
                     if (instance) {
                         instance.destroy();
                     }
-                    delete el.dataset.initialized;
+                    delete textarea.dataset.initialized;
+                    destroyEditor();
                 }
             });
 
             Livewire.hook('message.processed', () => {
                 initializeEditor();
             });
+
+            initializeEditor();
         });
     </script>
 @endpushOnce
