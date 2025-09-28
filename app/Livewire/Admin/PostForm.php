@@ -46,9 +46,9 @@ class PostForm extends Component
             $this->description = $post->description;
             $this->category_id = (string) $post->category_id;
             $this->sub_category_id = $post->sub_category_id ? (string) $post->sub_category_id : '';
-            $this->is_featured = $post->is_featured;
-            $this->allow_comments = $post->allow_comments;
-            $this->is_indexable = $post->is_indexable;
+            $this->is_featured = (bool) $post->is_featured;
+            $this->allow_comments = (bool) $post->allow_comments;
+            $this->is_indexable = (bool) $post->is_indexable;
             $this->meta_title = $post->meta_title;
             $this->meta_description = $post->meta_description;
             $this->meta_keywords = $post->meta_keywords;
