@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubCategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,5 +36,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
               Route::post('/update-profile', 'updateProfile')->name('update.profile');
               Route::get('/settings', 'generalSettings')->name('settings');
        });
+
+       Route::resource('categories', CategoryController::class)->except(['show']);
+       Route::resource('subcategories', SubCategoryController::class)->except(['show']);
     });
 });

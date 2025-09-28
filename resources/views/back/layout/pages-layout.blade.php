@@ -376,69 +376,13 @@
                         <li class="menu-item has-active">
                             <a href="{{ route('admin.dashboard') }}" class="menu-link"><span class="menu-icon fas fa-home"></span> <span class="menu-text">Dashboard</span></a>
                         </li><!-- /.menu-item -->
-                        <!-- .menu-item -->
-                        <li class="menu-item has-child">
-                            <a href="#" class="menu-link"><span class="menu-icon far fa-file"></span> <span class="menu-text">App Pages</span> <span class="badge badge-warning">New</span></a> <!-- child menu -->
-                            <ul class="menu">
-                                <li class="menu-item">
-                                    <a href="page-clients.html" class="menu-link">Clients</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="page-teams.html" class="menu-link">Teams</a>
-                                </li>
-                                <li class="menu-item has-child">
-                                    <a href="#" class="menu-link">Team</a> <!-- grand child menu -->
-                                    <ul class="menu">
-                                        <li class="menu-item">
-                                            <a href="page-team.html" class="menu-link">Overview</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-team-feeds.html" class="menu-link">Feeds</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-team-projects.html" class="menu-link">Projects</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-team-members.html" class="menu-link">Members</a>
-                                        </li>
-                                    </ul><!-- /grand child menu -->
-                                </li>
-                                <li class="menu-item has-child">
-                                    <a href="#" class="menu-link">Project</a> <!-- grand child menu -->
-                                    <ul class="menu">
-                                        <li class="menu-item">
-                                            <a href="page-project.html" class="menu-link">Overview</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-project-board.html" class="menu-link">Board</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-project-gantt.html" class="menu-link">Gantt View</a>
-                                        </li>
-                                    </ul><!-- /grand child menu -->
-                                </li>
-                                <li class="menu-item">
-                                    <a href="page-calendar.html" class="menu-link">Calendar</a>
-                                </li>
-                                <li class="menu-item has-child">
-                                    <a href="#" class="menu-link">Invoices</a> <!-- grand child menu -->
-                                    <ul class="menu">
-                                        <li class="menu-item">
-                                            <a href="page-invoices.html" class="menu-link">List</a>
-                                        </li>
-                                        <li class="menu-item">
-                                            <a href="page-invoice.html" class="menu-link">Details</a>
-                                        </li>
-                                    </ul><!-- /grand child menu -->
-                                </li>
-                                <li class="menu-item">
-                                    <a href="page-messages.html" class="menu-link">Messages</a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="page-conversations.html" class="menu-link">Conversations</a>
-                                </li>
-                            </ul><!-- /child menu -->
-                        </li><!-- /.menu-item -->
+                        <li class="menu-header">Blog Management</li>
+                        <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
+                            <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-icon oi oi-folder"></span> <span class="menu-text">Categories</span></a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
+                            <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
+                        </li>
                         <!-- .menu-item -->
                         <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a> <!-- child menu -->
