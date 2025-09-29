@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use App\Models\Concerns\HasRolesAndPermissions;
+use App\Support\Permissions\RoleRegistry;
 use App\UserStatus;
 use App\UserType;
-use App\Models\Concerns\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {
@@ -85,15 +86,13 @@ class User extends Authenticatable
             return $primaryRole->slug;
         }
 
-        if ($this->type instanceof UserType) {
-            return $this->type->value;
+        $type = $this->normalizedRoleTypeAttribute();
+
+        if ($type !== '') {
+            return $type;
         }
 
-        if (is_string($this->type) && $this->type !== '') {
-            return $this->type;
-        }
-
-        return UserType::Subscriber->value;
+        return app(RoleRegistry::class)->defaultRole();
     }
 
     /**
@@ -103,6 +102,7 @@ class User extends Authenticatable
      */
     public function roleDefinition(): array
     {
+        $registry = app(RoleRegistry::class);
         $role = $this->primaryRole();
 
         if ($role) {
@@ -110,12 +110,20 @@ class User extends Authenticatable
 
             return [
                 'label' => $role->name,
-                'summary' => $role->summary,
+                'summary' => $role->summary ?? $registry->definition($role->slug)?->summary,
                 'permissions' => $role->permissions->pluck('slug')->values()->all(),
             ];
         }
 
         $key = $this->roleKey();
+
+        if ($definition = $registry->definition($key)) {
+            return [
+                'label' => $definition->label,
+                'summary' => $definition->summary,
+                'permissions' => $definition->permissions,
+            ];
+        }
 
         return [
             'label' => ucfirst(str_replace('_', ' ', $key)),

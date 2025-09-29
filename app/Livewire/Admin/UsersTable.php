@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Role;
 use App\Models\User;
+use App\Support\Permissions\RoleRegistry;
 use App\UserStatus;
 use App\UserType;
 use Illuminate\Support\Facades\Auth;
@@ -138,7 +138,7 @@ class UsersTable extends Component
      */
     protected function availableRoleValues(): array
     {
-        return Role::query()->pluck('slug')->all();
+        return app(RoleRegistry::class)->slugs();
     }
 
     /**
@@ -154,14 +154,7 @@ class UsersTable extends Component
      */
     protected function roleOptions(): array
     {
-        return Role::query()
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Role $role) => [
-                'value' => $role->slug,
-                'label' => $role->name,
-            ])
-            ->all();
+        return app(RoleRegistry::class)->options();
     }
 
     /**
