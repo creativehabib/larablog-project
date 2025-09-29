@@ -5,220 +5,170 @@ namespace App\Models\Concerns;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Collection;
+use Spatie\Permission\PermissionRegistrar;
+use Spatie\Permission\Traits\HasRoles;
 
 trait HasRolesAndPermissions
 {
-    /**
-     * @return BelongsToMany<Role, self>
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class)->withTimestamps();
+    use HasRoles {
+        assignRole as spatieAssignRole;
+        syncRoles as spatieSyncRoles;
+        removeRole as spatieRemoveRole;
+        givePermissionTo as spatieGivePermissionTo;
+        syncPermissions as spatieSyncPermissions;
+        revokePermissionTo as spatieRevokePermissionTo;
     }
 
     /**
-     * @return BelongsToMany<Permission, self>
+     * Assign the given roles to the model and refresh cached relations.
      */
-    public function permissions(): BelongsToMany
+    public function assignRole(...$roles): static
     {
-        return $this->belongsToMany(Permission::class)->withTimestamps();
+        $result = $this->spatieAssignRole(...$roles);
+
+        $this->load('roles');
+        $this->syncPrimaryRoleAttribute($this->primaryRole());
+        $this->forgetPermissionCache();
+
+        return $result;
     }
 
     /**
-     * Assign one or many roles to the model.
+     * Sync the given roles on the model and refresh cached relations.
      */
-    public function assignRole(string|int|Role|array ...$roles): static
+    public function syncRoles(...$roles): static
     {
-        $storedRoles = $this->resolveRoles($roles);
+        $result = $this->spatieSyncRoles(...$roles);
 
-        if ($storedRoles->isEmpty()) {
-            return $this;
-        }
+        $this->load('roles');
+        $this->syncPrimaryRoleAttribute($this->primaryRole());
+        $this->forgetPermissionCache();
 
-        $this->roles()->syncWithoutDetaching($storedRoles->pluck('id')->all());
-
-        if (! $this->primaryRole()) {
-            $this->syncPrimaryRoleAttribute($storedRoles->first());
-        }
-
-        return $this->load('roles');
+        return $result;
     }
 
     /**
-     * Replace any currently assigned roles with the provided set.
+     * Remove the provided role from the model and refresh cached relations.
      */
-    public function syncRoles(string|int|Role|array ...$roles): static
+    public function removeRole($role): static
     {
-        $storedRoles = $this->resolveRoles($roles);
+        $result = $this->spatieRemoveRole($role);
 
-        $this->roles()->sync($storedRoles->pluck('id')->all());
+        $this->load('roles');
+        $this->syncPrimaryRoleAttribute($this->primaryRole());
+        $this->forgetPermissionCache();
 
-        $this->syncPrimaryRoleAttribute($storedRoles->first());
-
-        return $this->load('roles');
+        return $result;
     }
 
     /**
-     * Remove the provided role from the model.
+     * Grant the provided permission(s) to the model.
      */
-    public function removeRole(string|int|Role $role): static
+    public function givePermissionTo(...$permissions): static
     {
-        $storedRole = $this->resolveRole($role);
+        $result = $this->spatieGivePermissionTo(...$permissions);
 
-        $this->roles()->detach($storedRole);
+        $this->forgetPermissionCache();
 
-        if ($this->primaryRole()?->is($storedRole)) {
-            $this->syncPrimaryRoleAttribute($this->roles()->first());
-        }
-
-        return $this->load('roles');
+        return $result->load('permissions');
     }
 
     /**
-     * Determine if the model has (at least) one of the provided roles.
+     * Sync the provided permission(s) on the model.
      */
-    public function hasRole(string|int|Role|array ...$roles): bool
+    public function syncPermissions(...$permissions): static
     {
-        $storedRoles = $this->resolveRoles($roles);
+        $result = $this->spatieSyncPermissions(...$permissions);
 
-        if ($storedRoles->isEmpty()) {
-            return false;
-        }
+        $this->forgetPermissionCache();
 
-        $this->loadMissing('roles');
-
-        return $storedRoles->contains(fn (Role $role) => $this->roles->contains('id', $role->id));
+        return $result->load('permissions');
     }
 
     /**
-     * Determine if the model has any of the provided roles.
+     * Revoke the provided permission(s) from the model.
      */
-    public function hasAnyRole(string|int|Role|array ...$roles): bool
+    public function revokePermissionTo(...$permissions): static
     {
-        return $this->hasRole(...$roles);
+        $result = $this->spatieRevokePermissionTo(...$permissions);
+
+        $this->forgetPermissionCache();
+
+        return $result->load('permissions');
     }
 
     /**
-     * Determine if the model has all of the provided roles.
-     */
-    public function hasAllRoles(string|int|Role|array ...$roles): bool
-    {
-        $storedRoles = $this->resolveRoles($roles);
-
-        if ($storedRoles->isEmpty()) {
-            return false;
-        }
-
-        $this->loadMissing('roles');
-
-        return $storedRoles->every(fn (Role $role) => $this->roles->contains('id', $role->id));
-    }
-
-    /**
-     * Grant one or many direct permissions to the model.
-     */
-    public function givePermissionTo(string|int|Permission|array ...$permissions): static
-    {
-        $storedPermissions = $this->resolvePermissions($permissions);
-
-        if ($storedPermissions->isEmpty()) {
-            return $this;
-        }
-
-        $this->permissions()->syncWithoutDetaching($storedPermissions->pluck('id')->all());
-
-        return $this->load('permissions');
-    }
-
-    /**
-     * Sync direct permissions for the model.
-     */
-    public function syncPermissions(string|int|Permission|array ...$permissions): static
-    {
-        $storedPermissions = $this->resolvePermissions($permissions);
-
-        $this->permissions()->sync($storedPermissions->pluck('id')->all());
-
-        return $this->load('permissions');
-    }
-
-    /**
-     * Revoke the provided direct permission(s) from the model.
-     */
-    public function revokePermissionTo(string|int|Permission|array ...$permissions): static
-    {
-        $storedPermissions = $this->resolvePermissions($permissions);
-
-        if ($storedPermissions->isEmpty()) {
-            return $this;
-        }
-
-        $this->permissions()->detach($storedPermissions->pluck('id')->all());
-
-        return $this->load('permissions');
-    }
-
-    /**
-     * Determine if the model has the provided permission via roles or direct assignment.
-     */
-    public function hasPermissionTo(string|Permission $permission): bool
-    {
-        $permissionModel = $permission instanceof Permission
-            ? $permission
-            : Permission::query()->where('slug', $permission)->first();
-
-        if (! $permissionModel) {
-            if (method_exists($this, 'permissionNames')) {
-                /** @var list<string> $names */
-                $names = $this->permissionNames();
-
-                if (in_array('*', $names, true) || in_array((string) $permission, $names, true)) {
-                    return true;
-                }
-            }
-
-            $this->loadMissing('permissions', 'roles.permissions');
-
-            return $this->allPermissions()->contains(fn (Permission $perm) => $perm->slug === $permission || $perm->slug === '*');
-        }
-
-        return $this->hasPermissionModel($permissionModel);
-    }
-
-    /**
-     * Determine if the model has the provided permission directly assigned.
-     */
-    public function hasDirectPermission(string|Permission $permission): bool
-    {
-        $this->loadMissing('permissions');
-
-        if ($permission instanceof Permission) {
-            return $this->permissions->contains('id', $permission->id);
-        }
-
-        return $this->permissions->contains('slug', $permission) || $this->permissions->contains('slug', '*');
-    }
-
-    /**
-     * Retrieve all permissions assigned to the model via roles or directly.
+     * Retrieve all permissions for the model via direct assignment or roles.
      */
     public function allPermissions(): EloquentCollection
     {
-        $this->loadMissing('permissions', 'roles.permissions');
+        /** @var EloquentCollection<int, Permission> $permissions */
+        $permissions = $this->getAllPermissions();
 
-        /** @var EloquentCollection<int, Permission> $direct */
-        $direct = $this->permissions;
-
-        /** @var EloquentCollection<int, Permission> $viaRoles */
-        $viaRoles = $this->roles->flatMap(fn (Role $role) => $role->permissions)->unique('id');
-
-        return $direct->merge($viaRoles)->unique('id');
+        return $permissions;
     }
 
     /**
-     * Get the primary/most relevant role for the model.
+     * Determine if the model has the provided permission slug.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->permissionNames();
+
+        if (in_array('*', $permissions, true)) {
+            return true;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
+    /**
+     * Determine if the model has any of the provided permission slugs.
+     */
+    public function hasAnyPermission(string ...$permissions): bool
+    {
+        if (empty($permissions)) {
+            return $this->hasPermission('access_admin_panel');
+        }
+
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve the permission slugs associated with the model.
+     *
+     * @return list<string>
+     */
+    public function permissionNames(): array
+    {
+        $databasePermissions = $this->getAllPermissions()->pluck('slug');
+
+        $configPermissions = collect(config('roles.' . $this->roleKey() . '.permissions', []));
+
+        return $databasePermissions
+            ->merge($configPermissions)
+            ->filter(fn ($permission) => is_string($permission) && $permission !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Determine if the model can access the admin panel.
+     */
+    public function canAccessAdminPanel(): bool
+    {
+        return $this->hasPermission('access_admin_panel');
+    }
+
+    /**
+     * Determine the primary role associated with the model.
      */
     public function primaryRole(): ?Role
     {
@@ -254,75 +204,7 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Normalize the provided role inputs into stored models.
-     */
-    protected function resolveRoles(array $roles): Collection
-    {
-        return collect($roles)
-            ->flatten()
-            ->filter(fn ($role) => $role !== null && $role !== '')
-            ->map(fn ($role) => $this->resolveRole($role))
-            ->unique(fn (Role $role) => $role->getKey())
-            ->values();
-    }
-
-    /**
-     * Resolve a single role value into a stored model instance.
-     */
-    protected function resolveRole(string|int|Role $role): Role
-    {
-        if ($role instanceof Role) {
-            return $role;
-        }
-
-        $query = Role::query();
-
-        if (is_numeric($role)) {
-            return $query->whereKey((int) $role)->firstOrFail();
-        }
-
-        return $query
-            ->where('slug', $role)
-            ->orWhere('name', $role)
-            ->firstOrFail();
-    }
-
-    /**
-     * Normalize permission inputs into stored models.
-     */
-    protected function resolvePermissions(array $permissions): Collection
-    {
-        return collect($permissions)
-            ->flatten()
-            ->filter(fn ($permission) => $permission !== null && $permission !== '')
-            ->map(fn ($permission) => $this->resolvePermission($permission))
-            ->unique(fn (Permission $permission) => $permission->getKey())
-            ->values();
-    }
-
-    /**
-     * Resolve a single permission value into a stored model instance.
-     */
-    protected function resolvePermission(string|int|Permission $permission): Permission
-    {
-        if ($permission instanceof Permission) {
-            return $permission;
-        }
-
-        $query = Permission::query();
-
-        if (is_numeric($permission)) {
-            return $query->whereKey((int) $permission)->firstOrFail();
-        }
-
-        return $query
-            ->where('slug', $permission)
-            ->orWhere('name', $permission)
-            ->firstOrFail();
-    }
-
-    /**
-     * Persist the primary role representation on the model if applicable.
+     * Persist the current primary role slug on the model when applicable.
      */
     protected function syncPrimaryRoleAttribute(?Role $role): void
     {
@@ -341,24 +223,10 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Determine if a permission model is assigned either directly or via roles.
+     * Flush the cached permissions maintained by the package registrar.
      */
-    protected function hasPermissionModel(Permission $permission): bool
+    protected function forgetPermissionCache(): void
     {
-        $this->loadMissing('permissions', 'roles.permissions');
-
-        if ($this->permissions->contains('id', $permission->id)) {
-            return true;
-        }
-
-        if ($this->permissions->contains('slug', '*')) {
-            return true;
-        }
-
-        if ($permission->slug === '*') {
-            return $this->permissions->isNotEmpty() || $this->roles->isNotEmpty();
-        }
-
-        return $this->roles->contains(fn (Role $role) => $role->permissions->contains('id', $permission->id) || $role->permissions->contains('slug', '*'));
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

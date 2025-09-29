@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -14,6 +15,8 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $definitions = config('roles', []);
 
         foreach ($definitions as $slug => $definition) {
@@ -26,12 +29,13 @@ class RolePermissionSeeder extends Seeder
                 [
                     'name' => $definition['label'] ?? Str::headline($slug),
                     'summary' => $definition['summary'] ?? null,
+                    'guard_name' => config('auth.defaults.guard', 'web'),
                 ]
             );
 
             $permissions = $definition['permissions'] ?? [];
 
-            $permissionIds = collect($permissions)
+            $permissionModels = collect($permissions)
                 ->flatten()
                 ->filter(fn ($permission) => is_string($permission) && $permission !== '')
                 ->map(function (string $permission) {
@@ -41,13 +45,15 @@ class RolePermissionSeeder extends Seeder
 
                     return Permission::query()->updateOrCreate(
                         ['slug' => $permission],
-                        ['name' => $label !== '' ? $label : Str::headline($permission)]
+                        [
+                            'name' => $label !== '' ? $label : Str::headline($permission),
+                            'guard_name' => config('auth.defaults.guard', 'web'),
+                        ]
                     );
                 })
-                ->pluck('id')
                 ->all();
 
-            $role->permissions()->sync($permissionIds);
+            $role->syncPermissions($permissionModels);
         }
     }
 }
