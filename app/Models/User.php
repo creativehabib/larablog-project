@@ -115,17 +115,12 @@ class User extends Authenticatable
             ];
         }
 
-        $roles = config('roles', []);
         $key = $this->roleKey();
 
-        if (array_key_exists($key, $roles)) {
-            return $roles[$key];
-        }
-
-        return $roles[UserType::Subscriber->value] ?? [
+        return [
             'label' => ucfirst(str_replace('_', ' ', $key)),
             'summary' => null,
-            'permissions' => [],
+            'permissions' => $this->permissionNames(),
         ];
     }
 

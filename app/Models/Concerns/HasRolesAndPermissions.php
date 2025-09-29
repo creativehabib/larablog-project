@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\UserType;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
@@ -147,12 +148,8 @@ trait HasRolesAndPermissions
      */
     public function permissionNames(): array
     {
-        $databasePermissions = $this->getAllPermissions()->pluck('slug');
-
-        $configPermissions = collect(config('roles.' . $this->roleKey() . '.permissions', []));
-
-        return $databasePermissions
-            ->merge($configPermissions)
+        return $this->getAllPermissions()
+            ->pluck('slug')
             ->filter(fn ($permission) => is_string($permission) && $permission !== '')
             ->unique()
             ->values()
@@ -215,7 +212,7 @@ trait HasRolesAndPermissions
         $value = $role?->slug;
 
         if ($value === null) {
-            $value = config('roles.default', 'subscriber');
+            $value = UserType::Subscriber->value;
         }
 
         $this->forceFill(['type' => $value]);
