@@ -326,7 +326,7 @@
                     <!-- .btn-account -->
                     <div class="dropdown d-none d-md-flex">
                         <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ auth()->user()->avatar }}" alt="" id="topbarUserAvatar"></span>
-                            <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->type }}</span></span></button> <!-- .dropdown-menu -->
+                            <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->roleLabel() }}</span></span></button> <!-- .dropdown-menu -->
                         <div class="dropdown-menu">
                             <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
                             <div class="dropdown-arrow ml-3 d-none d-lg-block"></div>
@@ -353,7 +353,7 @@
             <!-- .aside-header -->
             <header class="aside-header d-block d-md-none">
                 <!-- .btn-account -->
-                <button class="btn-account" type="button" data-toggle="collapse" data-target="#dropdown-aside"><span class="user-avatar user-avatar-lg"><img src="{{ auth()->user()->avatar }}" alt=""></span> <span class="account-icon"><span class="fa fa-caret-down fa-lg"></span></span> <span class="account-summary"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->type }}</span></span></button> <!-- /.btn-account -->
+                <button class="btn-account" type="button" data-toggle="collapse" data-target="#dropdown-aside"><span class="user-avatar user-avatar-lg"><img src="{{ auth()->user()->avatar }}" alt=""></span> <span class="account-icon"><span class="fa fa-caret-down fa-lg"></span></span> <span class="account-summary"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->roleLabel() }}</span></span></button> <!-- /.btn-account -->
                 <!-- .dropdown-aside -->
                 <div id="dropdown-aside" class="dropdown-aside collapse">
                     <!-- dropdown-items -->

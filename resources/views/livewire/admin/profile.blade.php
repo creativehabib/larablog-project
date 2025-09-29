@@ -34,7 +34,7 @@
                                             </div>
                                         </div>
                                         <div class="text-center text-sm-right">
-                                            <span class="badge badge-secondary">{{ auth()->user()->type ?? 'User' }}</span>
+                                            <span class="badge badge-secondary">{{ auth()->user()->roleLabel() ?? 'User' }}</span>
                                             <div class="text-muted">
                                                 <small>Joined {{ auth()->user()->created_at->format('d M Y') }}</small>
                                             </div>
