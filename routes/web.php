@@ -50,11 +50,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
        Route::get('posts', [PostController::class, 'index'])
            ->name('posts.index')
-           ->middleware('permission:manage_content|publish_posts|edit_any_post|create_posts|submit_posts');
+           ->middleware('permission:manage_content|publish_posts|create_posts|submit_posts');
 
        Route::get('posts/create', [PostController::class, 'create'])
            ->name('posts.create')
-           ->middleware('permission:manage_content|create_posts|submit_posts|edit_any_post');
+           ->middleware('permission:manage_content|create_posts|submit_posts');
 
        Route::get('posts/{post}/edit', [PostController::class, 'edit'])
            ->name('posts.edit')
