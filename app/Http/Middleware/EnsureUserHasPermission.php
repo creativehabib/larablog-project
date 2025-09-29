@@ -21,7 +21,7 @@ class EnsureUserHasPermission
             return redirect()->route('admin.login');
         }
 
-        $permissions = ! empty($permissions) ? $permissions : ['access_admin_panel'];
+        $permissions = ! empty($permissions) ? $this->expandPermissions($permissions) : ['access_admin_panel'];
 
         if ($user->hasAnyPermission(...$permissions)) {
             return $next($request);
@@ -32,5 +32,22 @@ class EnsureUserHasPermission
         }
 
         abort(Response::HTTP_FORBIDDEN, __('You do not have permission to perform this action.'));
+    }
+
+    /**
+     * Expand delimited permission strings into a unique flat list.
+     *
+     * @param  list<string>  $permissions
+     * @return list<string>
+     */
+    protected function expandPermissions(array $permissions): array
+    {
+        return collect($permissions)
+            ->flatMap(fn (string $permission) => preg_split('/[|,]/', $permission) ?: [])
+            ->map(fn (string $permission) => trim($permission))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }

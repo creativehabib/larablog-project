@@ -64,4 +64,16 @@ class AdminMenuVisibilityTest extends TestCase
         $response->assertOk();
         $response->assertSee('User Management', false);
     }
+
+    public function test_author_can_access_post_creation_page(): void
+    {
+        $user = User::factory()->create([
+            'type' => UserType::Author,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.posts.create'));
+
+        $response->assertOk();
+        $response->assertSee('Create Post', false);
+    }
 }
