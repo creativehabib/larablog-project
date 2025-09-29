@@ -378,6 +378,7 @@
                             $canAccessPosts = $adminUser?->hasAnyPermission('manage_content', 'publish_posts', 'edit_any_post', 'create_posts', 'submit_posts');
                             $canViewSettings = $adminUser?->hasAnyPermission('manage_content', 'manage_users');
                             $canManageUsers = $adminUser?->hasPermission('manage_users');
+                            $canManageRoles = $adminUser?->hasPermission('manage_roles');
                         @endphp
 
                         <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'has-active' : '' }}">
@@ -414,12 +415,18 @@
                             </li>
                         @endif
 
-                        <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') ? 'has-active' : '' }}">
+                        <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a>
                             <ul class="menu">
                                 <li class="menu-item {{ request()->routeIs('admin.profile') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.profile') }}" class="menu-link">Profile</a>
                                 </li>
+
+                                @if ($canManageRoles)
+                                    <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
+                                        <a href="{{ route('admin.roles.index') }}" class="menu-link">Roles &amp; Permissions</a>
+                                    </li>
+                                @endif
 
                                 @if ($canManageUsers)
                                     <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'has-active' : '' }}">

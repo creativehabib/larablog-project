@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\RoleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,6 +51,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::resource('posts', PostController::class)
            ->only(['index', 'create', 'edit'])
            ->middleware('permission:manage_content,publish_posts,edit_any_post,create_posts,submit_posts');
+
+       Route::resource('roles', RoleController::class)
+           ->except(['show'])
+           ->middleware('permission:manage_roles');
 
        Route::get('users', [UserManagementController::class, 'index'])
            ->name('users.index')
