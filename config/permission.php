@@ -1,7 +1,5 @@
 <?php
 
-use DateInterval;
-
 return [
     'models' => [
         'permission' => App\Models\Permission::class,
@@ -29,7 +27,7 @@ return [
     'teams' => false,
 
     'cache' => [
-        'expiration_time' => DateInterval::createFromDateString('24 hours'),
+        'expiration_time' => \DateInterval::createFromDateString('24 hours'),
         'key' => 'spatie.permission.cache',
         'store' => 'default',
     ],
