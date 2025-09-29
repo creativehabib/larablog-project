@@ -5,16 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\Permissions\RoleRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
+    public function __construct(protected RoleRegistry $roles)
+    {
+    }
+
     /**
      * Display a listing of the roles.
      */
@@ -155,6 +160,7 @@ class RoleController extends Controller
     protected function availablePermissions(): Collection
     {
         return Permission::query()
+            ->where('guard_name', $this->guardName())
             ->orderByRaw("CASE WHEN slug = '*' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->get();
@@ -275,6 +281,6 @@ class RoleController extends Controller
      */
     protected function guardName(): string
     {
-        return config('auth.defaults.guard', 'web');
+        return $this->roles->guard();
     }
 }

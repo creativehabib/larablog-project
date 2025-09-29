@@ -4,7 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\UserType;
+use App\Support\Permissions\RoleRegistry;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
@@ -175,17 +175,7 @@ trait HasRolesAndPermissions
             return null;
         }
 
-        $typeAttribute = $this->getAttribute('type');
-
-        if ($typeAttribute instanceof \BackedEnum) {
-            $typeAttribute = $typeAttribute->value;
-        } elseif (is_string($typeAttribute) || is_int($typeAttribute)) {
-            $typeAttribute = (string) $typeAttribute;
-        } elseif (is_object($typeAttribute) && method_exists($typeAttribute, '__toString')) {
-            $typeAttribute = (string) $typeAttribute;
-        } else {
-            $typeAttribute = '';
-        }
+        $typeAttribute = $this->normalizedRoleTypeAttribute();
 
         if ($typeAttribute !== '') {
             $match = $this->roles->firstWhere('slug', $typeAttribute);
@@ -209,10 +199,12 @@ trait HasRolesAndPermissions
             return;
         }
 
-        $value = $role?->slug;
+        $registry = app(RoleRegistry::class);
 
-        if ($value === null) {
-            $value = UserType::Subscriber->value;
+        $value = is_string($role?->slug) ? $role->slug : $this->normalizedRoleTypeAttribute();
+
+        if ($value === '') {
+            $value = $registry->defaultRole();
         }
 
         $this->forceFill(['type' => $value]);
@@ -225,5 +217,31 @@ trait HasRolesAndPermissions
     protected function forgetPermissionCache(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    /**
+     * Resolve the current type attribute into a normalized role slug.
+     */
+    protected function normalizedRoleTypeAttribute(): string
+    {
+        $typeAttribute = $this->getAttribute('type');
+
+        if ($typeAttribute instanceof \BackedEnum) {
+            return (string) $typeAttribute->value;
+        }
+
+        if (is_string($typeAttribute) && $typeAttribute !== '') {
+            return $typeAttribute;
+        }
+
+        if (is_int($typeAttribute)) {
+            return (string) $typeAttribute;
+        }
+
+        if (is_object($typeAttribute) && method_exists($typeAttribute, '__toString')) {
+            return (string) $typeAttribute;
+        }
+
+        return '';
     }
 }
