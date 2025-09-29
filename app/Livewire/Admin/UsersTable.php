@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Role;
 use App\Models\User;
 use App\UserStatus;
 use App\UserType;
@@ -63,8 +64,7 @@ class UsersTable extends Component
             return;
         }
 
-        $user->type = UserType::from($role);
-        $user->save();
+        $user->syncRoles($role);
 
         session()->flash('success', 'User role updated successfully.');
     }
@@ -128,7 +128,7 @@ class UsersTable extends Component
     {
         $user = Auth::user();
 
-        if (! $user || $user->type !== UserType::SuperAdmin) {
+        if (! $user || ! $user->hasRole(UserType::SuperAdmin->value)) {
             abort(403);
         }
     }
@@ -138,7 +138,7 @@ class UsersTable extends Component
      */
     protected function availableRoleValues(): array
     {
-        return array_map(static fn (UserType $type) => $type->value, UserType::cases());
+        return Role::query()->pluck('slug')->all();
     }
 
     /**
@@ -154,17 +154,14 @@ class UsersTable extends Component
      */
     protected function roleOptions(): array
     {
-        $rolesConfig = config('roles', []);
-
-        return array_map(function (UserType $type) use ($rolesConfig) {
-            $key = $type->value;
-            $label = $rolesConfig[$key]['label'] ?? ucfirst(str_replace('_', ' ', $key));
-
-            return [
-                'value' => $key,
-                'label' => $label,
-            ];
-        }, UserType::cases());
+        return Role::query()
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Role $role) => [
+                'value' => $role->slug,
+                'label' => $role->name,
+            ])
+            ->all();
     }
 
     /**

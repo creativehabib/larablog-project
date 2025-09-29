@@ -130,9 +130,11 @@ class PostsTable extends Component
             return false;
         }
 
-        $role = $user->type instanceof UserType ? $user->type->value : (string) $user->type;
+        if ($user->hasAnyRole(UserType::SuperAdmin->value, UserType::Administrator->value)) {
+            return true;
+        }
 
-        return in_array($role, [UserType::SuperAdmin->value, UserType::Administrator->value], true);
+        return $user->hasAnyPermission('manage_content', 'edit_any_post');
     }
 
     protected function canManagePost(Post $post): bool

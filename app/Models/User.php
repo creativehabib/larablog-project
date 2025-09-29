@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+use App\Models\Concerns\HasRolesAndPermissions;
 use App\UserStatus;
 use App\UserType;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRolesAndPermissions;
 
     /**
      * The attributes that are mass assignable.
@@ -73,6 +74,12 @@ class User extends Authenticatable
      */
     public function roleKey(): string
     {
+        $primaryRole = $this->primaryRole();
+
+        if ($primaryRole) {
+            return $primaryRole->slug;
+        }
+
         if ($this->type instanceof UserType) {
             return $this->type->value;
         }
@@ -91,6 +98,18 @@ class User extends Authenticatable
      */
     public function roleDefinition(): array
     {
+        $role = $this->primaryRole();
+
+        if ($role) {
+            $role->loadMissing('permissions');
+
+            return [
+                'label' => $role->name,
+                'summary' => $role->summary,
+                'permissions' => $role->permissions->pluck('slug')->values()->all(),
+            ];
+        }
+
         $roles = config('roles', []);
         $key = $this->roleKey();
 
@@ -154,11 +173,22 @@ class User extends Authenticatable
      *
      * @return list<string>
      */
-    public function permissions(): array
+    /**
+     * Get the permissions granted to the user via roles or direct assignment.
+     *
+     * @return list<string>
+     */
+    public function permissionNames(): array
     {
-        $definition = $this->roleDefinition();
+        $permissions = $this->allPermissions()->pluck('slug')->unique()->values()->all();
 
-        return $definition['permissions'] ?? [];
+        if ($permissions === []) {
+            $definition = $this->roleDefinition();
+
+            return $definition['permissions'] ?? [];
+        }
+
+        return $permissions;
     }
 
     /**
@@ -166,7 +196,7 @@ class User extends Authenticatable
      */
     public function hasPermission(string $permission): bool
     {
-        $permissions = $this->permissions();
+        $permissions = $this->permissionNames();
 
         if (in_array('*', $permissions, true)) {
             return true;
