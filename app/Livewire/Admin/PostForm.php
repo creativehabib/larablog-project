@@ -291,9 +291,11 @@ class PostForm extends Component
             return false;
         }
 
-        $role = $user->type instanceof UserType ? $user->type->value : (string) $user->type;
+        if ($user->hasAnyRole(UserType::SuperAdmin->value, UserType::Administrator->value)) {
+            return true;
+        }
 
-        if (in_array($role, [UserType::SuperAdmin->value, UserType::Administrator->value], true)) {
+        if ($user->hasAnyPermission('manage_content', 'edit_any_post')) {
             return true;
         }
 

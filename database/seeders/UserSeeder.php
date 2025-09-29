@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $role => $attributes) {
-            User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $attributes['email']],
                 array_merge($attributes, [
                     'password' => $password,
@@ -62,6 +62,8 @@ class UserSeeder extends Seeder
                     'status' => UserStatus::Active,
                 ])
             );
+
+            $user->syncRoles($role);
         }
     }
 }
