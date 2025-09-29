@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\UserType;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +23,14 @@ class EnsureUserHasPermission
         }
 
         $permissions = ! empty($permissions) ? $this->expandPermissions($permissions) : ['access_admin_panel'];
+
+        if (method_exists($user, 'hasPermission') && $user->hasPermission('*')) {
+            return $next($request);
+        }
+
+        if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(UserType::SuperAdmin->value)) {
+            return $next($request);
+        }
 
         if ($user->hasAnyPermission(...$permissions)) {
             return $next($request);
