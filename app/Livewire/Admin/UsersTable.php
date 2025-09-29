@@ -128,7 +128,7 @@ class UsersTable extends Component
     {
         $user = Auth::user();
 
-        if (! $user || ! $user->hasPermission('manage_users')) {
+        if (! $user || $user->type !== UserType::SuperAdmin) {
             abort(403);
         }
     }
