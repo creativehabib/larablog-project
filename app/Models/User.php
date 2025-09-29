@@ -180,15 +180,16 @@ class User extends Authenticatable
      */
     public function permissionNames(): array
     {
-        $permissions = $this->allPermissions()->pluck('slug')->unique()->values()->all();
+        $databasePermissions = $this->allPermissions()->pluck('slug');
 
-        if ($permissions === []) {
-            $definition = $this->roleDefinition();
+        $configPermissions = collect(config('roles.' . $this->roleKey() . '.permissions', []));
 
-            return $definition['permissions'] ?? [];
-        }
-
-        return $permissions;
+        return $databasePermissions
+            ->merge($configPermissions)
+            ->filter(fn ($permission) => is_string($permission) && $permission !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**
