@@ -55,8 +55,27 @@ class EnsureUserHasPermission
             ->flatMap(fn (string $permission) => preg_split('/[|,]/', $permission) ?: [])
             ->map(fn (string $permission) => trim($permission))
             ->filter()
+            ->flatMap(fn (string $permission) => $this->resolveAliases($permission))
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Resolve known permission aliases.
+     *
+     * Treat submit_posts as satisfying create_posts requirements so that
+     * contributors can open the post creation form without being blocked by
+     * the middleware.
+     *
+     * @return list<string>
+     */
+    protected function resolveAliases(string $permission): array
+    {
+        $aliases = [
+            'create_posts' => ['create_posts', 'submit_posts'],
+        ];
+
+        return $aliases[$permission] ?? [$permission];
     }
 }
