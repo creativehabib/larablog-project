@@ -228,7 +228,17 @@ trait HasRolesAndPermissions
             return null;
         }
 
-        $typeAttribute = (string) ($this->getAttribute('type') ?? '');
+        $typeAttribute = $this->getAttribute('type');
+
+        if ($typeAttribute instanceof \BackedEnum) {
+            $typeAttribute = $typeAttribute->value;
+        } elseif (is_string($typeAttribute) || is_int($typeAttribute)) {
+            $typeAttribute = (string) $typeAttribute;
+        } elseif (is_object($typeAttribute) && method_exists($typeAttribute, '__toString')) {
+            $typeAttribute = (string) $typeAttribute;
+        } else {
+            $typeAttribute = '';
+        }
 
         if ($typeAttribute !== '') {
             $match = $this->roles->firstWhere('slug', $typeAttribute);
