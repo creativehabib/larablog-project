@@ -326,7 +326,7 @@
                     <!-- .btn-account -->
                     <div class="dropdown d-none d-md-flex">
                         <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="user-avatar user-avatar-md"><img src="{{ auth()->user()->avatar }}" alt="" id="topbarUserAvatar"></span>
-                            <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->roleLabel() }}</span></span></button> <!-- .dropdown-menu -->
+                            <span class="account-summary pr-lg-4 d-none d-lg-block"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">fgfdg</span></span></button> <!-- .dropdown-menu -->
                         <div class="dropdown-menu">
                             <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
                             <div class="dropdown-arrow ml-3 d-none d-lg-block"></div>
@@ -353,7 +353,7 @@
             <!-- .aside-header -->
             <header class="aside-header d-block d-md-none">
                 <!-- .btn-account -->
-                <button class="btn-account" type="button" data-toggle="collapse" data-target="#dropdown-aside"><span class="user-avatar user-avatar-lg"><img src="{{ auth()->user()->avatar }}" alt=""></span> <span class="account-icon"><span class="fa fa-caret-down fa-lg"></span></span> <span class="account-summary"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">{{ auth()->user()->roleLabel() }}</span></span></button> <!-- /.btn-account -->
+                <button class="btn-account" type="button" data-toggle="collapse" data-target="#dropdown-aside"><span class="user-avatar user-avatar-lg"><img src="{{ auth()->user()->avatar }}" alt=""></span> <span class="account-icon"><span class="fa fa-caret-down fa-lg"></span></span> <span class="account-summary"><span class="account-name">{{ auth()->user()->name }}</span> <span class="account-description">dsf</span></span></button> <!-- /.btn-account -->
                 <!-- .dropdown-aside -->
                 <div id="dropdown-aside" class="dropdown-aside collapse">
                     <!-- dropdown-items -->
@@ -372,39 +372,25 @@
                 <nav id="stacked-menu" class="stacked-menu">
                     <!-- .menu -->
                     <ul class="menu">
-                        @php
-                            $adminUser = auth()->user();
-                            $canManageContent = $adminUser?->hasPermission('manage_content');
-                            $canAccessPosts = $adminUser?->hasAnyPermission('manage_content', 'publish_posts', 'edit_any_post', 'create_posts', 'submit_posts');
-                            $canViewSettings = $adminUser?->hasAnyPermission('manage_content', 'manage_users');
-                            $canManageUsers = $adminUser?->hasPermission('manage_users');
-                            $canManageRoles = $adminUser?->hasPermission('manage_roles');
-                        @endphp
 
                         <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'has-active' : '' }}">
                             <a href="{{ route('admin.dashboard') }}" class="menu-link"><span class="menu-icon fas fa-home"></span> <span class="menu-text">Dashboard</span></a>
                         </li>
 
-                        @if ($canManageContent || $canAccessPosts)
+
                             <li class="menu-header">Blog Management</li>
 
-                            @if ($canManageContent)
                                 <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-icon oi oi-folder"></span> <span class="menu-text">Categories</span></a>
                                 </li>
                                 <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
                                 </li>
-                            @endif
 
-                            @if ($canAccessPosts)
                                 <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
                                 </li>
-                            @endif
-                        @endif
 
-                        @if ($canViewSettings)
                             <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                                 <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a>
                                 <ul class="menu">
@@ -413,7 +399,6 @@
                                     </li>
                                 </ul>
                             </li>
-                        @endif
 
                         <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a>
@@ -422,17 +407,13 @@
                                     <a href="{{ route('admin.profile') }}" class="menu-link">Profile</a>
                                 </li>
 
-                                @if ($canManageRoles)
                                     <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
                                         <a href="{{ route('admin.roles.index') }}" class="menu-link">Roles &amp; Permissions</a>
                                     </li>
-                                @endif
 
-                                @if ($canManageUsers)
                                     <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'has-active' : '' }}">
                                         <a href="{{ route('admin.users.index') }}" class="menu-link">User Management</a>
                                     </li>
-                                @endif
                             </ul>
                         </li>
                     </ul><!-- /.menu -->

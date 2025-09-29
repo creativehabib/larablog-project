@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\SubCategory;
-use App\UserType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -40,9 +39,6 @@ class PostForm extends Component
 
     public function mount(?Post $post = null): void
     {
-        if (! $this->canManagePost($post)) {
-            abort(403);
-        }
 
         $this->post = $post;
 
@@ -114,9 +110,6 @@ class PostForm extends Component
 
     public function save(): mixed
     {
-        if (! $this->canManagePost($this->post)) {
-            abort(403);
-        }
 
         $data = $this->validate($this->rules());
 
@@ -281,28 +274,5 @@ class PostForm extends Component
         }
 
         return view('livewire.admin.post-form');
-    }
-
-    protected function canManagePost(?Post $post = null): bool
-    {
-        $user = Auth::user();
-
-        if (! $user) {
-            return false;
-        }
-
-        if ($user->hasAnyRole(UserType::SuperAdmin->value, UserType::Administrator->value)) {
-            return true;
-        }
-
-        if (! $post) {
-            return $user->hasAnyPermission('manage_content', 'create_posts', 'submit_posts');
-        }
-
-        if ($user->hasAnyPermission('manage_content', 'edit_any_post')) {
-            return true;
-        }
-
-        return (int) $post->user_id === (int) $user->id;
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
@@ -15,7 +14,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('permissions', PermissionController::class);
+
 //Testing route
 Route::view('/example-page', 'example-page');
 Route::view('/example-auth', 'example-auth');
@@ -33,41 +32,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
        });
     });
 
-    Route::middleware(['auth','preventBackHistory','permission:access_admin_panel'])->group(function () {
+    Route::middleware(['auth','preventBackHistory'])->group(function () {
        Route::controller(AdminController::class)->group(function(){
               Route::get('/dashboard', 'dashboard')->name('dashboard');
               Route::post('/logout', 'logout')->name('logout');
               Route::get('/profile', 'profile')->name('profile');
               Route::post('/update-profile', 'updateProfile')->name('update.profile');
-              Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:manage_content,manage_users');
+              Route::get('/settings', 'generalSettings')->name('settings');
        });
 
-       Route::resource('categories', CategoryController::class)
-           ->except(['show'])
-           ->middleware('permission:manage_content');
+        Route::resource('categories', CategoryController::class)->except(['show']);
+        Route::resource('subcategories', SubCategoryController::class)->except(['show']);
+        Route::resource('posts', PostController::class)->only(['index', 'create', 'edit']);
 
-       Route::resource('subcategories', SubCategoryController::class)
-           ->except(['show'])
-           ->middleware('permission:manage_content');
+       Route::resource('roles', RoleController::class);
+       Route::resource('permissions', PermissionController::class);
 
-       Route::get('posts', [PostController::class, 'index'])
-           ->name('posts.index')
-           ->middleware('permission:manage_content|publish_posts|create_posts|submit_posts');
-
-       Route::get('posts/create', [PostController::class, 'create'])
-           ->name('posts.create')
-           ->middleware('permission:manage_content|create_posts|submit_posts');
-
-       Route::get('posts/{post}/edit', [PostController::class, 'edit'])
-           ->name('posts.edit')
-           ->middleware('permission:manage_content|publish_posts|edit_any_post|edit_own_posts');
-
-       Route::resource('roles', RoleController::class)
-           ->except(['show'])
-           ->middleware('permission:manage_roles');
-
-       Route::get('users', [UserManagementController::class, 'index'])
-           ->name('users.index')
-           ->middleware('permission:manage_users');
+       Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
     });
 });

@@ -2,13 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use App\UserStatus;
-use App\UserType;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -20,50 +16,38 @@ class UserSeeder extends Seeder
     {
         $password = Hash::make('password');
 
-        $users = [
-            UserType::SuperAdmin->value => [
-                'name' => 'Super Admin',
-                'email' => 'superadmin@example.com',
-                'username' => 'superadmin',
-            ],
-            UserType::Administrator->value => [
-                'name' => 'Administrator',
-                'email' => 'administrator@example.com',
-                'username' => 'administrator',
-            ],
-            UserType::Editor->value => [
-                'name' => 'Editor',
-                'email' => 'editor@example.com',
-                'username' => 'editor',
-            ],
-            UserType::Author->value => [
-                'name' => 'Author Reporter',
-                'email' => 'author@example.com',
-                'username' => 'author',
-            ],
-            UserType::Contributor->value => [
-                'name' => 'Contributor',
-                'email' => 'contributor@example.com',
-                'username' => 'contributor',
-            ],
-            UserType::Subscriber->value => [
-                'name' => 'Subscriber',
-                'email' => 'subscriber@example.com',
-                'username' => 'subscriber',
-            ],
-        ];
+        // Creating Admin User
+        $superAdmin = User::create([
+            'name' => 'Admin',
+            'username' => 'admin',
+            'email' => 'admin@example.com',
+            'password' => $password,
+            'type' => 'admin',
+            'status' => 'active',
+        ]);
+        $superAdmin->assignRole('Admin');
 
-        foreach ($users as $role => $attributes) {
-            $user = User::updateOrCreate(
-                ['email' => $attributes['email']],
-                array_merge($attributes, [
-                    'password' => $password,
-                    'type' => UserType::from($role),
-                    'status' => UserStatus::Active,
-                ])
-            );
+        // Creating Editor
+        $admin = User::create([
+            'name' => 'Syed Ahsan Kamal',
+            'username' => 'editor',
+            'email' => 'editor@example.com',
+            'password' => $password,
+            'type' => 'editor',
+            'status' => 'active',
+        ]);
+        $admin->assignRole('Editor');
 
-            $user->syncRoles($role);
-        }
+        // Creating Writer
+        $user = User::create([
+            'name' => 'Naghman Ali',
+            'username' => 'writer',
+            'email' => 'writer@example.com',
+            'password' => $password,
+            'type' => 'writer',
+            'status' => 'active',
+        ]);
+        $user->assignRole('Writer');
+
     }
 }

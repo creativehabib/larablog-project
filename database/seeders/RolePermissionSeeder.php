@@ -2,104 +2,53 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
-use App\Models\Role;
-use App\Support\Permissions\RoleDefinition;
-use App\Support\Permissions\RoleRegistry;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Spatie\Permission\PermissionRegistrar;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RolePermissionSeeder extends Seeder
 {
-    public function __construct(protected RoleRegistry $roles)
-    {
-    }
-
     /**
-     * Seed the application's roles and permissions from the registry.
+     * Run the database seeds.
+     *
+     * @return void
      */
     public function run(): void
     {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        // প্রথমে পারমিশন ক্যাশ রিসেট করে নিন
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $guard = $this->roles->guard();
+        // 📝 পারমিশন তালিকা (slug সহ)
+        Permission::create(['name' => 'create articles', 'slug' => Str::slug('create articles'), 'guard_name' => 'web']);
+        Permission::create(['name' => 'edit articles', 'slug' => Str::slug('edit articles'), 'guard_name' => 'web']);
+        Permission::create(['name' => 'delete articles', 'slug' => Str::slug('delete articles'), 'guard_name' => 'web']);
+        Permission::create(['name' => 'publish articles', 'slug' => Str::slug('publish articles'), 'guard_name' => 'web']);
+        Permission::create(['name' => 'unpublish articles', 'slug' => Str::slug('unpublish articles'), 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage users', 'slug' => Str::slug('manage users'), 'guard_name' => 'web']);
 
-        $this->syncRoles($guard);
+        // 🧑‍💼 ভূমিকা বা রোল তালিকা (slug সহ) - ✅ এখানে পরিবর্তন করা হয়েছে
+        $adminRole = Role::create(['name' => 'Admin', 'slug' => Str::slug('Admin'), 'guard_name' => 'web']);
+        $editorRole = Role::create(['name' => 'Editor', 'slug' => Str::slug('Editor'), 'guard_name' => 'web']);
+        $writerRole = Role::create(['name' => 'Writer', 'slug' => Str::slug('Writer'), 'guard_name' => 'web']);
 
-        if ($this->roles->shouldPruneMissing()) {
-            $this->pruneMissingRoles($this->roles->slugs(), $guard);
-            $this->pruneMissingPermissions($this->roles->declaredPermissions(), $guard);
-        }
+        // 🔐 ভূমিকা অনুযায়ী পারমিশন বণ্টন
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-    }
+        // Admin কে সব পারমিশন দেওয়া হলো
+        $adminRole->givePermissionTo(Permission::all());
 
-    protected function syncRoles(string $guard): void
-    {
-        $this->roles->definitions()->each(function (RoleDefinition $definition) use ($guard): void {
-            $role = Role::query()->updateOrCreate(
-                ['slug' => $definition->slug],
-                [
-                    'name' => $definition->label,
-                    'summary' => $definition->summary,
-                    'guard_name' => $guard,
-                ]
-            );
+        // Editor কে নির্দিষ্ট পারমিশন দেওয়া হলো
+        $editorRole->givePermissionTo([
+            'create articles',
+            'edit articles',
+            'publish articles',
+            'unpublish articles'
+        ]);
 
-            $permissions = collect($definition->permissions)
-                ->map(fn (string $permission) => $this->persistPermission($permission, $guard))
-                ->filter()
-                ->values()
-                ->all();
-
-            $role->syncPermissions($permissions);
-        });
-    }
-
-    protected function persistPermission(string $slug, string $guard): Permission
-    {
-        return Permission::query()->updateOrCreate(
-            ['slug' => $slug],
-            [
-                'name' => $this->permissionLabel($slug),
-                'guard_name' => $guard,
-            ]
-        );
-    }
-
-    protected function permissionLabel(string $slug): string
-    {
-        if ($slug === '*') {
-            return 'All Permissions';
-        }
-
-        $label = Str::headline(str_replace(['*', '.', '_'], ' ', $slug));
-
-        return $label !== '' ? $label : $slug;
-    }
-
-    protected function pruneMissingRoles(array $expectedSlugs, string $guard): void
-    {
-        Role::query()
-            ->where('guard_name', $guard)
-            ->whereNotIn('slug', $expectedSlugs)
-            ->get()
-            ->each(function (Role $role): void {
-                $role->permissions()->detach();
-                $role->delete();
-            });
-    }
-
-    protected function pruneMissingPermissions(array $expectedPermissions, string $guard): void
-    {
-        Permission::query()
-            ->where('guard_name', $guard)
-            ->whereNotIn('slug', $expectedPermissions)
-            ->get()
-            ->each(function (Permission $permission): void {
-                $permission->roles()->detach();
-                $permission->delete();
-            });
+        // Writer কে নির্দিষ্ট পারমিশন দেওয়া হলো
+        $writerRole->givePermissionTo([
+            'create articles',
+            'edit articles'
+        ]);
     }
 }

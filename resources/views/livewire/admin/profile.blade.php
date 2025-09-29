@@ -34,7 +34,7 @@
                                             </div>
                                         </div>
                                         <div class="text-center text-sm-right">
-                                            <span class="badge badge-secondary">{{ auth()->user()->roleLabel() ?? 'User' }}</span>
+                                            <span class="badge badge-secondary">{{ auth()->user()->type ?? 'User' }}</span>
                                             <div class="text-muted">
                                                 <small>Joined {{ auth()->user()->created_at->format('d M Y') }}</small>
                                             </div>
@@ -62,7 +62,6 @@
                                 <div class="tab-content pt-3">
                                     <!-- Profile Tab -->
                                     <div class="tab-pane fade {{ $tab == 'personal_info' ? 'show active' : '' }}" id="personal_info" role="tabpanel">
-                                        <h5 class="mb-3">User Profile</h5>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h6>About</h6>
