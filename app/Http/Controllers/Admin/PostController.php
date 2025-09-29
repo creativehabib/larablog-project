@@ -65,6 +65,6 @@ class PostController extends Controller
             return true;
         }
 
-        return $user->hasAnyPermission('manage_content', 'create_posts', 'submit_posts', 'edit_any_post');
+        return $user->hasAnyPermission('manage_content', 'create_posts', 'submit_posts');
     }
 }
