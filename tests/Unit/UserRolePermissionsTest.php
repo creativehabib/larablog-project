@@ -30,6 +30,21 @@ class UserRolePermissionsTest extends TestCase
         $this->assertTrue($user->hasPermission('manage_content'));
     }
 
+    public function test_only_super_admin_can_manage_users(): void
+    {
+        $administrator = User::factory()->create([
+            'type' => UserType::Administrator,
+        ]);
+
+        $this->assertFalse($administrator->hasPermission('manage_users'));
+
+        $superAdmin = User::factory()->create([
+            'type' => UserType::SuperAdmin,
+        ]);
+
+        $this->assertTrue($superAdmin->hasPermission('manage_users'));
+    }
+
     public function test_subscriber_cannot_access_admin_panel(): void
     {
         $user = User::factory()->create([

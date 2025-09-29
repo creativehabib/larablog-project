@@ -14,14 +14,12 @@ return [
         'permissions' => [
             'access_admin_panel',
             'manage_content',
-            'manage_users',
             'publish_posts',
             'edit_any_post',
             'create_posts',
             'edit_own_posts',
             'submit_posts',
             'schedule_posts',
-            'assign_roles',
         ],
     ],
     UserType::Editor->value => [
