@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -14,6 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::resource('permissions', PermissionController::class);
 //Testing route
 Route::view('/example-page', 'example-page');
 Route::view('/example-auth', 'example-auth');

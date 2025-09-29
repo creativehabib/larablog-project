@@ -3,284 +3,61 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Permission;
-use App\Models\Role;
-use App\Support\Permissions\RoleRegistry;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\View\View;
-use Spatie\Permission\PermissionRegistrar;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
-    public function __construct(protected RoleRegistry $roles)
+    public function index()
     {
+        $roles = Role::all();
+        return view('back.pages.roles.index', compact('roles'));
     }
 
-    /**
-     * Display a listing of the roles.
-     */
-    public function index(): View
+    public function create()
     {
-        $roles = Role::query()
-            ->with(['permissions' => fn ($query) => $query->orderBy('name')])
-            ->withCount(['permissions', 'users'])
-            ->orderBy('name')
-            ->get();
-
-        return view('back.pages.roles.index', [
-            'pageTitle' => 'Roles & Permissions',
-            'roles' => $roles,
-        ]);
+        $permissions = Permission::all();
+        return view('back.pages.roles.create', compact('permissions'));
     }
 
-    /**
-     * Show the form for creating a new role.
-     */
-    public function create(): View
+    public function store(Request $request)
     {
-        return view('back.pages.roles.create', [
-            'pageTitle' => 'Create Role',
-            'permissions' => $this->availablePermissions(),
-        ]);
-    }
-
-    /**
-     * Store a newly created role in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255'],
-            'summary' => ['nullable', 'string'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::exists('permissions', 'slug')],
-            'new_permissions' => ['nullable', 'string'],
+        $request->validate([
+            'name' => 'required|unique:roles,name',
+            'permissions' => 'nullable|array'
         ]);
 
-        $slug = $this->makeUniqueSlug($validated['slug'] ?? $validated['name']);
-
-        $role = Role::create([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'summary' => $validated['summary'] ?? null,
-            'guard_name' => $this->guardName(),
-        ]);
-
-        $permissionSlugs = $this->mergeAdditionalPermissions(
-            $validated['permissions'] ?? [],
-            $validated['new_permissions'] ?? ''
-        );
-
-        $this->syncRolePermissions($role, $permissionSlugs);
-        $this->forgetPermissionCache();
-
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', __('Role created successfully.'));
-    }
-
-    /**
-     * Show the form for editing the specified role.
-     */
-    public function edit(Role $role): View
-    {
-        $role->load('permissions');
-
-        return view('back.pages.roles.edit', [
-            'pageTitle' => 'Edit Role',
-            'role' => $role,
-            'permissions' => $this->availablePermissions(),
-        ]);
-    }
-
-    /**
-     * Update the specified role in storage.
-     */
-    public function update(Request $request, Role $role): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255'],
-            'summary' => ['nullable', 'string'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', Rule::exists('permissions', 'slug')],
-            'new_permissions' => ['nullable', 'string'],
-        ]);
-
-        $slug = $this->makeUniqueSlug($validated['slug'] ?? $validated['name'], $role->id);
-
-        $role->update([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'summary' => $validated['summary'] ?? null,
-            'guard_name' => $this->guardName(),
-        ]);
-
-        $permissionSlugs = $this->mergeAdditionalPermissions(
-            $validated['permissions'] ?? [],
-            $validated['new_permissions'] ?? ''
-        );
-
-        $this->syncRolePermissions($role, $permissionSlugs);
-        $this->forgetPermissionCache();
-
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', __('Role updated successfully.'));
-    }
-
-    /**
-     * Remove the specified role from storage.
-     */
-    public function destroy(Role $role): RedirectResponse
-    {
-        if ($role->slug === 'superadmin') {
-            return redirect()
-                ->route('admin.roles.index')
-                ->with('fail', __('The superadmin role cannot be deleted.'));
+        $role = Role::create(['name' => $request->name]);
+        if ($request->has('permissions')) {
+            $role->givePermissionTo($request->permissions);
         }
 
+        return redirect()->route('back.pages.index')->with('success', 'Role created successfully.');
+    }
+
+    public function edit(Role $role)
+    {
+        $permissions = Permission::all();
+        return view('back.pages.roles.edit', compact('role', 'permissions'));
+    }
+
+    public function update(Request $request, Role $role)
+    {
+        $request->validate([
+            'name' => 'required|unique:roles,name,' . $role->id,
+            'permissions' => 'nullable|array'
+        ]);
+
+        $role->update(['name' => $request->name]);
+        $role->syncPermissions($request->permissions);
+
+        return redirect()->route('back.pages.index')->with('success', 'Role updated successfully.');
+    }
+
+    public function destroy(Role $role)
+    {
         $role->delete();
-
-        $this->forgetPermissionCache();
-
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', __('Role deleted successfully.'));
-    }
-
-    /**
-     * Retrieve the available permissions ordered for display.
-     */
-    protected function availablePermissions(): Collection
-    {
-        return Permission::query()
-            ->where('guard_name', $this->guardName())
-            ->orderByRaw("CASE WHEN slug = '*' THEN 0 ELSE 1 END")
-            ->orderBy('name')
-            ->get();
-    }
-
-    /**
-     * Generate a unique slug for the role.
-     */
-    protected function makeUniqueSlug(string $value, ?int $ignoreId = null): string
-    {
-        $baseSlug = $this->normalizeSlug($value);
-
-        if ($baseSlug === '') {
-            $baseSlug = Str::random(8);
-        }
-
-        $slug = $baseSlug;
-        $counter = 1;
-
-        while (
-            Role::query()
-                ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
-                ->where('slug', $slug)
-                ->exists()
-        ) {
-            $slug = $baseSlug.'-'.$counter++;
-        }
-
-        return $slug;
-    }
-
-    /**
-     * Normalize the provided slug string.
-     */
-    protected function normalizeSlug(string $value): string
-    {
-        $value = trim($value);
-
-        if ($value === '') {
-            return '';
-        }
-
-        $value = Str::lower($value);
-        $value = str_replace([' ', '__'], '_', $value);
-        $value = preg_replace('/[^a-z0-9_\-\.\*]/', '', $value) ?? '';
-        $value = preg_replace('/_+/', '_', $value) ?? '';
-        $value = trim($value, '_-');
-
-        return $value;
-    }
-
-    /**
-     * Combine selected permissions with any additional entries.
-     *
-     * @param  array<int, string>  $selected
-     * @return array<int, string>
-     */
-    protected function mergeAdditionalPermissions(array $selected, string $additional): array
-    {
-        $selected = collect($selected)
-            ->filter(fn ($permission) => is_string($permission) && $permission !== '')
-            ->values();
-
-        $extra = collect(preg_split('/\r\n|\r|\n/', $additional) ?: [])
-            ->map(fn ($line) => trim($line))
-            ->filter()
-            ->map(function (string $line) {
-                [$slug, $label] = array_pad(array_map('trim', explode('|', $line, 2)), 2, null);
-
-                $slug = $this->normalizeSlug($slug ?? '');
-
-                if ($slug === '') {
-                    return null;
-                }
-
-                $name = $label ?? '';
-
-                if ($name === '') {
-                    $name = Str::headline(str_replace(['*', '.', '_'], ' ', $slug));
-                }
-
-                $permission = Permission::query()->updateOrCreate(
-                    ['slug' => $slug],
-                    [
-                        'name' => $name,
-                        'guard_name' => $this->guardName(),
-                    ]
-                );
-
-                return $permission->slug;
-            })
-            ->filter()
-            ->values();
-
-        return $selected->merge($extra)->unique()->values()->all();
-    }
-
-    /**
-     * Sync the provided permissions with the role.
-     *
-     * @param  array<int, string>  $permissionSlugs
-     */
-    protected function syncRolePermissions(Role $role, array $permissionSlugs): void
-    {
-        $role->syncPermissions($permissionSlugs);
-    }
-
-    /**
-     * Clear the cached permissions stored by the registrar.
-     */
-    protected function forgetPermissionCache(): void
-    {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-    }
-
-    /**
-     * Resolve the guard name used for roles and permissions.
-     */
-    protected function guardName(): string
-    {
-        return $this->roles->guard();
+        return redirect()->route('back.pages.index')->with('success', 'Role deleted successfully.');
     }
 }
