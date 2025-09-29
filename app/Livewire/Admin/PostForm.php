@@ -40,11 +40,11 @@ class PostForm extends Component
 
     public function mount(?Post $post = null): void
     {
-        $this->post = $post;
-
-        if ($post && ! $this->canManagePost($post)) {
+        if (! $this->canManagePost($post)) {
             abort(403);
         }
+
+        $this->post = $post;
 
         if ($post) {
             $this->title = $post->title;
@@ -114,7 +114,7 @@ class PostForm extends Component
 
     public function save(): mixed
     {
-        if ($this->post && ! $this->canManagePost($this->post)) {
+        if (! $this->canManagePost($this->post)) {
             abort(403);
         }
 
@@ -295,11 +295,11 @@ class PostForm extends Component
             return true;
         }
 
-        if ($user->hasAnyPermission('manage_content', 'edit_any_post')) {
-            return true;
+        if (! $post) {
+            return $user->hasAnyPermission('manage_content', 'create_posts');
         }
 
-        if (! $post) {
+        if ($user->hasAnyPermission('manage_content', 'edit_any_post')) {
             return true;
         }
 

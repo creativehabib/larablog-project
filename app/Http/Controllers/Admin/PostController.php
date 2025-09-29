@@ -17,6 +17,8 @@ class PostController extends Controller
 
     public function create()
     {
+        abort_unless($this->canCreatePosts(), 403);
+
         return view('back.pages.posts.create', [
             'pageTitle' => 'Create Post',
         ]);
@@ -49,5 +51,20 @@ class PostController extends Controller
         }
 
         return (int) $post->user_id === (int) $user->id;
+    }
+
+    protected function canCreatePosts(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(UserType::SuperAdmin->value, UserType::Administrator->value)) {
+            return true;
+        }
+
+        return $user->hasAnyPermission('manage_content', 'create_posts');
     }
 }
