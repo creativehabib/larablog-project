@@ -296,7 +296,7 @@ class PostForm extends Component
         }
 
         if (! $post) {
-            return $user->hasAnyPermission('manage_content', 'create_posts');
+            return $user->hasAnyPermission('manage_content', 'create_posts', 'submit_posts');
         }
 
         if ($user->hasAnyPermission('manage_content', 'edit_any_post')) {
