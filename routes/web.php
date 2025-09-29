@@ -48,9 +48,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
            ->except(['show'])
            ->middleware('permission:manage_content');
 
-       Route::resource('posts', PostController::class)
-           ->only(['index', 'create', 'edit'])
+       Route::get('posts', [PostController::class, 'index'])
+           ->name('posts.index')
            ->middleware('permission:manage_content|publish_posts|edit_any_post|create_posts|submit_posts');
+
+       Route::get('posts/create', [PostController::class, 'create'])
+           ->name('posts.create')
+           ->middleware('permission:manage_content|create_posts|submit_posts');
+
+       Route::get('posts/{post}/edit', [PostController::class, 'edit'])
+           ->name('posts.edit')
+           ->middleware('permission:manage_content|publish_posts|edit_any_post|edit_own_posts');
 
        Route::resource('roles', RoleController::class)
            ->except(['show'])
