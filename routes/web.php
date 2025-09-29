@@ -50,7 +50,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
        Route::resource('posts', PostController::class)
            ->only(['index', 'create', 'edit'])
-           ->middleware('permission:manage_content,publish_posts,edit_any_post,create_posts,submit_posts');
+           ->middleware('permission:manage_content|publish_posts|edit_any_post|create_posts|submit_posts');
 
        Route::resource('roles', RoleController::class)
            ->except(['show'])
