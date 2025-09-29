@@ -8,14 +8,19 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use App\Models\Concerns\HasRolesAndPermissions;
 use App\UserStatus;
 use App\UserType;
+use App\Models\Concerns\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRolesAndPermissions;
+
+    /**
+     * The guard name expected by spatie/laravel-permission.
+     */
+    protected string $guard_name = 'web';
 
     /**
      * The attributes that are mass assignable.
@@ -168,67 +173,4 @@ class User extends Authenticatable
         return ucfirst(str_replace('_', ' ', $this->statusKey()));
     }
 
-    /**
-     * Get the permissions granted to the user's role.
-     *
-     * @return list<string>
-     */
-    /**
-     * Get the permissions granted to the user via roles or direct assignment.
-     *
-     * @return list<string>
-     */
-    public function permissionNames(): array
-    {
-        $databasePermissions = $this->allPermissions()->pluck('slug');
-
-        $configPermissions = collect(config('roles.' . $this->roleKey() . '.permissions', []));
-
-        return $databasePermissions
-            ->merge($configPermissions)
-            ->filter(fn ($permission) => is_string($permission) && $permission !== '')
-            ->unique()
-            ->values()
-            ->all();
-    }
-
-    /**
-     * Determine if the user has the provided permission.
-     */
-    public function hasPermission(string $permission): bool
-    {
-        $permissions = $this->permissionNames();
-
-        if (in_array('*', $permissions, true)) {
-            return true;
-        }
-
-        return in_array($permission, $permissions, true);
-    }
-
-    /**
-     * Determine if the user has any of the provided permissions.
-     */
-    public function hasAnyPermission(string ...$permissions): bool
-    {
-        if (empty($permissions)) {
-            return $this->hasPermission('access_admin_panel');
-        }
-
-        foreach ($permissions as $permission) {
-            if ($this->hasPermission($permission)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Determine if the user can access the admin panel.
-     */
-    public function canAccessAdminPanel(): bool
-    {
-        return $this->hasPermission('access_admin_panel');
-    }
 }

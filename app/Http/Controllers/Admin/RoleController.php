@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -62,6 +63,7 @@ class RoleController extends Controller
             'name' => $validated['name'],
             'slug' => $slug,
             'summary' => $validated['summary'] ?? null,
+            'guard_name' => $this->guardName(),
         ]);
 
         $permissionSlugs = $this->mergeAdditionalPermissions(
@@ -70,6 +72,7 @@ class RoleController extends Controller
         );
 
         $this->syncRolePermissions($role, $permissionSlugs);
+        $this->forgetPermissionCache();
 
         return redirect()
             ->route('admin.roles.index')
@@ -110,6 +113,7 @@ class RoleController extends Controller
             'name' => $validated['name'],
             'slug' => $slug,
             'summary' => $validated['summary'] ?? null,
+            'guard_name' => $this->guardName(),
         ]);
 
         $permissionSlugs = $this->mergeAdditionalPermissions(
@@ -118,6 +122,7 @@ class RoleController extends Controller
         );
 
         $this->syncRolePermissions($role, $permissionSlugs);
+        $this->forgetPermissionCache();
 
         return redirect()
             ->route('admin.roles.index')
@@ -136,6 +141,8 @@ class RoleController extends Controller
         }
 
         $role->delete();
+
+        $this->forgetPermissionCache();
 
         return redirect()
             ->route('admin.roles.index')
@@ -231,7 +238,10 @@ class RoleController extends Controller
 
                 $permission = Permission::query()->updateOrCreate(
                     ['slug' => $slug],
-                    ['name' => $name]
+                    [
+                        'name' => $name,
+                        'guard_name' => $this->guardName(),
+                    ]
                 );
 
                 return $permission->slug;
@@ -249,11 +259,22 @@ class RoleController extends Controller
      */
     protected function syncRolePermissions(Role $role, array $permissionSlugs): void
     {
-        $permissionIds = Permission::query()
-            ->whereIn('slug', $permissionSlugs)
-            ->pluck('id')
-            ->all();
+        $role->syncPermissions($permissionSlugs);
+    }
 
-        $role->permissions()->sync($permissionIds);
+    /**
+     * Clear the cached permissions stored by the registrar.
+     */
+    protected function forgetPermissionCache(): void
+    {
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    /**
+     * Resolve the guard name used for roles and permissions.
+     */
+    protected function guardName(): string
+    {
+        return config('auth.defaults.guard', 'web');
     }
 }
