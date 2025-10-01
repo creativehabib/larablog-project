@@ -25,7 +25,6 @@ class UserSeeder extends Seeder
             'type' => 'admin',
             'status' => 'active',
         ]);
-        $superAdmin->assignRole('Admin');
 
         // Creating Editor
         $admin = User::create([
@@ -36,7 +35,6 @@ class UserSeeder extends Seeder
             'type' => 'editor',
             'status' => 'active',
         ]);
-        $admin->assignRole('Editor');
 
         // Creating Writer
         $user = User::create([
@@ -47,7 +45,6 @@ class UserSeeder extends Seeder
             'type' => 'writer',
             'status' => 'active',
         ]);
-        $user->assignRole('Writer');
 
     }
 }

@@ -18,86 +18,52 @@
 </div>
 
 <div class="form-group">
-    <label for="slug">Slug</label>
-    <input
-        type="text"
-        name="slug"
-        id="slug"
-        value="{{ old('slug', $role->slug ?? '') }}"
-        class="form-control @error('slug') is-invalid @enderror"
-        placeholder="Leave empty to auto-generate"
-    >
-    @error('slug')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
-
-<div class="form-group">
-    <label for="summary">Summary</label>
-    <textarea
-        name="summary"
-        id="summary"
-        rows="3"
-        class="form-control @error('summary') is-invalid @enderror"
-    >{{ old('summary', $role->summary ?? '') }}</textarea>
-    @error('summary')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-</div>
-
-<div class="form-group">
     <label class="d-block">Assign Permissions</label>
     <p class="text-muted small mb-3">Select the permissions that should be granted to this role. "All Permissions" overrides individual selections.</p>
-    <div class="row">
-        @foreach ($permissions as $permission)
-            @php
-                $checkboxId = 'permission-'.$permission->id;
-                $isChecked = in_array($permission->slug, $selectedPermissions, true);
-                $label = $permission->name ?? \Illuminate\Support\Str::headline(str_replace(['*', '.', '_'], ' ', $permission->slug));
-            @endphp
-            <div class="col-md-4">
-                <div class="custom-control custom-checkbox mb-2">
-                    <input
-                        type="checkbox"
-                        class="custom-control-input"
-                        id="{{ $checkboxId }}"
-                        name="permissions[]"
-                        value="{{ $permission->slug }}"
-                        {{ $isChecked ? 'checked' : '' }}
-                    >
-                    <label class="custom-control-label" for="{{ $checkboxId }}">
-                        {{ $label }}
-                        <span class="d-block text-muted small">{{ $permission->slug }}</span>
-                    </label>
-                </div>
-            </div>
-        @endforeach
+    <hr>
+    <div class="">
+        <div class="form-check custom-control custom-checkbox mb-2">
+            <input type="checkbox" class="custom-control-input" id="checkPermissionAll" name="permissions" value="">
+            <label class="custom-control-label" for="checkPermissionAll">All</label>
+        </div>
     </div>
-    @error('permissions')
-        <div class="text-danger small">{{ $message }}</div>
-    @enderror
-    @error('permissions.*')
-        <div class="text-danger small">{{ $message }}</div>
-    @enderror
+    <hr>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="checkPermission" value="Roles">
+                <label class="custom-control-label" for="checkPermission">Roles</label>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
+                <label class="custom-control-label" for="checkPermission0">Role List</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
+                <label class="custom-control-label" for="checkPermission0">Role Create</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
+                <label class="custom-control-label" for="checkPermission0">Role Edit</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
+                <label class="custom-control-label" for="checkPermission0">Role Delete</label>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="new_permissions">Create Additional Permissions</label>
-    <textarea
-        name="new_permissions"
-        id="new_permissions"
-        rows="4"
-        class="form-control @error('new_permissions') is-invalid @enderror"
-        placeholder="One permission per line. Use the format slug|Label (label optional)."
-    >{{ old('new_permissions') }}</textarea>
-    @error('new_permissions')
-        <div class="invalid-feedback">{{ $message }}</div>
-    @enderror
-    <small class="form-text text-muted">Example: <code>manage_tags|Manage Tags</code> or <code>feature_posts</code></small>
-</div>
 
 <div class="form-group mb-0">
     <button type="submit" class="btn btn-primary">
         {{ $submitLabel ?? __('Save Role') }}
+    </button>
+
+    <button type="reset" class="btn btn-outline-secondary">
+        {{ __('Reset Role') }}
     </button>
 </div>

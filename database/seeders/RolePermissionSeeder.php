@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -16,39 +16,65 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // প্রথমে পারমিশন ক্যাশ রিসেট করে নিন
-        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // 📝 পারমিশন তালিকা (slug সহ)
-        Permission::create(['name' => 'create articles', 'slug' => Str::slug('create articles'), 'guard_name' => 'web']);
-        Permission::create(['name' => 'edit articles', 'slug' => Str::slug('edit articles'), 'guard_name' => 'web']);
-        Permission::create(['name' => 'delete articles', 'slug' => Str::slug('delete articles'), 'guard_name' => 'web']);
-        Permission::create(['name' => 'publish articles', 'slug' => Str::slug('publish articles'), 'guard_name' => 'web']);
-        Permission::create(['name' => 'unpublish articles', 'slug' => Str::slug('unpublish articles'), 'guard_name' => 'web']);
-        Permission::create(['name' => 'manage users', 'slug' => Str::slug('manage users'), 'guard_name' => 'web']);
-
-        // 🧑‍💼 ভূমিকা বা রোল তালিকা (slug সহ) - ✅ এখানে পরিবর্তন করা হয়েছে
-        $adminRole = Role::create(['name' => 'Admin', 'slug' => Str::slug('Admin'), 'guard_name' => 'web']);
-        $editorRole = Role::create(['name' => 'Editor', 'slug' => Str::slug('Editor'), 'guard_name' => 'web']);
-        $writerRole = Role::create(['name' => 'Writer', 'slug' => Str::slug('Writer'), 'guard_name' => 'web']);
-
-        // 🔐 ভূমিকা অনুযায়ী পারমিশন বণ্টন
-
-        // Admin কে সব পারমিশন দেওয়া হলো
-        $adminRole->givePermissionTo(Permission::all());
-
-        // Editor কে নির্দিষ্ট পারমিশন দেওয়া হলো
-        $editorRole->givePermissionTo([
-            'create articles',
-            'edit articles',
-            'publish articles',
-            'unpublish articles'
-        ]);
-
-        // Writer কে নির্দিষ্ট পারমিশন দেওয়া হলো
-        $writerRole->givePermissionTo([
-            'create articles',
-            'edit articles'
-        ]);
+        $role = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $permissionsAll = [
+            [
+                'group_name' => 'Roles',
+                'permissions' => [
+                    'role.permission',
+                    'role.list',
+                    'role.create',
+                    'role.edit',
+                    'role.delete',
+                ]
+            ],
+            [
+                'group_name' => 'Users',
+                'permissions' => [
+                    'user.permission',
+                    'user.list',
+                    'user.create',
+                    'user.edit',
+                    'user.delete',
+                ]
+            ],
+            [
+                'group_name' => 'Categories',
+                'permissions' => [
+                    'category.permission',
+                    'category.list',
+                    'category.create',
+                    'category.edit',
+                    'category.delete',
+                ]
+            ],
+            [
+                'group_name' => 'Posts',
+                'permissions' => [
+                    'post.permission',
+                    'post.list',
+                    'post.create',
+                    'post.edit',
+                    'post.delete',
+                ]
+            ]
+        ];
+        foreach ($permissionsAll as $permGroup) {
+            $permissionGroup = $permGroup['group_name'];
+            foreach($permGroup['permissions'] as $permissionName) {
+                $permission = Permission::create([
+                    'name' => $permissionName,
+                    'group_name' => $permissionGroup,
+                    'guard_name' => 'web'
+                ]);
+                $role->givePermissionTo($permission);
+                $permission->assignRole($role);
+            }
+        }
+        $user = User::find(1);
+        if($user){
+            $user->assignRole($role);
+        }
     }
 }

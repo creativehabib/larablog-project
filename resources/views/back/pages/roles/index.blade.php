@@ -23,21 +23,14 @@
                         <thead>
                             <tr>
                                 <th scope="col">Name</th>
-                                <th scope="col">Slug</th>
-                                <th scope="col">Summary</th>
                                 <th scope="col" class="text-center">Permissions</th>
-                                <th scope="col" class="text-center">Users</th>
-                                <th scope="col" class="text-right">Actions</th>
+                                <th scope="col" class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($roles as $role)
                                 <tr>
                                     <td class="align-middle font-weight-semibold">{{ $role->name }}</td>
-                                    <td class="align-middle"><code>{{ $role->slug }}</code></td>
-                                    <td class="align-middle" style="max-width: 320px;">
-                                        {{ $role->summary ?? '—' }}
-                                    </td>
                                     <td class="align-middle text-center">
                                         @if ($role->permissions_count > 0)
                                             <div class="d-flex flex-wrap justify-content-center">
@@ -52,8 +45,7 @@
                                             <span class="text-muted">None</span>
                                         @endif
                                     </td>
-                                    <td class="align-middle text-center">{{ $role->users_count }}</td>
-                                    <td class="align-middle text-right">
+                                    <td class="align-middle text-center">
                                         <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-outline-primary">
                                             <span class="oi oi-pencil mr-1"></span> Edit
                                         </a>

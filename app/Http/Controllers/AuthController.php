@@ -49,15 +49,15 @@ class AuthController extends Controller
             'password'=> $request->password
         );
         if( Auth::attempt($credentials) ){
-            // Check if account is inactive mode
-            if( auth()->user()->status == 'active' ){
+            // Check if an account is inactive mode
+            if( auth()->user()->status == UserStatus::Active ){
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 return redirect()->route('admin.login')->with('fail', 'Your account is currently inactive. Please contact your administrator.');
             }
             //Check if account is in pending mode
-            if( auth()->user()->status == 'pending' ){
+            if( auth()->user()->status == UserStatus::Pending ){
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
