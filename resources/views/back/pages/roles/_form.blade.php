@@ -1,7 +1,6 @@
 @php
-    $selectedPermissions = collect(old('permissions', isset($role) ? $role->permissions->pluck('slug')->all() : []))->map(fn ($value) => (string) $value)->all();
+    $selectedPermissions = old('permissions', isset($role) ? $role->permissions->pluck('name')->all() : []);
 @endphp
-
 <div class="form-group">
     <label for="name">Role Name <span class="text-danger">*</span></label>
     <input
@@ -17,44 +16,45 @@
     @enderror
 </div>
 
+
 <div class="form-group">
     <label class="d-block">Assign Permissions</label>
-    <p class="text-muted small mb-3">Select the permissions that should be granted to this role. "All Permissions" overrides individual selections.</p>
+    <p class="text-muted small mb-3">Select the permissions that should be granted to this role.</p>
     <hr>
-    <div class="">
-        <div class="form-check custom-control custom-checkbox mb-2">
-            <input type="checkbox" class="custom-control-input" id="checkPermissionAll" name="permissions" value="">
-            <label class="custom-control-label" for="checkPermissionAll">All</label>
-        </div>
+    <div class="form-check custom-control custom-checkbox mb-2">
+        {{-- FIX: This checkbox is only for JS control, no name or value needed --}}
+        <input type="checkbox" class="custom-control-input" id="checkPermissionAll">
+        <label class="custom-control-label" for="checkPermissionAll">All Permissions</label>
     </div>
     <hr>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="checkPermission" value="Roles">
-                <label class="custom-control-label" for="checkPermission">Roles</label>
-            </div>
-        </div>
-        <div class="col-md-9">
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
-                <label class="custom-control-label" for="checkPermission0">Role List</label>
-            </div>
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
-                <label class="custom-control-label" for="checkPermission0">Role Create</label>
-            </div>
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
-                <label class="custom-control-label" for="checkPermission0">Role Edit</label>
-            </div>
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" name="permission0" id="checkPermission0" value="Permission">
-                <label class="custom-control-label" for="checkPermission0">Role Delete</label>
-            </div>
-        </div>
 
-    </div>
+    {{-- FIX: Use a different variable for the inner loop item ($permission) --}}
+    @foreach($groupedPermissions as $groupName => $permissions)
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input group-checkbox" id="checkGroup-{{ Str::slug($groupName) }}" data-group="{{ Str::slug($groupName) }}">
+                    <label class="custom-control-label" for="checkGroup-{{ Str::slug($groupName) }}">{{ $groupName }}</label>
+                </div>
+            </div>
+            <div class="col-md-9 group-permissions-container" data-group-container="{{ Str::slug($groupName) }}">
+                @foreach($permissions->sortBy('name') as $permission)
+                    <div class="custom-control custom-checkbox mr-3 mb-2">
+                        <input
+                            type="checkbox"
+                            class="custom-control-input permission-checkbox"
+                            name="permissions[]"
+                            id="checkPermission-{{ $permission->id }}"
+                            value="{{ $permission->name }}"
+                            {{ in_array($permission->name, $selectedPermissions) ? 'checked' : '' }}
+                        >
+                        <label class="custom-control-label" for="checkPermission-{{ $permission->id }}">{{ $permission->name }}</label>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        <hr class="my-1">
+    @endforeach
 </div>
 
 
@@ -63,7 +63,74 @@
         {{ $submitLabel ?? __('Save Role') }}
     </button>
 
-    <button type="reset" class="btn btn-outline-secondary">
-        {{ __('Reset Role') }}
-    </button>
+    <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-secondary">
+        Cancel
+    </a>
 </div>
+
+{{-- Add this script section to your page --}}
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkAll = document.getElementById('checkPermissionAll');
+            const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+            const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+
+            // "All Permissions" checkbox functionality
+            checkAll.addEventListener('change', function () {
+                permissionCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                groupCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+
+            // "Group" checkbox functionality
+            groupCheckboxes.forEach(groupCheckbox => {
+                groupCheckbox.addEventListener('change', function () {
+                    const group = this.getAttribute('data-group');
+                    const permissionsInGroup = document.querySelectorAll(`[data-group-container="${group}"] .permission-checkbox`);
+                    permissionsInGroup.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    updateCheckAllState();
+                });
+            });
+
+            // Individual permission checkbox functionality
+            permissionCheckboxes.forEach(permissionCheckbox => {
+                permissionCheckbox.addEventListener('change', function () {
+                    updateGroupCheckboxState(this);
+                    updateCheckAllState();
+                });
+            });
+
+            // Helper function to update a group's checkbox state
+            function updateGroupCheckboxState(permissionCheckbox) {
+                const container = permissionCheckbox.closest('.group-permissions-container');
+                const group = container.getAttribute('data-group-container');
+                const groupCheckbox = document.querySelector(`.group-checkbox[data-group="${group}"]`);
+                const allInGroup = container.querySelectorAll('.permission-checkbox');
+                const allCheckedInGroup = container.querySelectorAll('.permission-checkbox:checked');
+                groupCheckbox.checked = allInGroup.length === allCheckedInGroup.length;
+            }
+
+            // Helper function to update the "All Permissions" checkbox state
+            function updateCheckAllState() {
+                checkAll.checked = permissionCheckboxes.length === document.querySelectorAll('.permission-checkbox:checked').length;
+            }
+
+            // Initial state check on page load
+            groupCheckboxes.forEach(groupCheckbox => {
+                const group = groupCheckbox.getAttribute('data-group');
+                const container = document.querySelector(`[data-group-container="${group}"]`);
+                const allInGroup = container.querySelectorAll('.permission-checkbox');
+                const allCheckedInGroup = container.querySelectorAll('.permission-checkbox:checked');
+                groupCheckbox.checked = allInGroup.length > 0 && allInGroup.length === allCheckedInGroup.length;
+            });
+            updateCheckAllState();
+
+        });
+    </script>
+@endpush

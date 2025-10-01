@@ -400,7 +400,7 @@
                                 </ul>
                             </li>
 
-                        <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
+                        <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ||  request()->routeIs('admin.permissions.*')? 'has-active' : '' }}">
                             <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a>
                             <ul class="menu">
                                 <li class="menu-item {{ request()->routeIs('admin.profile') ? 'has-active' : '' }}">
@@ -409,6 +409,10 @@
 
                                     <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
                                         <a href="{{ route('admin.roles.index') }}" class="menu-link">Roles &amp; Permissions</a>
+                                    </li>
+
+                                    <li class="menu-item {{ request()->routeIs('admin.permissions.*') ? 'has-active' : '' }}">
+                                        <a href="{{ route('admin.permissions.index') }}" class="menu-link">Permissions</a>
                                     </li>
 
                                     <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'has-active' : '' }}">

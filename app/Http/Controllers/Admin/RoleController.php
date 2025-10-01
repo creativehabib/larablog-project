@@ -11,14 +11,15 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::all();
+        $roles = Role::withCount('permissions')->with('permissions')->get();
         return view('back.pages.roles.index', compact('roles'));
     }
 
     public function create()
     {
         $permissions = Permission::all();
-        return view('back.pages.roles.create', compact('permissions'));
+        $groupedPermissions = $permissions->groupBy('group_name')->sortKeys();
+        return view('back.pages.roles.create', compact('groupedPermissions'));
     }
 
     public function store(Request $request)
@@ -36,10 +37,13 @@ class RoleController extends Controller
         return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
     }
 
+
     public function edit(Role $role)
     {
+        // FIX: Group permissions just like in the create method for consistency.
         $permissions = Permission::all();
-        return view('back.pages.roles.edit', compact('role', 'permissions'));
+        $groupedPermissions = $permissions->groupBy('group_name')->sortKeys();
+        return view('back.pages.roles.edit', compact('role', 'groupedPermissions'));
     }
 
     public function update(Request $request, Role $role)
@@ -50,7 +54,10 @@ class RoleController extends Controller
         ]);
 
         $role->update(['name' => $request->name]);
-        $role->syncPermissions($request->permissions);
+
+        // Use an empty array if no permissions are sent
+        $permissions = $request->input('permissions', []);
+        $role->syncPermissions($permissions);
 
         return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
     }

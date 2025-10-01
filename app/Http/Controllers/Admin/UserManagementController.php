@@ -12,23 +12,23 @@ class UserManagementController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::with('roles')->latest()->paginate(10);
         return view('back.pages.users.index', compact('users'));
     }
 
     public function create()
     {
-        $roles = Role::all();
+        $roles = Role::all(); // Role select করার জন্য সব Role নিয়ে নিচ্ছি
         return view('back.pages.users.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'roles' => 'nullable|array'
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|exists:roles,name',
         ]);
 
         $user = User::create([
@@ -37,11 +37,10 @@ class UserManagementController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        if ($request->has('roles')) {
-            $user->assignRole($request->roles);
-        }
+        // Role assign করা
+        $user->assignRole($request->role);
 
-        return redirect()->route('back.pages.users.index')->with('success', 'User created successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
 
     public function edit(User $user)
@@ -53,24 +52,23 @@ class UserManagementController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:8',
-            'roles' => 'nullable|array'
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed', // Password is optional
+            'role' => 'required|exists:roles,name',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
-
+        $user->name = $request->name;
+        $user->email = $request->email;
         if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
+            $user->password = Hash::make($request->password);
         }
+        $user->save();
 
-        $user->syncRoles($request->roles);
+        // Role পরিবর্তন করার জন্য syncRoles ব্যবহার করা ভালো
+        $user->syncRoles($request->role);
 
-        return redirect()->route('back.pages.users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy(User $user)

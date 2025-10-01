@@ -47,7 +47,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
        Route::resource('roles', RoleController::class);
        Route::resource('permissions', PermissionController::class);
-
-       Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
+       Route::resource('users', UserManagementController::class);
     });
 });
