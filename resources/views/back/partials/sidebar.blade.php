@@ -54,21 +54,26 @@
                             <li class="menu-item {{ request()->routeIs('admin.profile') ? 'has-active' : '' }}">
                                 <a href="{{ route('admin.profile') }}" class="menu-link">Profile</a>
                             </li>
-
+                            @can('role.view')
                             <li class="menu-item {{ request()->routeIs('admin.roles.*') ? 'has-active' : '' }}">
                                 <a href="{{ route('admin.roles.index') }}" class="menu-link">Roles &amp; Permissions</a>
                             </li>
-
+                            @endcan
+                            @can('permission.view')
                             <li class="menu-item {{ request()->routeIs('admin.permissions.*') ? 'has-active' : '' }}">
                                 <a href="{{ route('admin.permissions.index') }}" class="menu-link">Permissions</a>
                             </li>
+                            @endcan
 
+                            @can('user.view')
                             <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'has-active' : '' }}">
                                 <a href="{{ route('admin.users.index') }}" class="menu-link">User Management</a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
 
+                    @can('setting.view')
                     <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a>
                         <ul class="menu">
@@ -77,6 +82,7 @@
                             </li>
                         </ul>
                     </li>
+                    @endcan
 
 
                 </ul><!-- /.menu -->
