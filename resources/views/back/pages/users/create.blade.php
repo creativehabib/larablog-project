@@ -1,12 +1,15 @@
 @extends('back.layout.pages-layout')
 @section('pageTitle', $pageTitle ?? 'Create User')
 @section('content')
+    <header class="page-title-bar">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title mb-0">Create User</h1>
+            <a href="{{ route('admin.users.index') }}" class="btn btn-link">&larr; Back to users</a>
+        </div>
+    </header>
 
-    <div class="page-header">
-        <h1 class="page-title">Create New User</h1>
-    </div>
-
-    <div class="card">
+    <div class="page-section">
+        <div class="card">
         <div class="card-body">
             <form action="{{ route('admin.users.store') }}" method="POST">
                 @csrf
@@ -28,7 +31,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="role" class="form-label">Assign Role</label>
-                    <select name="role" class="form-select">
+                    <select name="role" class="custom-select">
                         <option value="">Select a role</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->name }}">{{ $role->name }}</option>
@@ -38,6 +41,7 @@
                 <button type="submit" class="btn btn-primary">Create User</button>
             </form>
         </div>
+    </div>
     </div>
 
 @endsection

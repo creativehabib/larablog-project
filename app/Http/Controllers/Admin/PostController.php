@@ -16,8 +16,6 @@ class PostController extends Controller
 
     public function create()
     {
-//        abort_unless($this->canCreatePosts(), 403);
-
         return view('back.pages.posts.create', [
             'pageTitle' => 'Create Post',
         ]);
@@ -25,8 +23,6 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-//        abort_unless($this->canAccessPost($post), 403);
-
         return view('back.pages.posts.edit', [
             'pageTitle' => 'Edit Post',
             'post' => $post,

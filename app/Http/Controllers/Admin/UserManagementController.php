@@ -5,11 +5,23 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
-class UserManagementController extends Controller
+class UserManagementController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:user.list', only: ['index']),
+            new Middleware('permission:user.edit', only: ['edit', 'update']),
+            new Middleware('permission:user.create', only: ['create', 'store']),
+            new Middleware('permission:user.delete', only: ['destroy']),
+        ];
+    }
     public function index()
     {
         $users = User::with('roles')->latest()->paginate(10);
@@ -18,7 +30,7 @@ class UserManagementController extends Controller
 
     public function create()
     {
-        $roles = Role::all(); // Role select করার জন্য সব Role নিয়ে নিচ্ছি
+        $roles = Role::all();
         return view('back.pages.users.create', compact('roles'));
     }
 
@@ -65,7 +77,6 @@ class UserManagementController extends Controller
         }
         $user->save();
 
-        // Role পরিবর্তন করার জন্য syncRoles ব্যবহার করা ভালো
         $user->syncRoles($request->role);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
@@ -73,6 +84,9 @@ class UserManagementController extends Controller
 
     public function destroy(User $user)
     {
+        if (Auth::id() == $user->id) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
         $user->delete();
         return redirect()->route('back.pages.users.index')->with('success', 'User deleted successfully.');
     }

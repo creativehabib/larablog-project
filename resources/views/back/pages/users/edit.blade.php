@@ -2,11 +2,15 @@
 @section('pageTitle', $pageTitle ?? 'Edit User')
 @section('content')
 
-    <div class="page-header">
-        <h1 class="page-title">Edit User</h1>
-    </div>
+    <header class="page-title-bar">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title mb-0">Edit User</h1>
+            <a href="{{ route('admin.users.index') }}" class="btn btn-link">&larr; Back to users</a>
+        </div>
+    </header>
 
-    <div class="card">
+    <div class="page-section">
+        <div class="card">
         <div class="card-body">
             <form action="{{ route('admin.users.update', $user) }}" method="POST">
                 @csrf @method('PUT')
@@ -28,16 +32,19 @@
                 </div>
                 <div class="mb-3">
                     <label for="role" class="form-label">Assign Role</label>
-                    <select name="role" class="form-select">
+                    <select name="role" class="custom-select">
                         <option value="">Select a role</option>
                         @foreach ($roles as $role)
-                            <option value="{{ $role->name }}">{{ $role->name }}</option>
+                            <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                {{ $role->name }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Create User</button>
+                <button type="submit" class="btn btn-primary">Update user</button>
             </form>
         </div>
+    </div>
     </div>
 
 @endsection

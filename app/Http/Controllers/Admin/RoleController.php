@@ -4,11 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-class RoleController extends Controller
+class RoleController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:role.list', only: ['index']),
+            new Middleware('permission:role.edit', only: ['edit', 'update']),
+            new Middleware('permission:role.create', only: ['create', 'store']),
+            new Middleware('permission:role.delete', only: ['destroy']),
+        ];
+    }
     public function index()
     {
         $roles = Role::withCount('permissions')->with('permissions')->get();
@@ -31,7 +42,7 @@ class RoleController extends Controller
 
         $role = Role::create(['name' => $request->name]);
         if ($request->has('permissions')) {
-            $role->givePermissionTo($request->permissions);
+            $role->syncPermissions($request->permissions);
         }
 
         return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');

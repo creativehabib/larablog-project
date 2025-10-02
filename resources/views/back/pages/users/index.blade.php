@@ -2,12 +2,19 @@
 @section('pageTitle', $pageTitle ?? 'Users')
 @section('content')
 
-    <div class="page-header d-flex align-items-center justify-content-between">
-        <h1 class="page-title">Users</h1>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Add User</a>
-    </div>
-
-    <div class="card">
+    <header class="page-title-bar d-flex align-items-center justify-content-between flex-wrap">
+        <div>
+            <h1 class="page-title mb-0">Users</h1>
+            <p class="text-muted mb-0">User Management</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                <span class="oi oi-plus mr-1"></span> Create User
+            </a>
+        </div>
+    </header>
+    <div class="page-section">
+        <div class="card">
         <div class="card-body">
             <table class="table table-hover">
                 <thead>
@@ -27,9 +34,9 @@
                         <td>{{ $user->email }}</td>
                         <td>
                             @if ($user->roles->isNotEmpty())
-                                <span class="badge bg-primary">{{ $user->roles->first()->name }}</span>
+                                <span class="badge badge-primary">{{ $user->roles->first()->name }}</span>
                             @else
-                                <span class="badge bg-secondary">No Role</span>
+                                <span class="badge badge-secondary">No Role</span>
                             @endif
                         </td>
                         <td class="text-center">
@@ -53,5 +60,5 @@
             </div>
         </div>
     </div>
-
+    </div>
 @endsection

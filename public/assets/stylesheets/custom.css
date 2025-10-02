@@ -1,1 +1,4 @@
 /* put your own styles to customize and override the theme */
+.page {
+    min-height: 100vh;
+}

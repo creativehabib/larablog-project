@@ -35,7 +35,7 @@
                                         @if ($role->permissions_count > 0)
                                             <div class="d-flex flex-wrap justify-content-center">
                                                 @foreach ($role->permissions->take(4) as $permission)
-                                                    <span class="badge badge-subtle border mr-1 mb-1">{{ $permission->name }}</span>
+                                                    <span class="badge badge-light border mr-1 mb-1">{{ $permission->name }}</span>
                                                 @endforeach
                                                 @if ($role->permissions_count > 4)
                                                     <span class="badge badge-secondary mb-1">+{{ $role->permissions_count - 4 }}</span>

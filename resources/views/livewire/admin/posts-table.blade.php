@@ -66,7 +66,9 @@
                                 </td>
                                 <td>{{ $post->updated_at?->format('d M, Y') }}</td>
                                 <td class="text-right">
-                                    <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    @can('post.edit')
+                                        <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    @endcan
                                     <button type="button" class="btn btn-sm btn-outline-danger" wire:click="deletePost({{ $post->id }})" onclick="confirm('Are you sure you want to delete this post?') || event.stopImmediatePropagation()">Delete</button>
                                 </td>
                             </tr>

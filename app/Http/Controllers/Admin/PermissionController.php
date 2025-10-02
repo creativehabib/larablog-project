@@ -5,10 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Models\Permission;
 
-class PermissionController extends Controller
+class PermissionController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:permission.list', only: ['index']),
+            new Middleware('permission:permission.edit', only: ['edit', 'update']),
+            new Middleware('permission:permission.create', only: ['create', 'store']),
+            new Middleware('permission:permission.delete', only: ['destroy']),
+        ];
+    }
     public function index()
     {
         $permissions = Permission::latest()->paginate(10);
