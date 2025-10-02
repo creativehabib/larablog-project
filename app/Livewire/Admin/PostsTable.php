@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -52,6 +53,12 @@ class PostsTable extends Component
     public function deletePost(int $postId): void
     {
         $post = Post::findOrFail($postId);
+        $user = Auth::user();
+
+        if (! $user->hasPermissionTo('post.delete') && $post->user_id !== $user->id) {
+            $this->dispatch('showToastr', type: 'error', message: 'You do not have permission to delete this post.');
+            return;
+        }
 
         if ($post->thumbnail_path) {
             Storage::disk('public')->delete($post->thumbnail_path);
@@ -66,7 +73,18 @@ class PostsTable extends Component
 
     public function render()
     {
-        $posts = Post::with(['category', 'subCategory'])
+        $currentUser = Auth::user();
+
+        // পোস্টের জন্য মূল কোয়েরি শুরু করুন
+        $postsQuery = Post::with(['category', 'subCategory']);
+
+        // ব্যবহারকারী যদি 'Admin' না হন, তাহলে শুধুমাত্র তার নিজের পোস্ট দেখান
+        if (! $currentUser->hasRole('Admin')) {
+            $postsQuery->where('user_id', $currentUser->id);
+        }
+
+        // উপরের শর্তের উপর ভিত্তি করে সার্চ এবং পেজিনেশন প্রয়োগ করুন
+        $posts = $postsQuery
             ->when($this->search !== '', function ($query) {
                 $searchTerm = '%'.$this->search.'%';
 

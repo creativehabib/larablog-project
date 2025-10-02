@@ -67,13 +67,18 @@
                                     <td><code>{{ $subcategory->slug }}</code></td>
                                     <td>{{ $subcategory->updated_at->format('d M, Y') }}</td>
                                     <td class="text-right">
-                                        <a href="{{ route('admin.subcategories.edit', $subcategory) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                        <button
-                                            type="button"
-                                            class="btn btn-sm btn-outline-danger"
-                                            wire:click="deleteSubCategory({{ $subcategory->id }})"
-                                            onclick="confirm('Are you sure you want to delete this sub category?') || event.stopImmediatePropagation()"
-                                        >Delete</button>
+                                        @can('category.edit')
+                                            <a href="{{ route('admin.subcategories.edit', $subcategory) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        @endcan
+
+                                        @can('category.delete')
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                wire:click="deleteSubCategory({{ $subcategory->id }})"
+                                                onclick="confirm('Are you sure you want to delete this sub category?') || event.stopImmediatePropagation()"
+                                            >Delete</button>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

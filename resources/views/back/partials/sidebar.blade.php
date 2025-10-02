@@ -33,17 +33,23 @@
                     <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
                         <ul class="menu">
-                            <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
-                                <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">All Posts</span></a>
-                            </li>
+                            @can('post.view')
+                                <li class="menu-item {{ request()->routeIs('admin.posts.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.posts.index') }}" class="menu-link"><span class="menu-text">All Posts</span></a>
+                                </li>
+                            @endcan
 
-                            <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
-                                <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-icon oi oi-folder"></span> <span class="menu-text">Categories</span></a>
-                            </li>
+                            @can('category.view')
+                                <li class="menu-item {{ request()->routeIs('admin.categories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.categories.index') }}" class="menu-link"><span class="menu-text">Categories</span></a>
+                                </li>
+                            @endcan
 
-                            <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
-                                <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-icon oi oi-layers"></span> <span class="menu-text">Sub Categories</span></a>
-                            </li>
+                            @can('subcategory.view')
+                                <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-text">Sub Categories</span></a>
+                                </li>
+                            @endcan
 
                         </ul>
                     </li>

@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ class SubCategoryController extends Controller
 {
     public function index(): View
     {
+        ! Gate::allows('subcategory.view') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.sub_categories.index', [
             'pageTitle' => 'Sub Categories',
         ]);
@@ -22,6 +24,7 @@ class SubCategoryController extends Controller
 
     public function create(): View
     {
+        ! Gate::allows('subcategory.create') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.sub_categories.create', [
             'pageTitle' => 'Create Sub Category',
             'categories' => Category::orderBy('name')->pluck('name', 'id'),
@@ -30,6 +33,7 @@ class SubCategoryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        ! Gate::allows('subcategory.create') ? abort(403, 'Unauthorized action.') : null;
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
@@ -62,6 +66,7 @@ class SubCategoryController extends Controller
 
     public function edit(SubCategory $subcategory): View
     {
+        ! Gate::allows('subcategory.edit') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.sub_categories.edit', [
             'pageTitle' => 'Edit Sub Category',
             'subcategory' => $subcategory,
@@ -71,6 +76,7 @@ class SubCategoryController extends Controller
 
     public function update(Request $request, SubCategory $subcategory): RedirectResponse
     {
+        ! Gate::allows('subcategory.edit') ? abort(403, 'Unauthorized action.') : null;
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
@@ -106,6 +112,7 @@ class SubCategoryController extends Controller
 
     public function destroy(SubCategory $subcategory): RedirectResponse
     {
+        ! Gate::allows('subcategory.delete') ? abort(403, 'Unauthorized action.') : null;
         if ($subcategory->image_path && Storage::disk('public')->exists($subcategory->image_path)) {
             Storage::disk('public')->delete($subcategory->image_path);
         }

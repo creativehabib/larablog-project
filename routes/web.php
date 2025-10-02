@@ -38,7 +38,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
               Route::post('/logout', 'logout')->name('logout');
               Route::get('/profile', 'profile')->name('profile');
               Route::post('/update-profile', 'updateProfile')->name('update.profile');
-              Route::get('/settings', 'generalSettings')->name('settings');
+              Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:setting.view');
        });
 
         Route::resource('categories', CategoryController::class)->except(['show']);

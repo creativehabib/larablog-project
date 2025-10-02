@@ -21,7 +21,7 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="postCategory">Category <span class="text-danger">*</span></label>
-                    <select id="postCategory" class="form-control @error('category_id') is-invalid @enderror" wire:model="category_id">
+                    <select id="postCategory" class="form-control @error('category_id') is-invalid @enderror" wire:model.live="category_id">
                         <option value="">Select category</option>
                         @foreach ($this->categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>

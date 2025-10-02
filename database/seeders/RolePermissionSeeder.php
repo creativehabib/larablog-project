@@ -22,8 +22,7 @@ class RolePermissionSeeder extends Seeder
             [
                 'group_name' => 'Roles',
                 'permissions' => [
-                    'role.permission',
-                    'role.list',
+                    'role.view',
                     'role.create',
                     'role.edit',
                     'role.delete',
@@ -32,8 +31,7 @@ class RolePermissionSeeder extends Seeder
             [
                 'group_name' => 'Users',
                 'permissions' => [
-                    'user.permission',
-                    'user.list',
+                    'user.view',
                     'user.create',
                     'user.edit',
                     'user.delete',
@@ -42,8 +40,7 @@ class RolePermissionSeeder extends Seeder
             [
                 'group_name' => 'Categories',
                 'permissions' => [
-                    'category.permission',
-                    'category.list',
+                    'category.view',
                     'category.create',
                     'category.edit',
                     'category.delete',
@@ -52,8 +49,7 @@ class RolePermissionSeeder extends Seeder
             [
                 'group_name' => 'Posts',
                 'permissions' => [
-                    'post.permission',
-                    'post.list',
+                    'post.view',
                     'post.create',
                     'post.edit',
                     'post.delete',

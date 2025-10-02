@@ -69,7 +69,9 @@
                                     @can('post.edit')
                                         <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                     @endcan
-                                    <button type="button" class="btn btn-sm btn-outline-danger" wire:click="deletePost({{ $post->id }})" onclick="confirm('Are you sure you want to delete this post?') || event.stopImmediatePropagation()">Delete</button>
+                                    @can('post.delete')
+                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="deletePost({{ $post->id }})" onclick="confirm('Are you sure you want to delete this post?') || event.stopImmediatePropagation()">Delete</button>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

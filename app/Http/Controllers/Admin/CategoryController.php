@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -14,6 +15,7 @@ class CategoryController extends Controller
 {
     public function index(): View
     {
+        ! Gate::allows('category.view') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.categories.index', [
             'pageTitle' => 'Categories',
         ]);
@@ -21,6 +23,7 @@ class CategoryController extends Controller
 
     public function create(): View
     {
+        ! Gate::allows('category.create') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.categories.create', [
             'pageTitle' => 'Create Category',
         ]);
@@ -28,6 +31,7 @@ class CategoryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        ! Gate::allows('category.create') ? abort(403, 'Unauthorized action.') : null;
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
@@ -58,6 +62,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category): View
     {
+        ! Gate::allows('category.edit') ? abort(403, 'Unauthorized action.') : null;
         return view('back.pages.categories.edit', [
             'pageTitle' => 'Edit Category',
             'category' => $category,
@@ -66,6 +71,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category): RedirectResponse
     {
+        ! Gate::allows('category.edit') ? abort(403, 'Unauthorized action.') : null;
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
@@ -99,6 +105,7 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        ! Gate::allows('category.delete') ? abort(403, 'Unauthorized action.') : null;
         if ($category->image_path && Storage::disk('public')->exists($category->image_path)) {
             Storage::disk('public')->delete($category->image_path);
         }
