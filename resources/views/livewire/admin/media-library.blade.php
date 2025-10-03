@@ -462,7 +462,30 @@
                             }
                         }
 
-                        Livewire.dispatch('mediaEditorSave', payload);
+                        const dispatched = (() => {
+                            if (this.$wire && typeof this.$wire.call === 'function') {
+                                this.$wire.call('saveMediaEditor', payload);
+                                return true;
+                            }
+
+                            if (typeof Livewire !== 'undefined') {
+                                if (typeof Livewire.dispatch === 'function') {
+                                    Livewire.dispatch('mediaEditorSave', payload);
+                                    return true;
+                                }
+
+                                if (typeof Livewire.emit === 'function') {
+                                    Livewire.emit('mediaEditorSave', payload);
+                                    return true;
+                                }
+                            }
+
+                            return false;
+                        })();
+
+                        if (!dispatched) {
+                            console.error('Unable to save media changes because Livewire is not available.');
+                        }
                     },
                     confirmDelete(id) {
                         if (confirm('Are you sure you want to delete this media file?')) {
