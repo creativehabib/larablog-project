@@ -2,20 +2,76 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Post;
+use App\Models\SubCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use SawaStacks\Utils\Kropify;
 
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $data = [
+        $totalPosts = Post::count();
+        $featuredPosts = Post::where('is_featured', true)->count();
+        $indexablePosts = Post::where('is_indexable', true)->count();
+
+        $categoriesCount = Category::count();
+        $subCategoriesCount = SubCategory::count();
+        $totalUsers = User::count();
+
+        $roles = Role::withCount('users')->get();
+        $roleCounts = $roles->mapWithKeys(fn (Role $role) => [$role->name => $role->users_count])->toArray();
+
+        $roleChartLabels = $roles->pluck('name')->values()->all();
+        $roleChartSeries = $roles->pluck('users_count')->map(fn ($count) => (int) $count)->values()->all();
+
+        $monthlyPostCounts = Post::query()
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->get()
+            ->groupBy(fn (Post $post) => $post->created_at->format('M Y'))
+            ->map->count();
+
+        $monthlyPostLabels = [];
+        $monthlyPostSeries = [];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $label = $month->format('M Y');
+            $monthlyPostLabels[] = $label;
+            $monthlyPostSeries[] = (int) ($monthlyPostCounts[$label] ?? 0);
+        }
+
+        $recentPosts = Post::with(['category', 'author'])
+            ->latest('updated_at')
+            ->limit(5)
+            ->get();
+
+        $recentUsers = User::with('roles')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return view('back.pages.dashboard', [
             'pageTitle' => 'Dashboard',
-        ];
-        return view('back.pages.dashboard', $data);
+            'totalPosts' => $totalPosts,
+            'featuredPosts' => $featuredPosts,
+            'indexablePosts' => $indexablePosts,
+            'categoriesCount' => $categoriesCount,
+            'subCategoriesCount' => $subCategoriesCount,
+            'totalUsers' => $totalUsers,
+            'monthlyPostLabels' => $monthlyPostLabels,
+            'monthlyPostSeries' => $monthlyPostSeries,
+            'roleChartLabels' => $roleChartLabels,
+            'roleChartSeries' => $roleChartSeries,
+            'roleCounts' => $roleCounts,
+            'recentPosts' => $recentPosts,
+            'recentUsers' => $recentUsers,
+        ]);
     }
 
     public function logout(Request $request)
