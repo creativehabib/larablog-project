@@ -164,6 +164,52 @@
             </div>
         @endif
 
+        @php $rowPollWidgets = ['live_poll']; @endphp
+        @if (array_filter($rowPollWidgets, fn ($widget) => $canViewWidget($widget)))
+            <div class="row">
+                @if ($canViewWidget('live_poll'))
+                    <div class="col-12 mb-4">
+                        <div class="card card-fluid shadow-sm h-100">
+                            <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-1">লাইভ পোল ইনসাইটস</h5>
+                                    <p class="text-muted small mb-0">ApexCharts এর মাধ্যমে জনমতের রিয়েল-টাইম আপডেট দেখুন।</p>
+                                </div>
+                                @if ($activePoll)
+                                    <span class="badge badge-success">{{ $activePoll->poll_date_bangla ?: 'তারিখ নেই' }}</span>
+                                @endif
+                            </div>
+
+                            <div class="card-body">
+                                @if ($activePoll)
+                                    <div class="row align-items-center">
+                                        <div class="col-lg-5 mb-3 mb-lg-0">
+                                            <h6 class="text-uppercase text-muted small">চলমান প্রশ্ন</h6>
+                                            <h4 class="mb-3">{{ $activePoll->question }}</h4>
+
+                                            <ul class="list-unstyled text-muted small mb-0">
+                                                <li class="mb-1"><strong class="text-dark">মোট ভোট:</strong> {{ $activePoll->total_vote_bangla }}</li>
+                                                <li class="mb-1"><span class="badge badge-pill badge-light border mr-2">হ্যাঁ</span> {{ $activePoll->yes_vote_bangla }} ভোট ({{ $activePoll->yes_vote_percent_bangla }}%)</li>
+                                                <li class="mb-1"><span class="badge badge-pill badge-light border mr-2">না</span> {{ $activePoll->no_vote_bangla }} ভোট ({{ $activePoll->no_vote_percent_bangla }}%)</li>
+                                                <li><span class="badge badge-pill badge-light border mr-2">মতামত নেই</span> {{ $activePoll->no_opinion_bangla }} ভোট ({{ $activePoll->no_opinion_vote_percent_bangla }}%)</li>
+                                            </ul>
+
+                                            <p class="text-muted small mt-3 mb-0">সর্বশেষ আপডেট: {{ $activePoll->updated_at?->diffForHumans() ?? 'অনুপলব্ধ' }}</p>
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <div id="livePollChart" style="min-height: 320px;"></div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <p class="text-muted mb-0">বর্তমানে কোনো সক্রিয় পোল নেই। নতুন পোল অ্যাকটিভ করলে এখানে ফলাফল দেখা যাবে।</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         @php $rowThreeWidgets = ['recent_posts', 'recent_users']; @endphp
         @if (array_filter($rowThreeWidgets, fn ($widget) => $canViewWidget($widget)))
             <div class="row">
@@ -302,6 +348,59 @@
                 });
                 roleDistributionChart.render();
             }
+
+            const livePollChartEl = document.querySelector('#livePollChart');
+@if ($activePoll)
+            if (livePollChartEl) {
+                const livePollChart = new ApexCharts(livePollChartEl, {
+                    chart: {
+                        type: 'bar',
+                        height: 320,
+                        toolbar: { show: false }
+                    },
+                    series: [{
+                        name: 'ভোট',
+                        data: @json($pollChartSeries),
+                    }],
+                    xaxis: {
+                        categories: @json($pollChartLabels),
+                        labels: {
+                            style: { colors: '#6c757d' }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: { colors: '#6c757d' }
+                        }
+                    },
+                    colors: @json($pollChartColors),
+                    plotOptions: {
+                        bar: {
+                            distributed: true,
+                            horizontal: true,
+                            borderRadius: 6,
+                        }
+                    },
+                    dataLabels: {
+                        style: {
+                            colors: ['#212529']
+                        },
+                        offsetX: 20,
+                        formatter: function (val) {
+                            return `${val} ভোট`;
+                        }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function (val) {
+                                return `${val} ভোট`;
+                            }
+                        }
+                    }
+                });
+                livePollChart.render();
+            }
+@endif
 
             window.addEventListener('sitemapCoverageUpdated', function (event) {
                 const detail = event.detail || {};

@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\GeneralSetting;
+use App\Models\Poll;
 use App\Models\Post;
 use App\Models\SubCategory;
 use App\Models\User;
-use App\Models\GeneralSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -57,6 +58,26 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
+        $activePoll = Poll::query()
+            ->where('is_active', true)
+            ->latest('poll_date')
+            ->latest()
+            ->first();
+
+        $pollChartLabels = $activePoll
+            ? ['হ্যাঁ', 'না', 'মতামত নেই']
+            : [];
+
+        $pollChartSeries = $activePoll
+            ? [
+                (int) $activePoll->yes_votes,
+                (int) $activePoll->no_votes,
+                (int) $activePoll->no_opinion_votes,
+            ]
+            : [];
+
+        $pollChartColors = ['#28a745', '#dc3545', '#6c757d'];
+
         $settings = GeneralSetting::first();
 
         return view('back.pages.dashboard', [
@@ -75,6 +96,10 @@ class AdminController extends Controller
             'recentPosts' => $recentPosts,
             'recentUsers' => $recentUsers,
             'dashboardWidgetVisibility' => $settings?->dashboard_widget_visibility ?? [],
+            'activePoll' => $activePoll,
+            'pollChartLabels' => $pollChartLabels,
+            'pollChartSeries' => $pollChartSeries,
+            'pollChartColors' => $pollChartColors,
         ]);
     }
 
