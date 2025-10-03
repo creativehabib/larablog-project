@@ -319,11 +319,30 @@
                             document.body.removeAttribute('data-bs-padding-right');
                         };
 
-                        if (typeof Livewire !== 'undefined' && typeof Livewire.hook === 'function') {
+                        let livewireCleanupHookRegistered = false;
+                        const registerLivewireCleanupHook = () => {
+                            if (livewireCleanupHookRegistered) {
+                                return;
+                            }
+
+                            if (typeof Livewire === 'undefined' || typeof Livewire.hook !== 'function') {
+                                return;
+                            }
+
                             Livewire.hook('message.processed', () => {
                                 cleanupModalArtifacts();
                             });
-                        }
+                            livewireCleanupHookRegistered = true;
+                        };
+
+                        registerLivewireCleanupHook();
+
+                        const livewireInitHandler = () => {
+                            registerLivewireCleanupHook();
+                        };
+
+                        window.addEventListener('livewire:init', livewireInitHandler, { once: true });
+                        window.addEventListener('livewire:load', livewireInitHandler, { once: true });
 
                         window.addEventListener('openMediaEditor', (event) => {
                             const detail = event.detail || {};
