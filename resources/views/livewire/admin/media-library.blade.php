@@ -175,10 +175,12 @@
                         <div class="col-lg-8">
                             <div class="bg-light rounded p-2 position-relative" style="min-height: 360px;">
                                 <img id="media-editor-image" x-ref="imagePreview" class="img-fluid rounded w-100" :class="{ 'd-none': !isImage }" alt="Editable preview">
-                                <div id="media-editor-non-image" x-ref="nonImageMessage" class="h-100 w-100 d-flex align-items-center justify-content-center flex-column text-muted" x-show="!isImage" x-cloak>
-                                    <i class="fas fa-file fa-3x mb-3"></i>
-                                    <p class="mb-0">Cropping &amp; resizing are available for images only.</p>
-                                </div>
+                                <template x-if="!isImage">
+                                    <div id="media-editor-non-image" x-ref="nonImageMessage" class="h-100 w-100 d-flex align-items-center justify-content-center flex-column text-muted" x-cloak>
+                                        <i class="fas fa-file fa-3x mb-3"></i>
+                                        <p class="mb-0">Cropping &amp; resizing are available for images only.</p>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                         <div class="col-lg-4">
