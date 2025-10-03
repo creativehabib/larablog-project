@@ -349,11 +349,16 @@
                                     const instance = bootstrap.Modal.getInstance(modalEl);
                                     if (instance) {
                                         instance.hide();
+                                        instance.dispose();
                                     }
                                 } else if (window.jQuery) {
                                     window.jQuery(modalEl).modal('hide');
                                 }
                             }
+                            document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.removeProperty('overflow');
+                            document.body.style.removeProperty('padding-right');
                             this.destroyCropper();
                         });
                     },
