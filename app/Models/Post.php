@@ -94,7 +94,15 @@ class Post extends Model
     protected function thumbnailUrl(): Attribute
     {
         return Attribute::get(function () {
-            return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : null;
+            if ($this->thumbnail_path) {
+                return Storage::url($this->thumbnail_path);
+            }
+
+            if ($this->isVideo()) {
+                return $this->videoThumbnailUrl();
+            }
+
+            return null;
         });
     }
 
@@ -181,6 +189,27 @@ class Post extends Model
     public function isArticle(): bool
     {
         return $this->content_type === self::CONTENT_TYPE_ARTICLE;
+    }
+
+    public function videoThumbnailUrl(): ?string
+    {
+        if (! $this->isVideo()) {
+            return null;
+        }
+
+        if ($this->video_source === self::VIDEO_SOURCE_UPLOAD) {
+            return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : null;
+        }
+
+        if (! $this->video_provider || ! $this->video_id) {
+            return null;
+        }
+
+        return match ($this->video_provider) {
+            self::VIDEO_PROVIDER_YOUTUBE => 'https://img.youtube.com/vi/'.$this->video_id.'/hqdefault.jpg',
+            self::VIDEO_PROVIDER_VIMEO => 'https://vumbnail.com/'.$this->video_id.'.jpg',
+            default => null,
+        };
     }
 
     public static function videoEmbedUrlFor(?string $provider, ?string $videoId): ?string

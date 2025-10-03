@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\GeneralSetting;
 use App\Models\Post;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -16,7 +15,7 @@ class PostController extends Controller
 
         $settings = $this->settings();
 
-        $image = $post->thumbnail_path ? Storage::url($post->thumbnail_path) : null;
+        $image = $post->thumbnail_url;
 
         $seo = [
             'title' => $post->meta_title ?: $post->title,
