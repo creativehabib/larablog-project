@@ -156,8 +156,12 @@ class MediaLibrary extends Component
     }
 
     #[On('mediaEditorSave')]
-    public function saveMediaEditor(array $payload): void
+    public function saveMediaEditor($payload = []): void
     {
+        if (! is_array($payload)) {
+            $payload = (array) $payload;
+        }
+
         $mediaId = (int) Arr::get($payload, 'id');
         if (! $mediaId) {
             return;
