@@ -140,38 +140,42 @@
                 </div>
             @endif
 
-            <div class="form-group">
-                <label for="postDescription">Post Description <span class="text-danger">*</span></label>
-                <div wire:ignore data-post-description-editor>
-                    <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
-                </div>
-                <input type="hidden" id="postDescriptionData" wire:model="description">
-                @error('description')
-                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="thumbnail">Post Thumbnail</label>
-                    <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
-                    @error('thumbnail')
+            @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
+                <div class="form-group">
+                    <label for="postDescription">Post Description <span class="text-danger">*</span></label>
+                    <div wire:ignore data-post-description-editor>
+                        <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
+                    </div>
+                    <input type="hidden" id="postDescriptionData" wire:model="description">
+                    @error('description')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
-                    <div class="mt-3">
-                        @if ($thumbnail)
-                            <p class="text-muted small mb-2">Preview:</p>
-                            <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
-                        @elseif ($existingThumbnail)
-                            <p class="text-muted small mb-2">Current thumbnail:</p>
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="{{ asset('storage/' . $existingThumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-height: 180px;">
-                                <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingThumbnail">Remove</button>
-                            </div>
-                        @endif
-                    </div>
                 </div>
-                <div class="form-group col-md-6">
+            @endif
+
+            <div class="form-row">
+                @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
+                    <div class="form-group col-md-6">
+                        <label for="thumbnail">Post Thumbnail</label>
+                        <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
+                        @error('thumbnail')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <div class="mt-3">
+                            @if ($thumbnail)
+                                <p class="text-muted small mb-2">Preview:</p>
+                                <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
+                            @elseif ($existingThumbnail)
+                                <p class="text-muted small mb-2">Current thumbnail:</p>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ asset('storage/' . $existingThumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-height: 180px;">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingThumbnail">Remove</button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+                <div class="form-group {{ $content_type === Post::CONTENT_TYPE_ARTICLE ? 'col-md-6' : 'col-12' }}">
                     <label>Post Options</label>
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="isFeatured" wire:model.defer="is_featured">

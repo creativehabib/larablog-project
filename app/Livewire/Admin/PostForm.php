@@ -406,7 +406,10 @@ class PostForm extends Component
                 Rule::unique('posts', 'slug')->ignore($postId),
             ],
             'content_type' => ['required', Rule::in([Post::CONTENT_TYPE_ARTICLE, Post::CONTENT_TYPE_VIDEO])],
-            'description' => ['required', 'string'],
+            'description' => array_filter([
+                $this->content_type === Post::CONTENT_TYPE_ARTICLE ? 'required' : 'nullable',
+                'string',
+            ]),
             'category_id' => ['nullable', 'integer', Rule::exists('categories', 'id')],
             'sub_category_id' => ['nullable', 'integer', Rule::exists('sub_categories', 'id')],
             'video_source' => array_filter([
