@@ -329,6 +329,13 @@
                             const modalEl = document.getElementById('mediaEditorModal');
                             let modalInstance = null;
                             if (modalEl) {
+                                document
+                                    .querySelectorAll('.modal-backdrop')
+                                    .forEach((backdrop) => backdrop.remove());
+                                document.body.classList.remove('modal-open');
+                                document.body.style.removeProperty('overflow');
+                                document.body.style.removeProperty('padding-right');
+
                                 if (window.bootstrap && window.bootstrap.Modal) {
                                     modalInstance = new bootstrap.Modal(modalEl);
                                     modalInstance.show();
