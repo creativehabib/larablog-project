@@ -320,6 +320,7 @@
                         };
 
                         let livewireCleanupHookRegistered = false;
+                        let pendingCleanupTimeout = null;
                         const registerLivewireCleanupHook = () => {
                             if (livewireCleanupHookRegistered) {
                                 return;
@@ -429,6 +430,15 @@
                             }
 
                             this.destroyCropper();
+
+                            if (pendingCleanupTimeout) {
+                                clearTimeout(pendingCleanupTimeout);
+                            }
+
+                            pendingCleanupTimeout = window.setTimeout(() => {
+                                pendingCleanupTimeout = null;
+                                cleanupModalArtifacts();
+                            }, 500);
                         });
                     },
                     handleDrop(event) {
