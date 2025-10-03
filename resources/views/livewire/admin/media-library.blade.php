@@ -361,8 +361,17 @@
                                 } else if (window.jQuery) {
                                     window.jQuery(modalEl).modal('hide');
                                 }
+
+                                modalEl.classList.remove('show');
+                                modalEl.setAttribute('aria-hidden', 'true');
+                                modalEl.removeAttribute('aria-modal');
+                                modalEl.style.removeProperty('padding-right');
+                                modalEl.style.display = 'none';
                             }
-                            document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
+
+                            document
+                                .querySelectorAll('.modal-backdrop')
+                                .forEach((backdrop) => backdrop.remove());
                             document.body.classList.remove('modal-open');
                             document.body.style.removeProperty('overflow');
                             document.body.style.removeProperty('padding-right');
@@ -446,7 +455,7 @@
                         }
                     },
                     closeEditor() {
-                        window.dispatchEvent(new CustomEvent('mediaEditorClosed'));
+                        this.dispatchMediaEditorClosed();
 
                         if (this.$wire && typeof this.$wire.call === 'function') {
                             this.$wire.call('cancelEditing');
@@ -464,7 +473,10 @@
                             }
                         }
                     },
-                    saveChanges() {
+                    dispatchMediaEditorClosed() {
+                        window.dispatchEvent(new CustomEvent('mediaEditorClosed'));
+                    },
+                    async saveChanges() {
                         const altText = this.$refs.altInput ? this.$refs.altInput.value : '';
                         const caption = this.$refs.captionInput ? this.$refs.captionInput.value : '';
 
@@ -493,10 +505,16 @@
                             }
                         }
 
-                        const dispatched = (() => {
+                        const dispatched = await (async () => {
                             if (this.$wire && typeof this.$wire.call === 'function') {
-                                this.$wire.call('saveMediaEditor', payload);
-                                return true;
+                                try {
+                                    await this.$wire.call('saveMediaEditor', payload);
+                                    this.dispatchMediaEditorClosed();
+                                    return true;
+                                } catch (error) {
+                                    console.error('Unable to save media changes via Livewire.', error);
+                                    return false;
+                                }
                             }
 
                             if (typeof Livewire !== 'undefined') {
