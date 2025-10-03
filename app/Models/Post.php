@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Post extends Model
 {
@@ -32,6 +35,11 @@ class Post extends Model
         'is_indexable' => 'boolean',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -45,5 +53,19 @@ class Post extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    protected function thumbnailUrl(): Attribute
+    {
+        return Attribute::get(function () {
+            return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : null;
+        });
+    }
+
+    protected function excerpt(): Attribute
+    {
+        return Attribute::get(function () {
+            return Str::limit(strip_tags((string) $this->description), 160);
+        });
     }
 }
