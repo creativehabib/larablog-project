@@ -319,6 +319,12 @@
                             document.body.removeAttribute('data-bs-padding-right');
                         };
 
+                        if (typeof Livewire !== 'undefined' && typeof Livewire.hook === 'function') {
+                            Livewire.hook('message.processed', () => {
+                                cleanupModalArtifacts();
+                            });
+                        }
+
                         window.addEventListener('openMediaEditor', (event) => {
                             const detail = event.detail || {};
                             this.mediaId = detail.id || null;
