@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\SubCategory;
 use App\Models\VideoPlaylist;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -357,6 +358,9 @@ class PostForm extends Component
             }
 
             $data['thumbnail_path'] = $this->thumbnail->store('posts', 'public');
+        } elseif ($autoThumbnailPath = $this->maybeFetchVideoThumbnail($data)) {
+            $data['thumbnail_path'] = $autoThumbnailPath;
+            $this->existingThumbnail = $autoThumbnailPath;
         }
 
         unset($data['thumbnail']);
@@ -782,6 +786,124 @@ class PostForm extends Component
             Post::VIDEO_PROVIDER_YOUTUBE => preg_match('/^[A-Za-z0-9_-]{6,}$/', $videoId) === 1,
             Post::VIDEO_PROVIDER_VIMEO => preg_match('/^[0-9]+$/', $videoId) === 1,
             default => false,
+        };
+    }
+
+    protected function maybeFetchVideoThumbnail(array $data): ?string
+    {
+        if (! $this->shouldFetchVideoThumbnail($data)) {
+            return null;
+        }
+
+        $provider = $data['video_provider'] ?? $this->video_provider;
+        $videoId = $data['video_id'] ?? $this->video_id;
+
+        if (! $provider || ! $videoId) {
+            return null;
+        }
+
+        foreach ($this->videoThumbnailUrls($provider, $videoId) as $thumbnailUrl) {
+            $storedPath = $this->downloadThumbnailFromUrl($thumbnailUrl);
+
+            if ($storedPath) {
+                return $storedPath;
+            }
+        }
+
+        return null;
+    }
+
+    protected function shouldFetchVideoThumbnail(array $data): bool
+    {
+        if ($this->thumbnail || $this->existingThumbnail) {
+            return false;
+        }
+
+        $contentType = $data['content_type'] ?? $this->content_type;
+
+        if ($contentType !== Post::CONTENT_TYPE_VIDEO) {
+            return false;
+        }
+
+        $videoSource = $data['video_source'] ?? $this->video_source;
+
+        if ($videoSource === Post::VIDEO_SOURCE_UPLOAD) {
+            return false;
+        }
+
+        $provider = $data['video_provider'] ?? $this->video_provider;
+        $videoId = $data['video_id'] ?? $this->video_id;
+
+        return filled($provider) && filled($videoId);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function videoThumbnailUrls(string $provider, string $videoId): array
+    {
+        return match ($provider) {
+            Post::VIDEO_PROVIDER_YOUTUBE => [
+                'https://img.youtube.com/vi/'.$videoId.'/maxresdefault.jpg',
+                'https://img.youtube.com/vi/'.$videoId.'/sddefault.jpg',
+                'https://img.youtube.com/vi/'.$videoId.'/hqdefault.jpg',
+                'https://img.youtube.com/vi/'.$videoId.'/mqdefault.jpg',
+            ],
+            Post::VIDEO_PROVIDER_VIMEO => [
+                'https://vumbnail.com/'.$videoId.'.jpg',
+            ],
+            default => [],
+        };
+    }
+
+    protected function downloadThumbnailFromUrl(string $url): ?string
+    {
+        try {
+            $response = Http::timeout(8)->get($url);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $contents = $response->body();
+
+        if ($contents === '') {
+            return null;
+        }
+
+        $contentType = strtolower((string) ($response->header('Content-Type') ?? ''));
+
+        if ($contentType !== '' && ! str_contains($contentType, 'image')) {
+            return null;
+        }
+
+        $extension = $this->extensionFromContentType($contentType);
+
+        if (! $extension) {
+            $path = parse_url($url, PHP_URL_PATH) ?: '';
+            $extension = pathinfo((string) $path, PATHINFO_EXTENSION);
+        }
+
+        $extension = $extension ? strtolower($extension) : 'jpg';
+
+        $storagePath = 'posts/'.Str::uuid().'.'.$extension;
+
+        Storage::disk('public')->put($storagePath, $contents);
+
+        return $storagePath;
+    }
+
+    protected function extensionFromContentType(?string $contentType): ?string
+    {
+        return match ($contentType ? strtolower(trim($contentType)) : '') {
+            'image/jpeg', 'image/jpg', 'image/pjpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => null,
         };
     }
 }
