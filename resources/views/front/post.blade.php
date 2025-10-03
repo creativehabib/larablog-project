@@ -44,6 +44,16 @@
                     <span aria-hidden="true">•</span>
                     <time datetime="{{ optional($post->updated_at)->toDateString() }}">Updated {{ optional($post->updated_at)->format('F d, Y') }}</time>
                 @endif
+                @if($post->isVideo())
+                    @if($post->video_duration)
+                        <span aria-hidden="true">•</span>
+                        <span>{{ $post->video_duration }}</span>
+                    @endif
+                    @if($post->playlist)
+                        <span aria-hidden="true">•</span>
+                        <span>Part of the <span class="font-medium text-slate-700">{{ $post->playlist->name }}</span> series</span>
+                    @endif
+                @endif
             </div>
         </header>
 

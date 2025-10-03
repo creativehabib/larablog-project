@@ -59,16 +59,77 @@
             @if ($content_type === Post::CONTENT_TYPE_VIDEO)
                 <div class="card card-body border mb-4">
                     <h5 class="card-title mb-3">Video Details</h5>
-                    <div class="form-group">
-                        <label for="videoUrl">Video URL <span class="text-danger">*</span></label>
-                        <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
-                        @error('video_url')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        @if ($video_provider)
-                            <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
-                        @endif
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="videoSource">Video Source <span class="text-danger">*</span></label>
+                            <select id="videoSource" class="form-control @error('video_source') is-invalid @enderror" wire:model.live="video_source">
+                                <option value="{{ Post::VIDEO_SOURCE_EMBED }}">Embed Code</option>
+                                <option value="{{ Post::VIDEO_SOURCE_UPLOAD }}">Direct Upload</option>
+                            </select>
+                            @error('video_source')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="videoDuration">Duration</label>
+                            <input type="text" id="videoDuration" class="form-control @error('video_duration') is-invalid @enderror" wire:model.defer="video_duration" placeholder="e.g. 12:45 or 8 min">
+                            <small class="form-text text-muted">Optional – helps viewers understand the runtime.</small>
+                            @error('video_duration')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="videoPlaylist">Playlist / Series</label>
+                            <select id="videoPlaylist" class="form-control @error('video_playlist_id') is-invalid @enderror" wire:model="video_playlist_id">
+                                <option value="">None</option>
+                                @foreach ($this->videoPlaylists as $playlist)
+                                    <option value="{{ $playlist->id }}">{{ $playlist->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('video_playlist_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
+
+                    @if ($video_source === Post::VIDEO_SOURCE_EMBED)
+                        <div class="form-group">
+                            <label for="videoEmbedCode">Embed Code</label>
+                            <textarea id="videoEmbedCode" rows="4" class="form-control @error('video_embed_code') is-invalid @enderror" wire:model.live.debounce.500ms="video_embed_code" placeholder="Paste the iframe embed code from YouTube, Vimeo, etc."></textarea>
+                            <small class="form-text text-muted">Embedding keeps your server fast and avoids heavy bandwidth usage.</small>
+                            @error('video_embed_code')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label for="videoUrl">Video URL</label>
+                            <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
+                            <small class="form-text text-muted">Optional fallback – we’ll detect the platform automatically.</small>
+                            @error('video_url')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @if ($video_provider)
+                                <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
+                            @endif
+                        </div>
+                    @else
+                        <div class="form-group">
+                            <label for="videoUpload">Video File @if (! $existingVideoPath)<span class="text-danger">*</span>@endif</label>
+                            <input type="file" id="videoUpload" class="form-control-file @error('video_upload') is-invalid @enderror" wire:model="video_upload" accept="video/mp4,video/quicktime,video/webm">
+                            <small class="form-text text-muted">Upload MP4, MOV or WEBM files (max 200MB). Direct uploads use more storage and bandwidth.</small>
+                            @error('video_upload')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            <div class="mt-3">
+                                @if ($existingVideoPath && ! $video_upload)
+                                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+                                        <span class="text-muted small">Current file: <code>{{ $existingVideoPath }}</code></span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingVideo">Remove current video</button>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
 
                     @if ($video_preview_html)
                         <div class="mt-3">

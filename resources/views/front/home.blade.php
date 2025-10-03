@@ -28,6 +28,9 @@
                             <span class="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
                                 <i class="fas fa-play text-[10px]"></i>
                                 Video
+                                @if($post->video_duration)
+                                    <span class="ml-2 text-[10px] font-medium normal-case tracking-normal">{{ $post->video_duration }}</span>
+                                @endif
                             </span>
                         @endif
                     </a>
@@ -42,6 +45,14 @@
                         @if($post->isVideo())
                             <span class="text-slate-400">•</span>
                             <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-600">Video</span>
+                            @if($post->video_duration)
+                                <span class="text-slate-400">•</span>
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">{{ $post->video_duration }}</span>
+                            @endif
+                            @if($post->playlist)
+                                <span class="text-slate-400">•</span>
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-600">{{ $post->playlist->name }}</span>
+                            @endif
                         @endif
                     </div>
                     <h2 class="mt-3 text-xl font-semibold text-slate-900 group-hover:text-indigo-600">
