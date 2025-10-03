@@ -22,6 +22,7 @@ class Poll extends Model
         'image',
         'source_url',
         'poll_date',
+        'is_active',
         'yes_votes',
         'no_votes',
         'no_opinion_votes',
@@ -34,6 +35,7 @@ class Poll extends Model
      */
     protected $casts = [
         'poll_date' => 'date',
+        'is_active' => 'bool',
     ];
 
     /**

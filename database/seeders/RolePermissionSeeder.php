@@ -54,6 +54,15 @@ class RolePermissionSeeder extends Seeder
                     'post.edit',
                     'post.delete',
                 ]
+            ],
+            [
+                'group_name' => 'Polls',
+                'permissions' => [
+                    'poll.view',
+                    'poll.create',
+                    'poll.edit',
+                    'poll.delete',
+                ]
             ]
         ];
         foreach ($permissionsAll as $permGroup) {
