@@ -337,7 +337,9 @@
                                 }
                             }
 
-                            this.setupEditor(detail);
+                            this.$nextTick(() => {
+                                this.setupEditor(detail);
+                            });
                         });
 
                         window.addEventListener('mediaEditorClosed', () => {
