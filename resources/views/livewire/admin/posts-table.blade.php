@@ -1,10 +1,13 @@
-@php use Illuminate\Support\Str; @endphp
+@php
+    use App\Models\Post;
+    use Illuminate\Support\Str;
+@endphp
 <div>
     <div class="card card-fluid">
         <div class="card-body">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
                 <div class="w-100 w-md-50">
-                    <input type="search" wire:model.live.debounce.500ms="search" class="form-control" placeholder="Search posts by title, slug, meta title, category or sub category">
+                    <input type="search" wire:model.live.debounce.500ms="search" class="form-control" placeholder="Search posts by title, slug, meta title, video URL, category or sub category">
                 </div>
                 <div class="text-muted small">
                     Showing {{ $posts->firstItem() ?? 0 }} - {{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} posts
@@ -17,6 +20,7 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
+                            <th>Type</th>
                             <th>Author</th>
                             <th>Category</th>
                             <th>Featured</th>
@@ -36,6 +40,11 @@
                                     @if ($post->meta_title)
                                         <div class="text-muted small">Meta: {{ Str::limit($post->meta_title, 45) }}</div>
                                     @endif
+                                </td>
+                                <td>
+                                    <span class="badge {{ $post->isVideo() ? 'badge-info' : 'badge-secondary' }}">
+                                        {{ $post->isVideo() ? 'Video' : 'Article' }}
+                                    </span>
                                 </td>
                                 <td>
                                     <div>{{ $post->author?->name ?? 'Unknown' }}</div>
@@ -76,7 +85,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted">No posts found.</td>
+                                <td colspan="10" class="text-center text-muted">No posts found.</td>
                             </tr>
                         @endforelse
                     </tbody>

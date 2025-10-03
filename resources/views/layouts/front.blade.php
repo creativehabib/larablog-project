@@ -19,6 +19,10 @@
     @if(!empty($seo['image']))
         <meta property="og:image" content="{{ $seo['image'] }}">
     @endif
+    @if(!empty($seo['video']))
+        <meta property="og:video" content="{{ $seo['video'] }}">
+        <meta property="og:video:type" content="text/html">
+    @endif
     @if(!empty($seo['published_time']))
         <meta property="article:published_time" content="{{ $seo['published_time'] }}">
     @endif
@@ -26,11 +30,16 @@
         <meta property="article:modified_time" content="{{ $seo['modified_time'] }}">
     @endif
 
-    <meta name="twitter:card" content="{{ !empty($seo['image']) ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:card" content="{{ $seo['twitter_card'] ?? (!empty($seo['image']) ? 'summary_large_image' : 'summary') }}">
     <meta name="twitter:title" content="{{ $seo['title'] ?? '' }}">
     <meta name="twitter:description" content="{{ $seo['description'] ?? '' }}">
     @if(!empty($seo['image']))
         <meta name="twitter:image" content="{{ $seo['image'] }}">
+    @endif
+    @if(!empty($seo['video']))
+        <meta name="twitter:player" content="{{ $seo['video'] }}">
+        <meta name="twitter:player:width" content="1280">
+        <meta name="twitter:player:height" content="720">
     @endif
 
     <link rel="alternate" type="application/rss+xml" title="{{ $settings->site_title ?? config('app.name') }} RSS Feed" href="{{ route('feed') }}">

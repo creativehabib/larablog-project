@@ -76,7 +76,7 @@ class PostsTable extends Component
         $currentUser = Auth::user();
 
         // পোস্টের জন্য মূল কোয়েরি শুরু করুন
-        $postsQuery = Post::with(['category', 'subCategory']);
+        $postsQuery = Post::with(['category', 'subCategory', 'author']);
 
         // ব্যবহারকারী যদি 'Admin' না হন, তাহলে শুধুমাত্র তার নিজের পোস্ট দেখান
         if (! $currentUser->hasRole('Admin')) {
@@ -92,6 +92,9 @@ class PostsTable extends Component
                     $nested->where('title', 'like', $searchTerm)
                         ->orWhere('slug', 'like', $searchTerm)
                         ->orWhere('meta_title', 'like', $searchTerm)
+                        ->orWhere('content_type', 'like', $searchTerm)
+                        ->orWhere('video_url', 'like', $searchTerm)
+                        ->orWhere('video_provider', 'like', $searchTerm)
                         ->orWhereHas('category', function ($categoryQuery) use ($searchTerm) {
                             $categoryQuery->where('name', 'like', $searchTerm);
                         })

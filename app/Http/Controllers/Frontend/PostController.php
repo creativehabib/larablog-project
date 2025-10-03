@@ -29,6 +29,12 @@ class PostController extends Controller
             'author' => $post->author?->name,
         ];
 
+        if ($post->isVideo()) {
+            $seo['type'] = 'video.other';
+            $seo['video'] = $post->video_embed_url;
+            $seo['twitter_card'] = 'player';
+        }
+
         return view('front.post', compact('post', 'seo', 'settings'));
     }
 

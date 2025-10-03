@@ -1,18 +1,29 @@
+@php use App\Models\Post; @endphp
 <div>
     <form wire:submit.prevent="save" class="card card-fluid">
         <div class="card-body">
             <div class="form-row">
-                <div class="form-group col-md-8">
+                <div class="form-group col-md-6">
                     <label for="postTitle">Post Title <span class="text-danger">*</span></label>
                     <input type="text" id="postTitle" class="form-control @error('title') is-invalid @enderror" wire:model.defer="title" placeholder="Enter post title">
                     @error('title')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="form-group col-md-4">
+                <div class="form-group col-md-3">
                     <label for="postSlug">Slug</label>
                     <input type="text" id="postSlug" class="form-control @error('slug') is-invalid @enderror" wire:model.defer="slug" placeholder="Auto generated from title">
                     @error('slug')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="contentType">Post Type <span class="text-danger">*</span></label>
+                    <select id="contentType" class="form-control @error('content_type') is-invalid @enderror" wire:model.live="content_type">
+                        <option value="{{ Post::CONTENT_TYPE_ARTICLE }}">Article</option>
+                        <option value="{{ Post::CONTENT_TYPE_VIDEO }}">Video</option>
+                    </select>
+                    @error('content_type')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -44,6 +55,29 @@
                     @enderror
                 </div>
             </div>
+
+            @if ($content_type === Post::CONTENT_TYPE_VIDEO)
+                <div class="card card-body border mb-4">
+                    <h5 class="card-title mb-3">Video Details</h5>
+                    <div class="form-group">
+                        <label for="videoUrl">Video URL <span class="text-danger">*</span></label>
+                        <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
+                        @error('video_url')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        @if ($video_provider)
+                            <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
+                        @endif
+                    </div>
+
+                    @if ($video_preview_html)
+                        <div class="mt-3">
+                            <p class="text-muted small mb-2">Preview</p>
+                            {!! $video_preview_html !!}
+                        </div>
+                    @endif
+                </div>
+            @endif
 
             <div class="form-group">
                 <label for="postDescription">Post Description <span class="text-danger">*</span></label>

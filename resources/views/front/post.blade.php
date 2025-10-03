@@ -47,7 +47,11 @@
             </div>
         </header>
 
-        @if ($post->thumbnail_url)
+        @if ($post->isVideo() && $post->video_embed_html)
+            <div class="mt-8">
+                {!! $post->video_embed_html !!}
+            </div>
+        @elseif ($post->thumbnail_url)
             <figure class="mt-8">
                 <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="w-full rounded-xl object-cover shadow-lg">
             </figure>

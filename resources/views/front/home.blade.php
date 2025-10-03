@@ -24,6 +24,12 @@
                 @if ($post->thumbnail_url)
                     <a href="{{ route('posts.show', $post) }}" class="relative block aspect-[16/9] overflow-hidden bg-slate-100">
                         <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                        @if($post->isVideo())
+                            <span class="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                                <i class="fas fa-play text-[10px]"></i>
+                                Video
+                            </span>
+                        @endif
                     </a>
                 @endif
                 <div class="flex flex-1 flex-col p-6">
@@ -33,13 +39,19 @@
                         @endif
                         <span class="text-slate-400">•</span>
                         <time datetime="{{ optional($post->created_at)->toDateString() }}" class="text-slate-500">{{ optional($post->created_at)->format('M d, Y') }}</time>
+                        @if($post->isVideo())
+                            <span class="text-slate-400">•</span>
+                            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-600">Video</span>
+                        @endif
                     </div>
                     <h2 class="mt-3 text-xl font-semibold text-slate-900 group-hover:text-indigo-600">
                         <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
                     </h2>
                     <p class="mt-3 text-sm text-slate-600 flex-1">{{ $post->excerpt }}</p>
                     <div class="mt-6 flex items-center justify-between text-sm text-indigo-600">
-                        <a href="{{ route('posts.show', $post) }}" class="font-semibold hover:text-indigo-700">Read full story</a>
+                        <a href="{{ route('posts.show', $post) }}" class="font-semibold hover:text-indigo-700">
+                            {{ $post->isVideo() ? 'Watch video' : 'Read full story' }}
+                        </a>
                         @if($post->author)
                             <span class="text-slate-500">By {{ $post->author->name }}</span>
                         @endif
