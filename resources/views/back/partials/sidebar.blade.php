@@ -30,7 +30,7 @@
 
 
                     <li class="menu-header">Blog Management</li>
-                    <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.polls.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
+                    <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
                         <ul class="menu">
                             @can('post.view')
@@ -51,14 +51,14 @@
                                 </li>
                             @endcan
 
-                            @can('poll.view')
-                                <li class="menu-item {{ request()->routeIs('admin.polls.*') ? 'has-active' : '' }}">
-                                    <a href="{{ route('admin.polls.index') }}" class="menu-link"><span class="menu-text">Opinion Polls</span></a>
-                                </li>
-                            @endcan
-
                         </ul>
                     </li>
+
+                    @can('poll.view')
+                    <li class="menu-item {{ request()->routeIs('admin.polls.*') ? 'has-active' : '' }}">
+                        <a href="{{ route('admin.polls.index') }}" class="menu-link"><span class="menu-icon fas fa-poll"></span> <span class="menu-text">Opinion Polls</span></a>
+                    </li>
+                    @endcan
 
                     <li class="menu-item has-child {{ request()->routeIs('admin.profile') || request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ||  request()->routeIs('admin.permissions.*')? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-person"></span> <span class="menu-text">User</span></a>
