@@ -14,7 +14,7 @@ class PollForm extends Component
 
     public ?Poll $poll = null;
 
-    public string $question = '';
+    public ?string $question = '';
     public ?string $poll_date = null;
     public ?string $source_url = null;
     public bool $is_active = true;
