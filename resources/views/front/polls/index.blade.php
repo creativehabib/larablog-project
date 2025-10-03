@@ -13,11 +13,14 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
-        @if (session('status'))
-            <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                {{ session('status') }}
-            </div>
-        @endif
+        @php($statusMessage = session('status'))
+        <div id="pollStatusMessage"
+             class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 {{ $statusMessage ? '' : 'hidden' }}"
+             role="status"
+             aria-live="polite"
+             data-poll-status>
+            {{ $statusMessage }}
+        </div>
 
         @php($latestPoll = $polls->first())
         @php($displayPoll = $activePoll ?? $latestPoll)
@@ -34,28 +37,43 @@
                     @endif
 
                     @if($activePoll && $displayPoll->id === $activePoll->id)
-                        <form action="{{ route('polls.vote', $activePoll) }}" method="POST" class="mt-6 space-y-3">
+                        <form
+                            id="pollVoteForm"
+                            action="{{ route('polls.vote', $activePoll) }}"
+                            method="POST"
+                            class="mt-6 space-y-3"
+                            data-poll-id="{{ $activePoll->id }}"
+                            data-success-message="আপনার ভোটের জন্য ধন্যবাদ!"
+                            data-error-message="দুঃখিত! ভোট সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।"
+                            data-already-voted-message="আপনি ইতোমধ্যেই এই জরিপে ভোট দিয়েছেন।"
+                        >
                             @csrf
                             <label class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 hover:border-indigo-500">
                                 <div class="flex items-center gap-3">
                                     <input type="radio" name="option" value="yes" class="h-4 w-4 text-indigo-600" required>
-                                    <span class="font-medium text-slate-800">হ্যাঁ ({{ $activePoll->yes_vote_bangla }} ভোট)</span>
+                                    <span class="font-medium text-slate-800">
+                                        হ্যাঁ (<span data-poll-count-bangla="yes">{{ $activePoll->yes_vote_bangla }}</span> ভোট)
+                                    </span>
                                 </div>
-                                <span class="text-sm text-slate-500">{{ $activePoll->yes_vote_percent_bangla }}%</span>
+                                <span class="text-sm text-slate-500" data-poll-percent-bangla="yes">{{ $activePoll->yes_vote_percent_bangla }}%</span>
                             </label>
                             <label class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 hover:border-indigo-500">
                                 <div class="flex items-center gap-3">
                                     <input type="radio" name="option" value="no" class="h-4 w-4 text-indigo-600" required>
-                                    <span class="font-medium text-slate-800">না ({{ $activePoll->no_vote_bangla }} ভোট)</span>
+                                    <span class="font-medium text-slate-800">
+                                        না (<span data-poll-count-bangla="no">{{ $activePoll->no_vote_bangla }}</span> ভোট)
+                                    </span>
                                 </div>
-                                <span class="text-sm text-slate-500">{{ $activePoll->no_vote_percent_bangla }}%</span>
+                                <span class="text-sm text-slate-500" data-poll-percent-bangla="no">{{ $activePoll->no_vote_percent_bangla }}%</span>
                             </label>
                             <label class="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3 hover:border-indigo-500">
                                 <div class="flex items-center gap-3">
                                     <input type="radio" name="option" value="no_opinion" class="h-4 w-4 text-indigo-600" required>
-                                    <span class="font-medium text-slate-800">মতামত নেই ({{ $activePoll->no_opinion_bangla }} ভোট)</span>
+                                    <span class="font-medium text-slate-800">
+                                        মতামত নেই (<span data-poll-count-bangla="no_opinion">{{ $activePoll->no_opinion_bangla }}</span> ভোট)
+                                    </span>
                                 </div>
-                                <span class="text-sm text-slate-500">{{ $activePoll->no_opinion_vote_percent_bangla }}%</span>
+                                <span class="text-sm text-slate-500" data-poll-percent-bangla="no_opinion">{{ $activePoll->no_opinion_vote_percent_bangla }}%</span>
                             </label>
                             <button type="submit" class="w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
                                 এখনই ভোট দিন
@@ -67,7 +85,9 @@
                         </div>
                     @endif
 
-                    <p class="mt-4 text-xs text-slate-500">মোট ভোট: {{ $displayPoll->total_vote_bangla }} | প্রকাশিত: {{ $displayPoll->poll_date_bangla }}</p>
+                    <p class="mt-4 text-xs text-slate-500">
+                        মোট ভোট: <span data-poll-total-bangla>{{ $displayPoll->total_vote_bangla }}</span> | প্রকাশিত: {{ $displayPoll->poll_date_bangla }}
+                    </p>
                 </div>
 
                 <div class="rounded-xl border border-slate-200 bg-white shadow-sm p-6">
@@ -76,28 +96,28 @@
                         <li>
                             <div class="flex items-center justify-between text-sm font-medium text-slate-700">
                                 <span>হ্যাঁ</span>
-                                <span>{{ $displayPoll->yes_vote_percent }}%</span>
+                                <span data-poll-percent="yes">{{ $displayPoll->yes_vote_percent }}%</span>
                             </div>
                             <div class="mt-2 h-2 w-full rounded-full bg-slate-200">
-                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ $displayPoll->yes_vote_percent }}%"></div>
+                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ $displayPoll->yes_vote_percent }}%" data-poll-progress="yes"></div>
                             </div>
                         </li>
                         <li>
                             <div class="flex items-center justify-between text-sm font-medium text-slate-700">
                                 <span>না</span>
-                                <span>{{ $displayPoll->no_vote_percent }}%</span>
+                                <span data-poll-percent="no">{{ $displayPoll->no_vote_percent }}%</span>
                             </div>
                             <div class="mt-2 h-2 w-full rounded-full bg-slate-200">
-                                <div class="h-full rounded-full bg-rose-500" style="width: {{ $displayPoll->no_vote_percent }}%"></div>
+                                <div class="h-full rounded-full bg-rose-500" style="width: {{ $displayPoll->no_vote_percent }}%" data-poll-progress="no"></div>
                             </div>
                         </li>
                         <li>
                             <div class="flex items-center justify-between text-sm font-medium text-slate-700">
                                 <span>মতামত নেই</span>
-                                <span>{{ $displayPoll->no_opinion_vote_percent }}%</span>
+                                <span data-poll-percent="no_opinion">{{ $displayPoll->no_opinion_vote_percent }}%</span>
                             </div>
                             <div class="mt-2 h-2 w-full rounded-full bg-slate-200">
-                                <div class="h-full rounded-full bg-amber-500" style="width: {{ $displayPoll->no_opinion_vote_percent }}%"></div>
+                                <div class="h-full rounded-full bg-amber-500" style="width: {{ $displayPoll->no_opinion_vote_percent }}%" data-poll-progress="no_opinion"></div>
                             </div>
                         </li>
                     </ul>
