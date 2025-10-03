@@ -308,6 +308,17 @@
                             this.suppressRatioUpdate = false;
                         });
 
+                        const cleanupModalArtifacts = () => {
+                            document
+                                .querySelectorAll('.modal-backdrop')
+                                .forEach((backdrop) => backdrop.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.removeProperty('overflow');
+                            document.body.style.removeProperty('padding-right');
+                            document.body.removeAttribute('data-bs-overflow');
+                            document.body.removeAttribute('data-bs-padding-right');
+                        };
+
                         window.addEventListener('openMediaEditor', (event) => {
                             const detail = event.detail || {};
                             this.mediaId = detail.id || null;
@@ -331,12 +342,7 @@
                             const modalEl = document.getElementById('mediaEditorModal');
                             let modalInstance = null;
                             if (modalEl) {
-                                document
-                                    .querySelectorAll('.modal-backdrop')
-                                    .forEach((backdrop) => backdrop.remove());
-                                document.body.classList.remove('modal-open');
-                                document.body.style.removeProperty('overflow');
-                                document.body.style.removeProperty('padding-right');
+                                cleanupModalArtifacts();
 
                                 if (window.bootstrap && window.bootstrap.Modal) {
                                     modalInstance = new bootstrap.Modal(modalEl);
@@ -354,29 +360,49 @@
                         window.addEventListener('mediaEditorClosed', () => {
                             const modalEl = document.getElementById('mediaEditorModal');
                             if (modalEl) {
-                                if (window.bootstrap && window.bootstrap.Modal) {
-                                    const instance = bootstrap.Modal.getInstance(modalEl);
-                                    if (instance) {
-                                        instance.hide();
-                                        instance.dispose();
-                                    }
-                                } else if (window.jQuery) {
-                                    window.jQuery(modalEl).modal('hide');
-                                }
+                                const finalizeCleanup = () => {
+                                    cleanupModalArtifacts();
 
-                                modalEl.classList.remove('show');
-                                modalEl.setAttribute('aria-hidden', 'true');
-                                modalEl.removeAttribute('aria-modal');
-                                modalEl.style.removeProperty('padding-right');
-                                modalEl.style.display = 'none';
+                                    if (window.bootstrap && window.bootstrap.Modal) {
+                                        const existingInstance = bootstrap.Modal.getInstance(modalEl);
+                                        if (existingInstance) {
+                                            existingInstance.dispose();
+                                        }
+                                    } else if (window.jQuery) {
+                                        window.jQuery(modalEl).modal('dispose');
+                                    }
+                                };
+
+                                if (window.bootstrap && window.bootstrap.Modal) {
+                                    let instance = bootstrap.Modal.getInstance(modalEl);
+                                    if (!instance) {
+                                        instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                                    }
+
+                                    const handleHidden = () => {
+                                        finalizeCleanup();
+                                        modalEl.removeEventListener('hidden.bs.modal', handleHidden);
+                                    };
+
+                                    modalEl.addEventListener('hidden.bs.modal', handleHidden);
+                                    instance.hide();
+                                } else if (window.jQuery) {
+                                    window
+                                        .jQuery(modalEl)
+                                        .one('hidden.bs.modal', finalizeCleanup)
+                                        .modal('hide');
+                                } else {
+                                    modalEl.classList.remove('show');
+                                    modalEl.setAttribute('aria-hidden', 'true');
+                                    modalEl.removeAttribute('aria-modal');
+                                    modalEl.style.removeProperty('padding-right');
+                                    modalEl.style.display = 'none';
+                                    finalizeCleanup();
+                                }
+                            } else {
+                                cleanupModalArtifacts();
                             }
 
-                            document
-                                .querySelectorAll('.modal-backdrop')
-                                .forEach((backdrop) => backdrop.remove());
-                            document.body.classList.remove('modal-open');
-                            document.body.style.removeProperty('overflow');
-                            document.body.style.removeProperty('padding-right');
                             this.destroyCropper();
                         });
                     },
