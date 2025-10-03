@@ -5,14 +5,19 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Frontend\FeedController;
+use App\Http\Controllers\Frontend\HomeController as FrontHomeController;
+use App\Http\Controllers\Frontend\PostController as FrontPostController;
+use App\Http\Controllers\Frontend\SitemapController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [FrontHomeController::class, 'index'])->name('home');
+Route::get('/news/{post:slug}', [FrontPostController::class, 'show'])->name('posts.show');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/feed', FeedController::class)->name('feed');
 
 
 //Testing route
@@ -43,7 +48,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('subcategories', SubCategoryController::class)->except(['show']);
-        Route::resource('posts', PostController::class)->only(['index', 'create', 'edit']);
+        Route::resource('posts', AdminPostController::class)->only(['index', 'create', 'edit']);
 
        Route::resource('roles', RoleController::class);
        Route::resource('permissions', PermissionController::class);
