@@ -51,7 +51,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="border border-dashed rounded-3 p-4 position-relative text-center upload-drop-zone" :class="{ 'is-dropping': dropping }"
-                x-on:dragover.prevent="dropping = true" x-on:dragleave.prevent="dropping = false" x-on:drop.prevent="handleDrop($event)">
+                 x-on:dragover.prevent="dropping = true" x-on:dragleave.prevent="dropping = false" x-on:drop.prevent="handleDrop($event)">
                 <input type="file" multiple class="position-absolute w-100 h-100 top-0 start-0 opacity-0" x-ref="fileInput" wire:model="uploads">
                 <div class="py-5">
                     <div class="display-6 text-primary mb-2"><i class="fas fa-cloud-upload-alt"></i></div>
@@ -63,7 +63,7 @@
                 <span class="spinner-border spinner-border-sm me-2" role="status"></span> Uploading files...
             </div>
             @error('uploads.*')
-                <div class="alert alert-danger mt-3">{{ $message }}</div>
+            <div class="alert alert-danger mt-3">{{ $message }}</div>
             @enderror
         </div>
     </div>
@@ -81,47 +81,47 @@
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
-                                <tr>
-                                    <th style="width: 60px"></th>
-                                    <th>Name</th>
-                                    <th>Details</th>
-                                    <th>Alt Text</th>
-                                    <th>Caption</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
+                            <tr>
+                                <th style="width: 60px"></th>
+                                <th>Name</th>
+                                <th>Details</th>
+                                <th>Alt Text</th>
+                                <th>Caption</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @foreach ($mediaItems as $media)
-                                    <tr wire:key="media-row-{{ $media->id }}">
-                                        <td>
-                                            @if ($media->type === MediaItem::TYPE_IMAGE)
-                                                <img src="{{ $media->url() }}" alt="{{ $media->original_name }}" class="rounded" style="width:48px;height:48px;object-fit:cover;">
-                                            @else
-                                                <span class="badge bg-secondary text-uppercase">{{ strtoupper($media->type) }}</span>
+                            @foreach ($mediaItems as $media)
+                                <tr wire:key="media-row-{{ $media->id }}">
+                                    <td>
+                                        @if ($media->type === MediaItem::TYPE_IMAGE)
+                                            <img src="{{ $media->url() }}" alt="{{ $media->original_name }}" class="rounded" style="width:48px;height:48px;object-fit:cover;">
+                                        @else
+                                            <span class="badge bg-secondary text-uppercase">{{ strtoupper($media->type) }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-truncate" style="max-width: 220px" title="{{ $media->original_name }}">{{ $media->original_name }}</div>
+                                        <div class="text-muted small">{{ $media->file_name }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-muted small">
+                                            {{ strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)) }} · {{ $media->sizeForHumans(1) }}
+                                            @if($media->width && $media->height)
+                                                · {{ $media->width }}×{{ $media->height }}
                                             @endif
-                                        </td>
-                                        <td>
-                                            <div class="fw-semibold text-truncate" style="max-width: 220px" title="{{ $media->original_name }}">{{ $media->original_name }}</div>
-                                            <div class="text-muted small">{{ $media->file_name }}</div>
-                                        </td>
-                                        <td>
-                                            <div class="text-muted small">
-                                                {{ strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)) }} · {{ $media->sizeForHumans(1) }}
-                                                @if($media->width && $media->height)
-                                                    · {{ $media->width }}×{{ $media->height }}
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="small text-muted">{{ $media->alt_text ?? '—' }}</td>
-                                        <td class="small text-muted">{{ $media->caption ? Str::limit($media->caption, 40) : '—' }}</td>
-                                        <td class="text-end">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-primary" wire:click="startEditing({{ $media->id }})">Edit</button>
-                                                <button type="button" class="btn btn-outline-danger" x-on:click.prevent="confirmDelete({{ $media->id }})">Delete</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="small text-muted">{{ $media->alt_text ?? '—' }}</td>
+                                    <td class="small text-muted">{{ $media->caption ? Str::limit($media->caption, 40) : '—' }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" wire:click="startEditing({{ $media->id }})">Edit</button>
+                                            <button type="button" class="btn btn-outline-danger" x-on:click.prevent="confirmDelete({{ $media->id }})">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -267,7 +267,6 @@
                     fileName: '',
                     mimeType: '',
                     mediaId: null,
-                    modalInstance: null,
                     dimensions: '—',
                     suppressRatioUpdate: false,
                     init() {
@@ -330,6 +329,7 @@
                             }
 
                             const modalEl = document.getElementById('mediaEditorModal');
+                            let modalInstance = null;
                             if (modalEl) {
                                 document
                                     .querySelectorAll('.modal-backdrop')
@@ -339,19 +339,9 @@
                                 document.body.style.removeProperty('padding-right');
 
                                 if (window.bootstrap && window.bootstrap.Modal) {
-                                    if (this.modalInstance) {
-                                        this.modalInstance.hide();
-                                        if (typeof this.modalInstance.dispose === 'function') {
-                                            this.modalInstance.dispose();
-                                        }
-                                    }
-
-                                    this.modalInstance =
-                                        bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-
-                                    this.modalInstance.show();
+                                    modalInstance = new bootstrap.Modal(modalEl);
+                                    modalInstance.show();
                                 } else if (window.jQuery) {
-                                    this.modalInstance = null;
                                     window.jQuery(modalEl).modal('show');
                                 }
                             }
@@ -365,18 +355,13 @@
                             const modalEl = document.getElementById('mediaEditorModal');
                             if (modalEl) {
                                 if (window.bootstrap && window.bootstrap.Modal) {
-                                    const instance =
-                                        this.modalInstance || bootstrap.Modal.getInstance(modalEl);
+                                    const instance = bootstrap.Modal.getInstance(modalEl);
                                     if (instance) {
                                         instance.hide();
-                                        if (typeof instance.dispose === 'function') {
-                                            instance.dispose();
-                                        }
+                                        instance.dispose();
                                     }
-                                    this.modalInstance = null;
                                 } else if (window.jQuery) {
                                     window.jQuery(modalEl).modal('hide');
-                                    this.modalInstance = null;
                                 }
                             }
                             document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
