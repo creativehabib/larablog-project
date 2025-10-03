@@ -6,6 +6,8 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 use App\Models\GeneralSetting;
 
 class Settings extends Component
@@ -13,6 +15,10 @@ class Settings extends Component
     use WithFileUploads;
 
     public $tab = 'general_settings';
+
+    public array $availableRoles = [];
+    public array $dashboardWidgets = [];
+    public array $dashboardVisibility = [];
 
     protected $queryString = [
         'tab' => ['keep' => true]
@@ -52,6 +58,24 @@ class Settings extends Component
             $this->site_logo_path = $settings->site_logo;
             $this->site_favicon_path = $settings->site_favicon;
             $this->site_copyright = $settings->site_copyright;
+        }
+
+        $this->availableRoles = Role::query()->pluck('name')->sort()->values()->toArray();
+        $this->dashboardWidgets = collect(config('dashboard.widgets', []))
+            ->mapWithKeys(function ($item, $key) {
+                return [
+                    $key => [
+                        'label' => $item['label'] ?? Str::title(str_replace('_', ' ', $key)),
+                        'description' => $item['description'] ?? null,
+                    ],
+                ];
+            })->toArray();
+
+        $storedVisibility = $settings?->dashboard_widget_visibility ?? [];
+
+        foreach ($this->dashboardWidgets as $widgetKey => $widgetMeta) {
+            $savedRoles = $storedVisibility[$widgetKey] ?? $this->availableRoles;
+            $this->dashboardVisibility[$widgetKey] = array_values(array_intersect($this->availableRoles, (array) $savedRoles));
         }
     }
 
@@ -135,8 +159,35 @@ class Settings extends Component
         $this->dispatch('showToastr', ['type' => 'info', 'message' => 'Please upload a logo or favicon to update branding']);
     }
 
+    public function updateDashboardVisibility(): void
+    {
+        $settings = GeneralSetting::first();
+
+        if (! $settings) {
+            $settings = GeneralSetting::create([]);
+        }
+
+        $normalized = [];
+
+        foreach (array_keys($this->dashboardWidgets) as $widgetKey) {
+            $selectedRoles = $this->dashboardVisibility[$widgetKey] ?? [];
+            $normalized[$widgetKey] = array_values(array_intersect($this->availableRoles, (array) $selectedRoles));
+        }
+
+        $settings->update([
+            'dashboard_widget_visibility' => $normalized,
+        ]);
+
+        $this->dashboardVisibility = $normalized;
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Dashboard visibility preferences saved successfully']);
+    }
+
     public function render()
     {
-        return view('livewire.admin.settings');
+        return view('livewire.admin.settings', [
+            'availableRoles' => $this->availableRoles,
+            'dashboardWidgets' => $this->dashboardWidgets,
+        ]);
     }
 }

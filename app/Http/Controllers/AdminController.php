@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\SubCategory;
 use App\Models\User;
+use App\Models\GeneralSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +57,8 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
+        $settings = GeneralSetting::first();
+
         return view('back.pages.dashboard', [
             'pageTitle' => 'Dashboard',
             'totalPosts' => $totalPosts,
@@ -71,6 +74,7 @@ class AdminController extends Controller
             'roleCounts' => $roleCounts,
             'recentPosts' => $recentPosts,
             'recentUsers' => $recentUsers,
+            'dashboardWidgetVisibility' => $settings?->dashboard_widget_visibility ?? [],
         ]);
     }
 
