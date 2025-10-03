@@ -64,7 +64,7 @@ class Poll extends Model
     protected function totalVotes(): Attribute
     {
         return Attribute::get(function (): int {
-            return $this->yes_votes + $this->no_votes + $this->no_opinion_votes;
+            return (int) $this->yes_votes + (int) $this->no_votes + (int) $this->no_opinion_votes;
         });
     }
 
@@ -189,8 +189,10 @@ class Poll extends Model
     /**
      * Convert the supplied number into Bangla digits.
      */
-    protected function toBanglaDigits(int $number): string
+    protected function toBanglaDigits(int|string|null $number): string
     {
+        $number = $number ?? 0;
+
         $digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         $banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 
@@ -200,8 +202,10 @@ class Poll extends Model
     /**
      * Calculate the percentage value for the given vote count.
      */
-    protected function calculatePercentage(int $value): int
+    protected function calculatePercentage(?int $value): int
     {
+        $value = $value ?? 0;
+
         if ($this->total_votes === 0) {
             return 0;
         }
