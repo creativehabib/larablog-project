@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\GeneralSetting;
 use App\Models\Poll;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -43,7 +44,7 @@ class PollController extends Controller
     /**
      * Store the vote for the provided poll.
      */
-    public function vote(Request $request, Poll $poll): RedirectResponse
+    public function vote(Request $request, Poll $poll): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'option' => ['required', 'in:yes,no,no_opinion'],
