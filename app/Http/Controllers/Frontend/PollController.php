@@ -56,10 +56,48 @@ class PollController extends Controller
         };
 
         if (! $poll->is_active) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'এই জরিপের ভোট গ্রহণ বন্ধ রয়েছে।',
+                ], 403);
+            }
+
             return back()->with('status', 'এই জরিপের ভোট গ্রহণ বন্ধ রয়েছে।');
         }
 
         $poll->increment($column);
+        $poll->refresh();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'আপনার ভোটের জন্য ধন্যবাদ!',
+                'poll' => [
+                    'id' => $poll->id,
+                    'totals' => [
+                        'total' => $poll->total_votes,
+                        'yes' => $poll->yes_votes,
+                        'no' => $poll->no_votes,
+                        'no_opinion' => $poll->no_opinion_votes,
+                    ],
+                    'totals_bangla' => [
+                        'total' => $poll->total_vote_bangla,
+                        'yes' => $poll->yes_vote_bangla,
+                        'no' => $poll->no_vote_bangla,
+                        'no_opinion' => $poll->no_opinion_bangla,
+                    ],
+                    'percentages' => [
+                        'yes' => $poll->yes_vote_percent,
+                        'no' => $poll->no_vote_percent,
+                        'no_opinion' => $poll->no_opinion_vote_percent,
+                    ],
+                    'percentages_bangla' => [
+                        'yes' => $poll->yes_vote_percent_bangla,
+                        'no' => $poll->no_vote_percent_bangla,
+                        'no_opinion' => $poll->no_opinion_vote_percent_bangla,
+                    ],
+                ],
+            ]);
+        }
 
         return back()->with('status', 'আপনার ভোটের জন্য ধন্যবাদ!');
     }
