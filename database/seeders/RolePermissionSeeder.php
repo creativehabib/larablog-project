@@ -47,6 +47,15 @@ class RolePermissionSeeder extends Seeder
                 ]
             ],
             [
+                'group_name' => 'Media Library',
+                'permissions' => [
+                    'media.view',
+                    'media.create',
+                    'media.edit',
+                    'media.delete',
+                ]
+            ],
+            [
                 'group_name' => 'Posts',
                 'permissions' => [
                     'post.view',
