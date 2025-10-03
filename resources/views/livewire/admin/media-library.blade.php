@@ -174,8 +174,8 @@
                     <div class="row g-4">
                         <div class="col-lg-8">
                             <div class="bg-light rounded p-2 position-relative" style="min-height: 360px;">
-                                <img id="media-editor-image" class="img-fluid rounded w-100 d-none" alt="Editable preview">
-                                <div id="media-editor-non-image" class="d-none h-100 w-100 d-flex align-items-center justify-content-center flex-column text-muted">
+                                <img id="media-editor-image" x-ref="imagePreview" class="img-fluid rounded w-100" :class="{ 'd-none': !isImage }" alt="Editable preview">
+                                <div id="media-editor-non-image" x-ref="nonImageMessage" class="h-100 w-100 d-flex align-items-center justify-content-center flex-column text-muted" x-show="!isImage" x-cloak>
                                     <i class="fas fa-file fa-3x mb-3"></i>
                                     <p class="mb-0">Cropping &amp; resizing are available for images only.</p>
                                 </div>
@@ -364,27 +364,18 @@
                         }
                     },
                     setupEditor(detail) {
-                        const imageEl = document.getElementById('media-editor-image');
-                        const fallbackEl = document.getElementById('media-editor-non-image');
+                        const imageEl = this.$refs.imagePreview;
 
                         this.destroyCropper();
 
                         if (!this.isImage) {
                             if (imageEl) {
-                                imageEl.classList.add('d-none');
-                            }
-                            if (fallbackEl) {
-                                fallbackEl.classList.remove('d-none');
+                                imageEl.src = '';
                             }
                             return;
                         }
 
-                        if (fallbackEl) {
-                            fallbackEl.classList.add('d-none');
-                        }
-
                         if (imageEl) {
-                            imageEl.classList.remove('d-none');
                             imageEl.src = detail.url ? `${detail.url}?t=${Date.now()}` : '';
                             imageEl.onload = () => {
                                 this.originalWidth = imageEl.naturalWidth;
