@@ -30,7 +30,7 @@
 
 
                     <li class="menu-header">Blog Management</li>
-                    <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
+                    <li class="menu-item has-child {{ request()->routeIs('admin.posts.*') || request()->routeIs('admin.polls.*') || request()->routeIs('admin.categories.*') || request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-document"></span> <span class="menu-text">Posts</span></a>
                         <ul class="menu">
                             @can('post.view')
@@ -48,6 +48,12 @@
                             @can('subcategory.view')
                                 <li class="menu-item {{ request()->routeIs('admin.subcategories.*') ? 'has-active' : '' }}">
                                     <a href="{{ route('admin.subcategories.index') }}" class="menu-link"><span class="menu-text">Sub Categories</span></a>
+                                </li>
+                            @endcan
+
+                            @can('poll.view')
+                                <li class="menu-item {{ request()->routeIs('admin.polls.*') ? 'has-active' : '' }}">
+                                    <a href="{{ route('admin.polls.index') }}" class="menu-link"><span class="menu-text">Opinion Polls</span></a>
                                 </li>
                             @endcan
 

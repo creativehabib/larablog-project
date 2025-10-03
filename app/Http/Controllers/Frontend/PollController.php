@@ -18,7 +18,16 @@ class PollController extends Controller
     public function index(): View
     {
         $settings = $this->settings();
-        $polls = Poll::query()->latest('poll_date')->paginate(10);
+        $polls = Poll::query()
+            ->orderByDesc('poll_date')
+            ->orderByDesc('created_at')
+            ->paginate(10);
+
+        $activePoll = Poll::query()
+            ->where('is_active', true)
+            ->orderByDesc('poll_date')
+            ->orderByDesc('created_at')
+            ->first();
 
         $seo = [
             'title' => 'Opinion Polls | ' . ($settings?->site_title ?? config('app.name')),
@@ -28,7 +37,7 @@ class PollController extends Controller
             'indexable' => true,
         ];
 
-        return view('front.polls.index', compact('polls', 'seo', 'settings'));
+        return view('front.polls.index', compact('polls', 'seo', 'settings', 'activePoll'));
     }
 
     /**
@@ -45,6 +54,10 @@ class PollController extends Controller
             'no' => 'no_votes',
             'no_opinion' => 'no_opinion_votes',
         };
+
+        if (! $poll->is_active) {
+            return back()->with('status', 'এই জরিপের ভোট গ্রহণ বন্ধ রয়েছে।');
+        }
 
         $poll->increment($column);
 

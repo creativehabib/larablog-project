@@ -21,6 +21,7 @@ class PollSeeder extends Seeder
             [
                 'image' => 'polls/1756214840-68adb638672b3.jpg',
                 'source_url' => 'https://bhorerkagoj.com/poll/152',
+                'is_active' => true,
                 'yes_votes' => 356,
                 'no_votes' => 704,
                 'no_opinion_votes' => 40,
