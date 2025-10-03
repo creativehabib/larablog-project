@@ -265,7 +265,7 @@ class MediaLibrary extends Component
 
         $mimeType = $file->getClientMimeType();
         $size = $file->getSize() ?: 0;
-        $type = $this->determineType($mimeType);
+        $type = $this->determineType($mimeType, $extension);
 
         $width = null;
         $height = null;
@@ -290,7 +290,27 @@ class MediaLibrary extends Component
         ]);
     }
 
-    protected function determineType(?string $mime): string
+    protected function determineType(?string $mime, ?string $extension = null): string
+    {
+        $type = $this->determineTypeFromMime($mime);
+
+        if ($type !== MediaItem::TYPE_OTHER) {
+            return $type;
+        }
+
+        if ($extension) {
+            $extension = strtolower($extension);
+            $typeFromExtension = $this->determineTypeFromExtension($extension);
+
+            if ($typeFromExtension !== MediaItem::TYPE_OTHER) {
+                return $typeFromExtension;
+            }
+        }
+
+        return MediaItem::TYPE_OTHER;
+    }
+
+    protected function determineTypeFromMime(?string $mime): string
     {
         if (! $mime) {
             return MediaItem::TYPE_OTHER;
@@ -314,6 +334,31 @@ class MediaLibrary extends Component
         }
 
         if (Str::contains($mime, ['zip', 'rar', 'tar', 'gzip'])) {
+            return MediaItem::TYPE_ARCHIVE;
+        }
+
+        return MediaItem::TYPE_OTHER;
+    }
+
+    protected function determineTypeFromExtension(string $extension): string
+    {
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'heic', 'heif'], true)) {
+            return MediaItem::TYPE_IMAGE;
+        }
+
+        if (in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv'], true)) {
+            return MediaItem::TYPE_VIDEO;
+        }
+
+        if (in_array($extension, ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'], true)) {
+            return MediaItem::TYPE_AUDIO;
+        }
+
+        if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'csv'], true)) {
+            return MediaItem::TYPE_DOCUMENT;
+        }
+
+        if (in_array($extension, ['zip', 'rar', 'tar', 'gz', 'gzip', '7z'], true)) {
             return MediaItem::TYPE_ARCHIVE;
         }
 
