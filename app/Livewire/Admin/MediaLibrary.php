@@ -156,6 +156,12 @@ class MediaLibrary extends Component
         $this->resetPage();
     }
 
+    #[On('mediaEditorCancel')]
+    public function cancelEditing(): void
+    {
+        $this->resetEditing();
+    }
+
     #[On('mediaEditorSave')]
     public function saveMediaEditor($payload = []): void
     {

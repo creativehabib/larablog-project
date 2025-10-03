@@ -166,9 +166,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Media</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" aria-label="Close" x-on:click.prevent="closeEditor()"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-4">
@@ -223,7 +221,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" x-on:click.prevent="closeEditor()">Close</button>
                     <button type="button" class="btn btn-primary" x-on:click="saveChanges()">Save changes</button>
                 </div>
             </div>
@@ -445,6 +443,25 @@
                             this.resizeHeight = Math.round(data.height);
                             this.dimensions = `${this.resizeWidth}×${this.resizeHeight}`;
                             this.suppressRatioUpdate = false;
+                        }
+                    },
+                    closeEditor() {
+                        window.dispatchEvent(new CustomEvent('mediaEditorClosed'));
+
+                        if (this.$wire && typeof this.$wire.call === 'function') {
+                            this.$wire.call('cancelEditing');
+                            return;
+                        }
+
+                        if (typeof Livewire !== 'undefined') {
+                            if (typeof Livewire.dispatch === 'function') {
+                                Livewire.dispatch('mediaEditorCancel');
+                                return;
+                            }
+
+                            if (typeof Livewire.emit === 'function') {
+                                Livewire.emit('mediaEditorCancel');
+                            }
                         }
                     },
                     saveChanges() {
