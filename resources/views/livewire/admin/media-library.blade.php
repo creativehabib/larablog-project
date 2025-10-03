@@ -267,6 +267,7 @@
                     fileName: '',
                     mimeType: '',
                     mediaId: null,
+                    modalInstance: null,
                     dimensions: '—',
                     suppressRatioUpdate: false,
                     init() {
@@ -329,7 +330,6 @@
                             }
 
                             const modalEl = document.getElementById('mediaEditorModal');
-                            let modalInstance = null;
                             if (modalEl) {
                                 document
                                     .querySelectorAll('.modal-backdrop')
@@ -339,9 +339,19 @@
                                 document.body.style.removeProperty('padding-right');
 
                                 if (window.bootstrap && window.bootstrap.Modal) {
-                                    modalInstance = new bootstrap.Modal(modalEl);
-                                    modalInstance.show();
+                                    if (this.modalInstance) {
+                                        this.modalInstance.hide();
+                                        if (typeof this.modalInstance.dispose === 'function') {
+                                            this.modalInstance.dispose();
+                                        }
+                                    }
+
+                                    this.modalInstance =
+                                        bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+
+                                    this.modalInstance.show();
                                 } else if (window.jQuery) {
+                                    this.modalInstance = null;
                                     window.jQuery(modalEl).modal('show');
                                 }
                             }
@@ -355,13 +365,18 @@
                             const modalEl = document.getElementById('mediaEditorModal');
                             if (modalEl) {
                                 if (window.bootstrap && window.bootstrap.Modal) {
-                                    const instance = bootstrap.Modal.getInstance(modalEl);
+                                    const instance =
+                                        this.modalInstance || bootstrap.Modal.getInstance(modalEl);
                                     if (instance) {
                                         instance.hide();
-                                        instance.dispose();
+                                        if (typeof instance.dispose === 'function') {
+                                            instance.dispose();
+                                        }
                                     }
+                                    this.modalInstance = null;
                                 } else if (window.jQuery) {
                                     window.jQuery(modalEl).modal('hide');
+                                    this.modalInstance = null;
                                 }
                             }
                             document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
