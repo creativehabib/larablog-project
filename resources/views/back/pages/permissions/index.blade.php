@@ -16,8 +16,8 @@
     <div class="page-section">
         <div class="card">
         <div class="card-body">
-            <table class="table table-hover">
-                <thead>
+            <table class="table table-hover table-sm mb-0">
+                <thead class="thead-light">
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>

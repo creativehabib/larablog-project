@@ -41,7 +41,7 @@
             <div class="row">
                 @if ($canViewWidget('total_posts'))
                     <div class="col-sm-6 col-lg-3 mb-4">
-                        <div class="card card-fluid border-left border-primary shadow-sm h-100">
+                        <div class="card card-fluid border-left border-primary shadow-sm h-100" style="border-left-width: 6px !important;">
                             <div class="card-body d-flex flex-column">
                                 <h6 class="text-uppercase text-muted small mb-2">মোট পোস্ট</h6>
                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -56,7 +56,7 @@
 
                 @if ($canViewWidget('categories_summary'))
                     <div class="col-sm-6 col-lg-3 mb-4">
-                        <div class="card card-fluid border-left border-success shadow-sm h-100">
+                        <div class="card card-fluid border-left border-success shadow-sm h-100" style="border-left-width: 6px !important;">
                             <div class="card-body">
                                 <h6 class="text-uppercase text-muted small mb-2">ক্যাটাগরি ও সাব-ক্যাটাগরি</h6>
                                 <div class="d-flex align-items-end justify-content-between">
@@ -78,7 +78,7 @@
 
                 @if ($canViewWidget('team_overview'))
                     <div class="col-sm-6 col-lg-3 mb-4">
-                        <div class="card card-fluid border-left border-warning shadow-sm h-100">
+                        <div class="card card-fluid border-left border-warning shadow-sm h-100" style="border-left-width: 6px !important;">
                             <div class="card-body">
                                 <h6 class="text-uppercase text-muted small mb-2">টিম ও ইউজার</h6>
                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -87,8 +87,8 @@
 
                                 <ul class="list-unstyled mb-0 small text-muted">
                                     <li><strong>Admin:</strong> {{ number_format($roleCounts['Admin'] ?? 0) }}</li>
-                                    <li><strong>Editor:</strong> {{ number_format($roleCounts['Editor'] ?? 0) }}</li>
-                                    <li><strong>User:</strong> {{ number_format($roleCounts['User'] ?? 0) }}</li>
+                                    <li><strong>Author:</strong> {{ number_format($roleCounts['Author'] ?? 0) }}</li>
+                                    <li><strong>Writer:</strong> {{ number_format($roleCounts['Writer'] ?? 0) }}</li>
                                 </ul>
                             </div>
                         </div>
@@ -97,7 +97,7 @@
 
                 @if ($canViewWidget('sitemap_coverage'))
                     <div class="col-sm-6 col-lg-3 mb-4">
-                        <div class="card card-fluid border-left border-info shadow-sm h-100">
+                        <div class="card card-fluid border-left border-info shadow-sm h-100" style="border-left-width: 6px !important;">
                             <div class="card-body">
                                 <h6 class="text-uppercase text-muted small mb-2">সাইটম্যাপ কাভারেজ</h6>
                                 <div class="d-flex justify-content-between align-items-end mb-3">
@@ -178,7 +178,7 @@
                             <div class="card-body">
                                 <div class="list-group list-group-flush">
                                     @forelse ($recentPosts as $post)
-                                        <div class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                                        <div class="list-group-item px-0 d-flex justify-content-between align-items-start border-bottom">
                                             <div>
                                                 <div class="font-weight-semibold">{{ $post->title }}</div>
                                                 <div class="text-muted small">{{ $post->category?->name ?? 'Uncategorized' }} · {{ $post->updated_at?->diffForHumans() }}</div>
@@ -205,7 +205,7 @@
                             <div class="card-body">
                                 <ul class="list-unstyled mb-0">
                                     @forelse ($recentUsers as $user)
-                                        <li class="media mb-3">
+                                        <li class="media mb-3 border-bottom pb-2">
                                             <img src="{{ $user->avatar }}" class="mr-3 rounded-circle" width="48" height="48" alt="Avatar">
                                             <div class="media-body">
                                                 <h6 class="mt-0 mb-1">{{ $user->name }}</h6>

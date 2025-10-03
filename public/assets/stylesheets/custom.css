@@ -1,11 +1,4 @@
 /* put your own styles to customize and override the theme */
-.app {
-    background-color: #f1fbff;
-}
-.page {
-    min-height: 100vh;
-}
-
 .dashboard-grid .row {
     margin-bottom: 1.5rem;
 }

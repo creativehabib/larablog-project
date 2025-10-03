@@ -128,7 +128,7 @@
 </div>
 
 @pushOnce('scripts')
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
     <script>
         document.addEventListener('livewire:init', () => {
             const debounce = (callback, wait = 300) => {
