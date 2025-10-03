@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\PollController as AdminPollController;
+use App\Http\Controllers\Admin\MediaLibraryController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleController;
@@ -53,6 +54,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('subcategories', SubCategoryController::class)->except(['show']);
         Route::resource('posts', AdminPostController::class)->only(['index', 'create', 'edit']);
+        Route::get('media-library', MediaLibraryController::class)
+            ->name('media-library.index')
+            ->middleware('permission:media.view');
         Route::resource('polls', AdminPollController::class)->only(['index', 'create', 'edit']);
 
        Route::resource('roles', RoleController::class);
