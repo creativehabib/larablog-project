@@ -124,16 +124,17 @@ class MediaLibrary extends Component
         $this->resizeWidth = $media->width;
         $this->resizeHeight = $media->height;
 
-        $this->dispatch('openMediaEditor', [
-            'id' => $media->id,
-            'url' => $this->resolveUrl($media),
-            'isImage' => $media->type === MediaItem::TYPE_IMAGE,
-            'width' => $media->width,
-            'height' => $media->height,
-            'altText' => $this->editingAltText,
-            'caption' => $this->editingCaption,
-            'mimeType' => $media->mime_type,
-        ]);
+        $this->dispatch(
+            'openMediaEditor',
+            id: $media->id,
+            url: $this->resolveUrl($media),
+            isImage: $media->type === MediaItem::TYPE_IMAGE,
+            width: $media->width,
+            height: $media->height,
+            altText: $this->editingAltText,
+            caption: $this->editingCaption,
+            mimeType: $media->mime_type,
+        );
     }
 
     public function deleteMedia(int $mediaId): void
