@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Frontend\FeedController;
 use App\Http\Controllers\Frontend\HomeController as FrontHomeController;
+use App\Http\Controllers\Frontend\PollController;
 use App\Http\Controllers\Frontend\PostController as FrontPostController;
 use App\Http\Controllers\Frontend\SitemapController;
 
@@ -18,6 +19,8 @@ Route::get('/', [FrontHomeController::class, 'index'])->name('home');
 Route::get('/news/{post:slug}', [FrontPostController::class, 'show'])->name('posts.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
+Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
+Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
 
 
 //Testing route
