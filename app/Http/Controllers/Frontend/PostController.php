@@ -12,6 +12,8 @@ class PostController extends Controller
 {
     public function show(Post $post)
     {
+        $post->loadMissing(['category', 'author', 'playlist']);
+
         $settings = $this->settings();
 
         $image = $post->thumbnail_path ? Storage::url($post->thumbnail_path) : null;
@@ -33,6 +35,12 @@ class PostController extends Controller
             $seo['type'] = 'video.other';
             $seo['video'] = $post->video_embed_url;
             $seo['twitter_card'] = 'player';
+            if ($post->video_duration) {
+                $seo['video_duration'] = $post->video_duration;
+            }
+            if ($post->playlist) {
+                $seo['video_playlist'] = $post->playlist->name;
+            }
         }
 
         return view('front.post', compact('post', 'seo', 'settings'));

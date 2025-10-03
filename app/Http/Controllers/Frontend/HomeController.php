@@ -15,7 +15,7 @@ class HomeController extends Controller
         $settings = $this->settings();
 
         $postsQuery = Post::query()
-            ->with(['category', 'author'])
+            ->with(['category', 'author', 'playlist'])
             ->where('is_indexable', true)
             ->latest('created_at');
 
