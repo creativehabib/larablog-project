@@ -3,6 +3,7 @@
         $navItems = [
             'general_settings' => ['icon' => 'user', 'label' => 'General Settings'],
             'logo_favicon' => ['icon' => 'settings', 'label' => 'Logo & Favicon'],
+            'dashboard_visibility' => ['icon' => 'eye', 'label' => 'Dashboard Visibility'],
             'security_settings' => ['icon' => 'shield', 'label' => 'Security'],
             'notification' => ['icon' => 'bell', 'label' => 'Notification'],
             'billing' => ['icon' => 'credit-card', 'label' => 'Billing'],
@@ -150,6 +151,54 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary">Update branding</button>
                             </form>
+                        </div>
+
+                        <div class="tab-pane {{ $tab == 'dashboard_visibility' ? 'active show' : '' }}" id="dashboard_visibility">
+                            <h6>DASHBOARD VISIBILITY</h6>
+                            <hr>
+                            @if (empty($availableRoles))
+                                <p class="text-muted mb-0">Please create at least one role to configure dashboard visibility.</p>
+                            @else
+                                <form wire:submit.prevent="updateDashboardVisibility">
+                                    <p class="text-muted small">নির্বাচিত রোলগুলোই সংশ্লিষ্ট ড্যাশবোর্ড কার্ড দেখতে পারবে। Admin রোল সর্বদা সব কার্ড দেখতে পাবে।</p>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered mb-4">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th style="min-width: 220px;">ড্যাশবোর্ড আইটেম</th>
+                                                    <th>যে রোলগুলো দেখতে পাবে</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($dashboardWidgets as $widgetKey => $widget)
+                                                    <tr>
+                                                        <td>
+                                                            <div class="font-weight-semibold">{{ $widget['label'] }}</div>
+                                                            @if (! empty($widget['description']))
+                                                                <div class="text-muted small">{{ $widget['description'] }}</div>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex flex-wrap">
+                                                                @foreach ($availableRoles as $roleName)
+                                                                    @php
+                                                                        $inputId = 'widget-' . $widgetKey . '-' . \Illuminate\Support\Str::slug($roleName);
+                                                                    @endphp
+                                                                    <div class="custom-control custom-checkbox mr-3 mb-2">
+                                                                        <input type="checkbox" class="custom-control-input" id="{{ $inputId }}" wire:model.defer="dashboardVisibility.{{ $widgetKey }}" value="{{ $roleName }}">
+                                                                        <label class="custom-control-label" for="{{ $inputId }}">{{ $roleName }}</label>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Save visibility</button>
+                                </form>
+                            @endif
                         </div>
 
                         <div class="tab-pane {{ $tab == 'security_settings' ? 'active show' : '' }}" id="security_settings">

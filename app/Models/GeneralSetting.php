@@ -17,6 +17,11 @@ class GeneralSetting extends Model
         'site_meta_description',
         'site_favicon',
         'site_copyright',
-        'site_logo'
+        'site_logo',
+        'dashboard_widget_visibility'
+    ];
+
+    protected $casts = [
+        'dashboard_widget_visibility' => 'array',
     ];
 }
