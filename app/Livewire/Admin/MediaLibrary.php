@@ -65,6 +65,11 @@ class MediaLibrary extends Component
         'uploads.*.max' => 'Each file must be 15MB or less.',
     ];
 
+    public function mount(bool $selectionEnabled = false): void
+    {
+        $this->selectionEnabled = $selectionEnabled;
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
