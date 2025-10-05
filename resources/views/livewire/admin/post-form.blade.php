@@ -269,7 +269,16 @@
 @pushOnce('scripts')
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
     <script>
-        document.addEventListener('livewire:init', () => {
+        const initializePostFormEnhancements = () => {
+            if (window.__postFormEnhancementsInitialized) {
+                return;
+            }
+
+            if (typeof window.Livewire === 'undefined') {
+                return;
+            }
+
+            window.__postFormEnhancementsInitialized = true;
             const debounce = (callback, wait = 300) => {
                 let timeoutId;
 
@@ -608,6 +617,13 @@
                     window.jQuery(modalEl).on('hidden.bs.modal', () => dispatchToLivewire('closeMediaSelector'));
                 }
             }
-        });
+        };
+
+        window.addEventListener('livewire:init', initializePostFormEnhancements, { once: true });
+        window.addEventListener('livewire:load', initializePostFormEnhancements, { once: true });
+
+        if (typeof window.Livewire !== 'undefined') {
+            initializePostFormEnhancements();
+        }
     </script>
 @endpushOnce
