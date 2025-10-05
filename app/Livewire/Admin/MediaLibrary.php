@@ -7,7 +7,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -39,18 +38,6 @@ class MediaLibrary extends Component
     public ?int $resizeWidth = null;
     public ?int $resizeHeight = null;
 
-    public bool $selectionEnabled = false;
-    public bool $selectionMode = false;
-
-    #[Locked]
-    public ?string $selectionContext = null;
-
-    #[Locked]
-    public array $selectionTypes = [];
-
-    #[Locked]
-    public bool $selectionMultiple = false;
-
     protected $queryString = [
         'viewMode' => ['except' => 'grid'],
         'typeFilter' => ['except' => 'all'],
@@ -64,11 +51,6 @@ class MediaLibrary extends Component
     protected $messages = [
         'uploads.*.max' => 'Each file must be 15MB or less.',
     ];
-
-    public function mount(bool $selectionEnabled = false): void
-    {
-        $this->selectionEnabled = $selectionEnabled;
-    }
 
     public function updatingSearch(): void
     {
@@ -100,81 +82,6 @@ class MediaLibrary extends Component
     public function updatedUploads(): void
     {
         $this->handleUploads();
-    }
-
-    #[On('openMediaSelector')]
-    public function openSelector($payload = []): void
-    {
-        if (! $this->selectionEnabled) {
-            return;
-        }
-
-        if (! is_array($payload)) {
-            $payload = (array) $payload;
-        }
-
-        $this->selectionMode = true;
-        $this->selectionContext = Arr::get($payload, 'context');
-        $this->selectionTypes = array_values(array_filter(Arr::wrap(Arr::get($payload, 'types', []))));
-        $this->selectionMultiple = (bool) Arr::get($payload, 'multiple', false);
-
-        $this->dispatch('mediaSelectorOpened', [
-            'context' => $this->selectionContext,
-        ]);
-    }
-
-    #[On('closeMediaSelector')]
-    public function closeSelector(): void
-    {
-        if (! $this->selectionMode) {
-            return;
-        }
-
-        $this->selectionMode = false;
-        $this->selectionContext = null;
-        $this->selectionTypes = [];
-        $this->selectionMultiple = false;
-
-        $this->dispatch('mediaSelectorClosed');
-    }
-
-    public function selectMedia(int $mediaId): void
-    {
-        if (! $this->selectionEnabled || ! $this->selectionMode) {
-            return;
-        }
-
-        $media = MediaItem::find($mediaId);
-
-        if (! $media) {
-            return;
-        }
-
-        if (! $this->allowsSelectionForType($media->type)) {
-            $this->dispatch('showToastr', type: 'error', message: 'This file type cannot be selected here.');
-            return;
-        }
-
-        $payload = [
-            'context' => $this->selectionContext,
-            'id' => $media->id,
-            'type' => $media->type,
-            'disk' => $media->disk,
-            'path' => $media->path,
-            'url' => $this->resolveUrl($media),
-            'altText' => $media->alt_text,
-            'caption' => $media->caption,
-            'width' => $media->width,
-            'height' => $media->height,
-            'originalName' => $media->original_name,
-            'fileName' => $media->file_name,
-        ];
-
-        $this->dispatch('mediaItemSelected', $payload);
-
-        if (! $this->selectionMultiple) {
-            $this->closeSelector();
-        }
     }
 
     public function setViewMode(string $mode): void
@@ -582,19 +489,6 @@ class MediaLibrary extends Component
         $this->editingCaption = '';
         $this->resizeWidth = null;
         $this->resizeHeight = null;
-    }
-
-    protected function allowsSelectionForType(?string $type): bool
-    {
-        if (! $type) {
-            return empty($this->selectionTypes);
-        }
-
-        if (empty($this->selectionTypes)) {
-            return true;
-        }
-
-        return in_array($type, $this->selectionTypes, true);
     }
 
     protected function resolveUrl(MediaItem $media): string
