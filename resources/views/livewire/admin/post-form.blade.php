@@ -142,7 +142,12 @@
 
             @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
                 <div class="form-group">
-                    <label for="postDescription">Post Description <span class="text-danger">*</span></label>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <label for="postDescription" class="mb-0">Post Description <span class="text-danger">*</span></label>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-open-media-library data-media-context="post-editor">
+                            <i class="fas fa-image me-1"></i> Insert from media library
+                        </button>
+                    </div>
                     <div wire:ignore data-post-description-editor>
                         <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
                     </div>
@@ -156,7 +161,12 @@
             <div class="form-row">
                 @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
                     <div class="form-group col-md-6">
-                        <label for="thumbnail">Post Thumbnail</label>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <label for="thumbnail" class="mb-0">Post Thumbnail</label>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-open-media-library data-media-context="post-thumbnail">
+                                <i class="fas fa-images me-1"></i> Choose from media library
+                            </button>
+                        </div>
                         <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
                         @error('thumbnail')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -165,6 +175,18 @@
                             @if ($thumbnail)
                                 <p class="text-muted small mb-2">Preview:</p>
                                 <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
+                            @elseif ($thumbnailSelection)
+                                <p class="text-muted small mb-2">Selected from media library:</p>
+                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                    <img src="{{ $thumbnailSelection['url'] ?? '' }}" alt="Selected thumbnail" class="img-thumbnail" style="max-height: 180px;">
+                                    <div class="small text-muted">
+                                        <div>{{ $thumbnailSelection['original_name'] ?? 'Media item' }}</div>
+                                        @if (($thumbnailSelection['width'] ?? null) && ($thumbnailSelection['height'] ?? null))
+                                            <div>{{ $thumbnailSelection['width'] }}×{{ $thumbnailSelection['height'] }}</div>
+                                        @endif
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" wire:click="clearThumbnailSelection">Remove</button>
+                                </div>
                             @elseif ($existingThumbnail)
                                 <p class="text-muted small mb-2">Current thumbnail:</p>
                                 <div class="d-flex align-items-center gap-3">
@@ -225,6 +247,24 @@
         </div>
     </form>
 </div>
+
+@once
+    <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Media Library</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <livewire:admin.media-library :selection-enabled="true" />
+                </div>
+            </div>
+        </div>
+    </div>
+@endonce
 
 @pushOnce('scripts')
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
@@ -396,6 +436,178 @@
             });
 
             initializeEditor();
+
+            const dispatchToLivewire = (name, payload = {}) => {
+                if (typeof Livewire === 'undefined') {
+                    return;
+                }
+
+                if (typeof Livewire.dispatch === 'function') {
+                    Livewire.dispatch(name, payload);
+                    return;
+                }
+
+                if (typeof Livewire.emit === 'function') {
+                    Livewire.emit(name, payload);
+                }
+            };
+
+            const getMediaLibraryModal = () => document.getElementById('mediaLibraryModal');
+
+            const showMediaLibraryModal = () => {
+                const modalEl = getMediaLibraryModal();
+                if (!modalEl) {
+                    return;
+                }
+
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    return;
+                }
+
+                if (window.jQuery) {
+                    window.jQuery(modalEl).modal('show');
+                    return;
+                }
+
+                modalEl.classList.add('show');
+                modalEl.style.display = 'block';
+                modalEl.removeAttribute('aria-hidden');
+                modalEl.setAttribute('aria-modal', 'true');
+            };
+
+            const hideMediaLibraryModal = () => {
+                const modalEl = getMediaLibraryModal();
+                if (!modalEl) {
+                    return;
+                }
+
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    return;
+                }
+
+                if (window.jQuery) {
+                    window.jQuery(modalEl).modal('hide');
+                    return;
+                }
+
+                modalEl.classList.remove('show');
+                modalEl.setAttribute('aria-hidden', 'true');
+                modalEl.removeAttribute('aria-modal');
+                modalEl.style.display = 'none';
+                dispatchToLivewire('closeMediaSelector');
+            };
+
+            const openMediaLibrary = (context, options = {}) => {
+                const payload = {
+                    context,
+                    multiple: options.multiple ?? false,
+                    types: Array.isArray(options.types) ? options.types : [],
+                };
+
+                dispatchToLivewire('openMediaSelector', payload);
+                showMediaLibraryModal();
+            };
+
+            const handleTriggerClick = (event) => {
+                event.preventDefault();
+                const trigger = event.currentTarget;
+                const context = trigger?.dataset?.mediaContext;
+
+                if (!context) {
+                    return;
+                }
+
+                const baseOptions = {
+                    multiple: false,
+                    types: ['image'],
+                };
+
+                openMediaLibrary(context, baseOptions);
+            };
+
+            const registerMediaLibraryTriggers = () => {
+                document.querySelectorAll('[data-open-media-library]').forEach((button) => {
+                    if (button.dataset.mediaLibraryBound === 'true') {
+                        return;
+                    }
+
+                    button.addEventListener('click', handleTriggerClick);
+                    button.dataset.mediaLibraryBound = 'true';
+                });
+            };
+
+            const escapeHtml = (value = '') => {
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            };
+
+            const insertImageIntoEditor = (detail) => {
+                const editor = window.CKEDITOR?.instances?.postDescription;
+
+                if (!editor || !detail?.url) {
+                    return;
+                }
+
+                const altText = escapeHtml(detail.altText || detail.originalName || '');
+                const html = `<img src="${detail.url}" alt="${altText}">`;
+
+                if (editor.status !== 'ready') {
+                    editor.on('instanceReady', () => {
+                        editor.insertHtml(html);
+                    });
+                    return;
+                }
+
+                editor.insertHtml(html);
+            };
+
+            const handleMediaItemSelected = (event) => {
+                const detail = event?.detail || {};
+                if (!detail.context) {
+                    return;
+                }
+
+                if (detail.context === 'post-thumbnail') {
+                    dispatchToLivewire('postThumbnailSelected', { id: detail.id });
+                }
+
+                if (detail.context === 'post-editor') {
+                    insertImageIntoEditor(detail);
+                }
+
+                hideMediaLibraryModal();
+            };
+
+            if (!window.__postFormMediaLibraryInitialized) {
+                window.__postFormMediaLibraryInitialized = true;
+                window.addEventListener('mediaItemSelected', handleMediaItemSelected);
+                window.addEventListener('mediaSelectorClosed', hideMediaLibraryModal);
+            }
+
+            registerMediaLibraryTriggers();
+
+            Livewire.hook('message.processed', () => {
+                registerMediaLibraryTriggers();
+            });
+
+            const modalEl = getMediaLibraryModal();
+            if (modalEl && !modalEl.__mediaLibraryModalBound) {
+                modalEl.__mediaLibraryModalBound = true;
+
+                if (window.bootstrap && modalEl.addEventListener) {
+                    modalEl.addEventListener('hidden.bs.modal', () => {
+                        dispatchToLivewire('closeMediaSelector');
+                    });
+                } else if (window.jQuery) {
+                    window.jQuery(modalEl).on('hidden.bs.modal', () => dispatchToLivewire('closeMediaSelector'));
+                }
+            }
         });
     </script>
 @endpushOnce

@@ -48,6 +48,25 @@
         </div>
     </div>
 
+    @if ($selectionMode)
+        <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <strong>Select media:</strong> Choose a file from the library to insert.
+                @if (! empty($selectionTypes))
+                    <span class="d-block small text-muted mt-1">Allowed types: {{ implode(', ', array_map('ucfirst', $selectionTypes)) }}</span>
+                @endif
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span wire:loading.delay.short class="text-muted small">
+                    <span class="spinner-border spinner-border-sm mr-1" role="status"></span>Processing...
+                </span>
+                <button type="button" class="btn btn-outline-secondary btn-sm" wire:click="closeSelector" wire:loading.attr="disabled">
+                    Cancel selection
+                </button>
+            </div>
+        </div>
+    @endif
+
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="border border-dashed rounded-3 p-4 position-relative text-center upload-drop-zone" :class="{ 'is-dropping': dropping }"
@@ -115,10 +134,23 @@
                                     <td class="small text-muted">{{ $media->alt_text ?? '—' }}</td>
                                     <td class="small text-muted">{{ $media->caption ? Str::limit($media->caption, 40) : '—' }}</td>
                                     <td class="text-end">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <button type="button" class="btn btn-outline-primary" wire:click="startEditing({{ $media->id }})">Edit</button>
-                                            <button type="button" class="btn btn-outline-danger" x-on:click.prevent="confirmDelete({{ $media->id }})">Delete</button>
-                                        </div>
+                                        @php
+                                            $selectable = empty($selectionTypes) || in_array($media->type, $selectionTypes, true);
+                                        @endphp
+                                        @if ($selectionMode)
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm"
+                                                    wire:click="selectMedia({{ $media->id }})"
+                                                    wire:loading.attr="disabled"
+                                                    @if (! $selectable) disabled @endif>
+                                                Select
+                                            </button>
+                                        @else
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-primary" wire:click="startEditing({{ $media->id }})">Edit</button>
+                                                <button type="button" class="btn btn-outline-danger" x-on:click.prevent="confirmDelete({{ $media->id }})">Delete</button>
+                                            </div>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -143,10 +175,26 @@
                                     <div class="card-body">
                                         <h6 class="card-title text-truncate" title="{{ $media->original_name }}">{{ $media->original_name }}</h6>
                                         <p class="small text-muted mb-3">{{ strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)) }} · {{ $media->sizeForHumans(1) }} @if($media->width && $media->height) · {{ $media->width }}×{{ $media->height }} @endif</p>
-                                        <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click="startEditing({{ $media->id }})"><i class="fas fa-edit me-1"></i> Edit</button>
-                                            <button type="button" class="btn btn-outline-danger btn-sm" x-on:click.prevent="confirmDelete({{ $media->id }})"><i class="fas fa-trash"></i></button>
-                                        </div>
+                                        @php
+                                            $selectable = empty($selectionTypes) || in_array($media->type, $selectionTypes, true);
+                                        @endphp
+                                        @if ($selectionMode)
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm w-100"
+                                                    wire:click="selectMedia({{ $media->id }})"
+                                                    wire:loading.attr="disabled"
+                                                    @if (! $selectable) disabled @endif>
+                                                <i class="fas fa-check me-1"></i> Select
+                                            </button>
+                                            @unless ($selectable)
+                                                <div class="small text-muted mt-2">This file type cannot be used here.</div>
+                                            @endunless
+                                        @else
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click="startEditing({{ $media->id }})"><i class="fas fa-edit me-1"></i> Edit</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm" x-on:click.prevent="confirmDelete({{ $media->id }})"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

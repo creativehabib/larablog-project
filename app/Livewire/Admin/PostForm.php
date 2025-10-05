@@ -3,15 +3,19 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Category;
+use App\Models\MediaItem;
 use App\Models\Post;
 use App\Models\SubCategory;
 use App\Models\VideoPlaylist;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -45,6 +49,11 @@ class PostForm extends Component
     public ?string $meta_keywords = null;
     public $thumbnail;
     public ?string $existingThumbnail = null;
+    public ?int $thumbnail_media_id = null;
+    public ?array $thumbnailSelection = null;
+
+    #[Locked]
+    public ?string $thumbnailPendingDeletion = null;
 
     public bool $autoGenerateSlug = true;
 
@@ -169,6 +178,8 @@ class PostForm extends Component
     public function updatedThumbnail($value): void
     {
         $this->thumbnail = $value;
+        $this->thumbnail_media_id = null;
+        $this->thumbnailSelection = null;
 
         if ($this->content_type === Post::CONTENT_TYPE_VIDEO) {
             $this->updateVideoPreview();
@@ -219,12 +230,67 @@ class PostForm extends Component
 
         Storage::disk('public')->delete($this->existingThumbnail);
         $this->existingThumbnail = null;
+        $this->thumbnail_media_id = null;
+        $this->thumbnailSelection = null;
+        $this->thumbnailPendingDeletion = null;
 
         if ($this->post) {
             $this->post->update(['thumbnail_path' => null]);
         }
 
         $this->dispatch('showToastr', type: 'success', message: 'Thumbnail removed successfully.');
+    }
+
+    #[On('postThumbnailSelected')]
+    public function applyThumbnailSelection($payload = []): void
+    {
+        if (! is_array($payload)) {
+            $payload = (array) $payload;
+        }
+
+        $mediaId = (int) Arr::get($payload, 'id');
+
+        if (! $mediaId) {
+            return;
+        }
+
+        $this->setThumbnailFromLibrary($mediaId);
+    }
+
+    public function clearThumbnailSelection(): void
+    {
+        $this->thumbnail_media_id = null;
+        $this->thumbnailSelection = null;
+        $this->thumbnailPendingDeletion = null;
+
+        $this->dispatch('showToastr', type: 'info', message: 'Thumbnail selection cleared.');
+    }
+
+    protected function setThumbnailFromLibrary(int $mediaId): void
+    {
+        $media = MediaItem::find($mediaId);
+
+        if (! $media || $media->type !== MediaItem::TYPE_IMAGE) {
+            $this->dispatch('showToastr', type: 'error', message: 'Please choose a valid image from the media library.');
+            return;
+        }
+
+        if ($this->existingThumbnail && $this->existingThumbnail !== $media->path) {
+            $this->thumbnailPendingDeletion = $this->existingThumbnail;
+            $this->existingThumbnail = null;
+        }
+
+        $this->thumbnail = null;
+        $this->thumbnail_media_id = $media->id;
+        $this->thumbnailSelection = [
+            'id' => $media->id,
+            'path' => $media->path,
+            'url' => $media->url(),
+            'alt_text' => $media->alt_text,
+            'width' => $media->width,
+            'height' => $media->height,
+            'original_name' => $media->original_name,
+        ];
     }
 
     public function save(): mixed
@@ -358,12 +424,25 @@ class PostForm extends Component
             }
 
             $data['thumbnail_path'] = $this->thumbnail->store('posts', 'public');
+            $this->thumbnail_media_id = null;
+            $this->thumbnailSelection = null;
+            $this->thumbnailPendingDeletion = null;
+        } elseif ($this->thumbnailSelection) {
+            $data['thumbnail_path'] = Arr::get($this->thumbnailSelection, 'path');
+            $this->existingThumbnail = Arr::get($this->thumbnailSelection, 'path');
+            $this->thumbnailPendingDeletion = null;
         } elseif ($autoThumbnailPath = $this->maybeFetchVideoThumbnail($data)) {
             $data['thumbnail_path'] = $autoThumbnailPath;
             $this->existingThumbnail = $autoThumbnailPath;
+            $this->thumbnailPendingDeletion = null;
         }
 
-        unset($data['thumbnail']);
+        unset($data['thumbnail'], $data['thumbnail_media_id']);
+
+        if ($this->thumbnailPendingDeletion) {
+            Storage::disk('public')->delete($this->thumbnailPendingDeletion);
+            $this->thumbnailPendingDeletion = null;
+        }
 
         if ($this->post && $this->post->exists) {
             $this->post->update($data);
@@ -469,6 +548,7 @@ class PostForm extends Component
             'meta_description' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string'],
             'thumbnail' => ['nullable', 'image', 'max:4096'],
+            'thumbnail_media_id' => ['nullable', 'integer', Rule::exists('media_items', 'id')],
         ];
     }
 
