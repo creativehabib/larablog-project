@@ -246,25 +246,25 @@
             </button>
         </div>
     </form>
-</div>
 
-@once
-    <div class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Media Library</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <livewire:admin.media-library :selection-enabled="true" />
+    @once
+        <div wire:ignore.self class="modal fade" id="mediaLibraryModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Media Library</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <livewire:admin.media-library :selection-enabled="true" />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endonce
+    @endonce
+</div>
 
 @pushOnce('scripts')
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
