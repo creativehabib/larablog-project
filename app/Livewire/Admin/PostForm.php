@@ -47,6 +47,9 @@ class PostForm extends Component
     public ?string $existingThumbnail = null;
 
     public bool $autoGenerateSlug = true;
+    public bool $isEditingSlug = false;
+    public bool $autoGenerateSlugBeforeEdit = true;
+    public ?string $slugBeforeEdit = null;
 
     protected ?string $lastSyncedDescription = null;
 
@@ -82,6 +85,8 @@ class PostForm extends Component
         }
 
         $this->lastSyncedDescription = $this->description;
+        $this->autoGenerateSlugBeforeEdit = $this->autoGenerateSlug;
+        $this->slugBeforeEdit = $this->slug;
     }
 
     public function updatedTitle($value): void
@@ -103,6 +108,52 @@ class PostForm extends Component
     {
         $this->autoGenerateSlug = false;
         $this->slug = $this->generateUniqueSlug($value ?: $this->title);
+    }
+
+    public function startSlugEditing(): void
+    {
+        if ($this->isEditingSlug) {
+            return;
+        }
+
+        $this->autoGenerateSlugBeforeEdit = $this->autoGenerateSlug;
+        $this->slugBeforeEdit = $this->slug;
+
+        if ($this->slug === '' && $this->title) {
+            $this->slug = $this->generateUniqueSlug($this->title);
+        }
+
+        $this->autoGenerateSlug = false;
+        $this->isEditingSlug = true;
+    }
+
+    public function cancelSlugEditing(): void
+    {
+        $this->slug = $this->slugBeforeEdit ?? $this->slug;
+        $this->isEditingSlug = false;
+        $this->autoGenerateSlug = $this->autoGenerateSlugBeforeEdit;
+
+        if ($this->autoGenerateSlug) {
+            $this->slug = $this->generateUniqueSlug($this->title);
+        }
+    }
+
+    public function saveSlugEdit(): void
+    {
+        $this->slug = $this->generateUniqueSlug($this->slug ?: $this->title);
+        $this->slugBeforeEdit = $this->slug;
+        $this->autoGenerateSlug = false;
+        $this->autoGenerateSlugBeforeEdit = false;
+        $this->isEditingSlug = false;
+    }
+
+    public function resetSlugToAuto(): void
+    {
+        $this->autoGenerateSlug = true;
+        $this->isEditingSlug = false;
+        $this->slug = $this->generateUniqueSlug($this->title);
+        $this->slugBeforeEdit = $this->slug;
+        $this->autoGenerateSlugBeforeEdit = true;
     }
 
     public function updatedContentType($value): void
