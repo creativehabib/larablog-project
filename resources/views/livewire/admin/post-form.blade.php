@@ -11,10 +11,36 @@
                     @enderror
                 </div>
                 <div class="form-group col-md-3">
-                    <label for="postSlug">Slug</label>
-                    <input type="text" id="postSlug" class="form-control @error('slug') is-invalid @enderror" wire:model.defer="slug" placeholder="Auto generated from title">
+                    <label class="d-flex justify-content-between align-items-center" for="postSlug">
+                        <span>Permalink</span>
+                        @if (! $autoGenerateSlug)
+                            <button type="button" class="btn btn-sm btn-link p-0" wire:click="resetSlugToAuto" wire:loading.attr="disabled">
+                                Reset to auto
+                            </button>
+                        @endif
+                    </label>
+                    <div class="border rounded px-3 py-2 bg-light">
+                        <p class="small mb-1 text-break">
+                            <span class="text-muted">{{ url('news') }}/</span>
+                            <span class="text-body font-weight-semibold">{{ $slug ?: 'your-slug' }}</span>
+                        </p>
+                        @if (! $isEditingSlug)
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" wire:click="startSlugEditing" wire:loading.attr="disabled">
+                                Edit permalink
+                            </button>
+                        @endif
+                    </div>
+                    @if ($isEditingSlug)
+                        <div class="mt-2">
+                            <input type="text" id="postSlug" class="form-control @error('slug') is-invalid @enderror" wire:model.defer="slug" placeholder="custom-slug">
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button type="button" class="btn btn-sm btn-primary" wire:click="saveSlugEdit" wire:loading.attr="disabled">Save</button>
+                                <button type="button" class="btn btn-sm btn-link text-danger" wire:click="cancelSlugEditing" wire:loading.attr="disabled">Cancel</button>
+                            </div>
+                        </div>
+                    @endif
                     @error('slug')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="form-group col-md-3">
