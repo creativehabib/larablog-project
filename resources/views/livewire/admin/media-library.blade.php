@@ -15,13 +15,13 @@
                 <div class="col-xl-3 col-lg-4">
                     <label for="media-search" class="form-label mb-1 text-muted small text-uppercase">Search</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-right-0"><i class="fas fa-search"></i></span>
+                        <span class="input-group-text border-right-0"><i class="fas fa-search"></i></span>
                         <input id="media-search" type="search" class="form-control border-left-0" placeholder="Search media..." wire:model.live.debounce.500ms="search">
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-4">
                     <label for="media-type-filter" class="form-label mb-1 text-muted small text-uppercase">Filter</label>
-                    <select id="media-type-filter" class="form-select" wire:change="setTypeFilter($event.target.value)">
+                    <select id="media-type-filter" class="custom-select" wire:change="setTypeFilter($event.target.value)">
                         <option value="all" @selected($typeFilter === 'all')>All files</option>
                         <option value="{{ MediaItem::TYPE_IMAGE }}" @selected($typeFilter === MediaItem::TYPE_IMAGE)>Images</option>
                         <option value="{{ MediaItem::TYPE_VIDEO }}" @selected($typeFilter === MediaItem::TYPE_VIDEO)>Videos</option>
