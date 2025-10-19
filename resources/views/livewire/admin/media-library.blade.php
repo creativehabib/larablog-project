@@ -223,7 +223,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">Close</button>
                     <button type="button" class="btn btn-primary" x-on:click="saveChanges()">Save changes</button>
                 </div>
             </div>
@@ -253,6 +253,9 @@
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js" integrity="sha384-/RkNvztNFVQVwKP1HjqCOUMIqFZ3VAbwY/jGj33jjXNMTvEihQ/HVbUaz2YsmiPg" crossorigin="anonymous"></script>
+        {{-- ======================================================= --}}
+        {{-- START: পরিবর্তন করা হয়েছে এই SCRIPT অংশে --}}
+        {{-- ======================================================= --}}
         <script>
             document.addEventListener('alpine:init', () => {
                 Alpine.data('mediaLibraryComponent', () => ({
@@ -269,15 +272,12 @@
                     mediaId: null,
                     dimensions: '—',
                     suppressRatioUpdate: false,
-                    init() {
-                        this.$watch('resizeWidth', (value) => {
-                            if (!this.isImage || !this.lockRatio || this.suppressRatioUpdate) {
-                                return;
-                            }
 
-                            if (!value || !this.originalWidth || !this.originalHeight) {
-                                return;
-                            }
+                    init() {
+                        // Watchers for resize inputs
+                        this.$watch('resizeWidth', (value) => {
+                            if (!this.isImage || !this.lockRatio || this.suppressRatioUpdate) return;
+                            if (!value || !this.originalWidth || !this.originalHeight) return;
 
                             const ratio = this.originalHeight / this.originalWidth;
                             this.suppressRatioUpdate = true;
@@ -290,13 +290,8 @@
                         });
 
                         this.$watch('resizeHeight', (value) => {
-                            if (!this.isImage || !this.lockRatio || this.suppressRatioUpdate) {
-                                return;
-                            }
-
-                            if (!value || !this.originalWidth || !this.originalHeight) {
-                                return;
-                            }
+                            if (!this.isImage || !this.lockRatio || this.suppressRatioUpdate) return;
+                            if (!value || !this.originalWidth || !this.originalHeight) return;
 
                             const ratio = this.originalWidth / this.originalHeight;
                             this.suppressRatioUpdate = true;
@@ -308,48 +303,23 @@
                             this.suppressRatioUpdate = false;
                         });
 
-                        const cleanupModalArtifacts = () => {
-                            document
-                                .querySelectorAll('.modal-backdrop')
-                                .forEach((backdrop) => {
-                                    backdrop.style.setProperty('display', 'none', 'important');
-                                    backdrop.remove();
-                                });
-                            document.body.classList.remove('modal-open');
-                            document.body.style.removeProperty('overflow');
-                            document.body.style.removeProperty('padding-right');
-                            document.body.removeAttribute('data-bs-overflow');
-                            document.body.removeAttribute('data-bs-padding-right');
-                        };
+                        // Initialize and cache the modal instance
+                        const modalEl = document.getElementById('mediaEditorModal');
+                        let modalInstance = null;
+                        if (window.bootstrap && window.bootstrap.Modal) {
+                            modalInstance = new bootstrap.Modal(modalEl);
+                        } else if (window.jQuery) {
+                            // Fallback for jQuery-based Bootstrap
+                            modalInstance = {
+                                show: () => window.jQuery(modalEl).modal('show'),
+                                hide: () => window.jQuery(modalEl).modal('hide'),
+                            };
+                        }
 
-                        let livewireCleanupHookRegistered = false;
-                        let pendingCleanupTimeout = null;
-                        const registerLivewireCleanupHook = () => {
-                            if (livewireCleanupHookRegistered) {
-                                return;
-                            }
-
-                            if (typeof Livewire === 'undefined' || typeof Livewire.hook !== 'function') {
-                                return;
-                            }
-
-                            Livewire.hook('message.processed', () => {
-                                cleanupModalArtifacts();
-                            });
-                            livewireCleanupHookRegistered = true;
-                        };
-
-                        registerLivewireCleanupHook();
-
-                        const livewireInitHandler = () => {
-                            registerLivewireCleanupHook();
-                        };
-
-                        window.addEventListener('livewire:init', livewireInitHandler, { once: true });
-                        window.addEventListener('livewire:load', livewireInitHandler, { once: true });
-
+                        // Event Listener to open the modal
                         window.addEventListener('openMediaEditor', (event) => {
-                            const detail = event.detail || {};
+                            const detail = event.detail[0] || event.detail; // Supports Livewire v3+ and older versions
+
                             this.mediaId = detail.id || null;
                             this.isImage = Boolean(detail.isImage);
                             this.fileName = detail.url ? detail.url.split('/').pop() : '';
@@ -359,26 +329,11 @@
                             this.originalWidth = detail.width || null;
                             this.originalHeight = detail.height || null;
                             this.dimensions = detail.width && detail.height ? `${detail.width}×${detail.height}` : '—';
+                            this.$refs.altInput.value = detail.altText || '';
+                            this.$refs.captionInput.value = detail.caption || '';
 
-                            if (this.$refs.altInput) {
-                                this.$refs.altInput.value = detail.altText || '';
-                            }
-
-                            if (this.$refs.captionInput) {
-                                this.$refs.captionInput.value = detail.caption || '';
-                            }
-
-                            const modalEl = document.getElementById('mediaEditorModal');
-                            let modalInstance = null;
-                            if (modalEl) {
-                                cleanupModalArtifacts();
-
-                                if (window.bootstrap && window.bootstrap.Modal) {
-                                    modalInstance = new bootstrap.Modal(modalEl);
-                                    modalInstance.show();
-                                } else if (window.jQuery) {
-                                    window.jQuery(modalEl).modal('show');
-                                }
+                            if (modalInstance) {
+                                modalInstance.show();
                             }
 
                             this.$nextTick(() => {
@@ -386,64 +341,24 @@
                             });
                         });
 
+                        // Event Listener to close the modal
                         window.addEventListener('mediaEditorClosed', () => {
-                            const modalEl = document.getElementById('mediaEditorModal');
-                            if (modalEl) {
-                                const finalizeCleanup = () => {
-                                    cleanupModalArtifacts();
-
-                                    if (window.bootstrap && window.bootstrap.Modal) {
-                                        const existingInstance = bootstrap.Modal.getInstance(modalEl);
-                                        if (existingInstance) {
-                                            existingInstance.dispose();
-                                        }
-                                    } else if (window.jQuery) {
-                                        window.jQuery(modalEl).modal('dispose');
-                                    }
-                                };
-
-                                if (window.bootstrap && window.bootstrap.Modal) {
-                                    let instance = bootstrap.Modal.getInstance(modalEl);
-                                    if (!instance) {
-                                        instance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                                    }
-
-                                    const handleHidden = () => {
-                                        finalizeCleanup();
-                                        modalEl.removeEventListener('hidden.bs.modal', handleHidden);
-                                    };
-
-                                    modalEl.addEventListener('hidden.bs.modal', handleHidden);
-                                    instance.hide();
-                                } else if (window.jQuery) {
-                                    window
-                                        .jQuery(modalEl)
-                                        .one('hidden.bs.modal', finalizeCleanup)
-                                        .modal('hide');
-                                } else {
-                                    modalEl.classList.remove('show');
-                                    modalEl.setAttribute('aria-hidden', 'true');
-                                    modalEl.removeAttribute('aria-modal');
-                                    modalEl.style.removeProperty('padding-right');
-                                    modalEl.style.display = 'none';
-                                    finalizeCleanup();
-                                }
-                            } else {
-                                cleanupModalArtifacts();
+                            if (modalInstance) {
+                                modalInstance.hide();
                             }
-
                             this.destroyCropper();
-
-                            if (pendingCleanupTimeout) {
-                                clearTimeout(pendingCleanupTimeout);
-                            }
-
-                            pendingCleanupTimeout = window.setTimeout(() => {
-                                pendingCleanupTimeout = null;
-                                cleanupModalArtifacts();
-                            }, 500);
                         });
+
+                        // Safety cleanup hook for Livewire updates
+                        if (typeof Livewire !== 'undefined') {
+                            Livewire.hook('message.processed', () => {
+                                if (document.body.classList.contains('modal-open') === false) {
+                                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                                }
+                            });
+                        }
                     },
+
                     handleDrop(event) {
                         this.dropping = false;
                         const files = event.dataTransfer?.files;
@@ -452,15 +367,13 @@
                             this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     },
+
                     setupEditor(detail) {
                         const imageEl = this.$refs.imagePreview;
-
                         this.destroyCropper();
 
                         if (!this.isImage) {
-                            if (imageEl) {
-                                imageEl.src = '';
-                            }
+                            if (imageEl) imageEl.src = '';
                             return;
                         }
 
@@ -476,24 +389,15 @@
                             };
                         }
                     },
+
                     initCropper(imageEl) {
                         this.cropper = new Cropper(imageEl, {
                             viewMode: 1,
                             autoCropArea: 1,
                             responsive: true,
                             checkOrientation: false,
-                            ready: () => {
-                                const data = this.cropper.getData();
-                                this.suppressRatioUpdate = true;
-                                this.resizeWidth = Math.round(data.width);
-                                this.resizeHeight = Math.round(data.height);
-                                this.dimensions = `${this.resizeWidth}×${this.resizeHeight}`;
-                                this.suppressRatioUpdate = false;
-                            },
                             crop: () => {
-                                if (!this.cropper) {
-                                    return;
-                                }
+                                if (!this.cropper) return;
                                 const data = this.cropper.getData();
                                 this.suppressRatioUpdate = true;
                                 this.resizeWidth = Math.round(data.width);
@@ -503,45 +407,20 @@
                             }
                         });
                     },
+
                     destroyCropper() {
                         if (this.cropper) {
                             this.cropper.destroy();
                             this.cropper = null;
                         }
                     },
+
                     resetCrop() {
                         if (this.cropper) {
                             this.cropper.reset();
-                            const data = this.cropper.getData();
-                            this.suppressRatioUpdate = true;
-                            this.resizeWidth = Math.round(data.width);
-                            this.resizeHeight = Math.round(data.height);
-                            this.dimensions = `${this.resizeWidth}×${this.resizeHeight}`;
-                            this.suppressRatioUpdate = false;
                         }
                     },
-                    closeEditor() {
-                        this.dispatchMediaEditorClosed();
 
-                        if (this.$wire && typeof this.$wire.call === 'function') {
-                            this.$wire.call('cancelEditing');
-                            return;
-                        }
-
-                        if (typeof Livewire !== 'undefined') {
-                            if (typeof Livewire.dispatch === 'function') {
-                                Livewire.dispatch('mediaEditorCancel');
-                                return;
-                            }
-
-                            if (typeof Livewire.emit === 'function') {
-                                Livewire.emit('mediaEditorCancel');
-                            }
-                        }
-                    },
-                    dispatchMediaEditorClosed() {
-                        window.dispatchEvent(new CustomEvent('mediaEditorClosed'));
-                    },
                     async saveChanges() {
                         const altText = this.$refs.altInput ? this.$refs.altInput.value : '';
                         const caption = this.$refs.captionInput ? this.$refs.captionInput.value : '';
@@ -562,7 +441,6 @@
                                 width: data.width,
                                 height: data.height,
                             };
-
                             if (this.resizeWidth && this.resizeHeight) {
                                 payload.resize = {
                                     width: Math.round(this.resizeWidth),
@@ -571,37 +449,10 @@
                             }
                         }
 
-                        const dispatched = await (async () => {
-                            if (this.$wire && typeof this.$wire.call === 'function') {
-                                try {
-                                    await this.$wire.call('saveMediaEditor', payload);
-                                    this.dispatchMediaEditorClosed();
-                                    return true;
-                                } catch (error) {
-                                    console.error('Unable to save media changes via Livewire.', error);
-                                    return false;
-                                }
-                            }
-
-                            if (typeof Livewire !== 'undefined') {
-                                if (typeof Livewire.dispatch === 'function') {
-                                    Livewire.dispatch('mediaEditorSave', payload);
-                                    return true;
-                                }
-
-                                if (typeof Livewire.emit === 'function') {
-                                    Livewire.emit('mediaEditorSave', payload);
-                                    return true;
-                                }
-                            }
-
-                            return false;
-                        })();
-
-                        if (!dispatched) {
-                            console.error('Unable to save media changes because Livewire is not available.');
-                        }
+                        await this.$wire.call('saveMediaEditor', payload);
+                        window.dispatchEvent(new CustomEvent('mediaEditorClosed'));
                     },
+
                     confirmDelete(id) {
                         if (confirm('Are you sure you want to delete this media file?')) {
                             this.$wire.call('deleteMedia', id);
