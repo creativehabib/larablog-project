@@ -322,6 +322,10 @@
             </div>
         </div>
     </div>
+
+    <span onclick="gotop()" class="go-to-top hidden-print" style="display: none;">
+        <i class="fa fa-angle-up" aria-hidden="true"></i>
+    </span>
 @endsection
 
 @push('scripts')
@@ -339,5 +343,24 @@
                 prevText: '',
             });
         });
+
+        $(window).on('scroll', function () {
+            if ($(window).scrollTop() > 300) {
+                $('.go-to-top').show();
+            } else {
+                $('.go-to-top').hide();
+            }
+        });
+
+        function gotop() {
+            var scrollStep = -window.scrollY / 300,
+                scrollInterval = setInterval(function () {
+                    if (window.scrollY !== 0) {
+                        window.scrollBy(0, scrollStep);
+                    } else {
+                        clearInterval(scrollInterval);
+                    }
+                }, 2);
+        }
     </script>
 @endpush
