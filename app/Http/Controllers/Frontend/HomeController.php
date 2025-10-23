@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Support\BanglaFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -42,7 +43,7 @@ class HomeController extends Controller
             });
         }
 
-        $postsForSections = (clone $postsQuery)->take(20)->get();
+        $postsForSections = (clone $postsQuery)->take(24)->get();
 
         $leadStory = $postsForSections->firstWhere('is_featured', true) ?? $postsForSections->first();
 
@@ -64,6 +65,33 @@ class HomeController extends Controller
             ->values();
 
         $latestPosts = (clone $postsQuery)->paginate(12)->withQueryString();
+
+        $latestSidebarPosts = (clone $postsQuery)->take(12)->get();
+
+        $popularPosts = Post::query()
+            ->with(['category'])
+            ->where('is_indexable', true)
+            ->orderByDesc('is_featured')
+            ->orderByDesc('created_at')
+            ->take(12)
+            ->get();
+
+        if ($popularPosts->isEmpty()) {
+            $popularPosts = (clone $postsQuery)->take(12)->get();
+        }
+
+        $navCategories = Category::query()
+            ->withCount(['posts as published_posts_count' => fn ($query) => $query->where('is_indexable', true)])
+            ->having('published_posts_count', '>', 0)
+            ->orderByDesc('published_posts_count')
+            ->take(12)
+            ->get();
+
+        $allCategories = Category::query()
+            ->withCount(['posts as published_posts_count' => fn ($query) => $query->where('is_indexable', true)])
+            ->having('published_posts_count', '>', 0)
+            ->orderBy('name')
+            ->get();
 
         $trendingTopics = Category::query()
             ->withCount(['posts as published_posts_count' => fn ($query) => $query->where('is_indexable', true)])
@@ -102,6 +130,12 @@ class HomeController extends Controller
         $currentDate = now(config('app.timezone', 'Asia/Dhaka'));
         $currentDateBangla = BanglaFormatter::fullDate($currentDate);
         $currentTimeBangla = BanglaFormatter::time($currentDate);
+
+        $logoUrl = null;
+
+        if ($settings?->site_logo) {
+            $logoUrl = Storage::url($settings->site_logo);
+        }
 
         $seo = [
             'title' => $settings?->site_title ?? config('app.name'),
@@ -148,12 +182,17 @@ class HomeController extends Controller
             'topStories' => $topStories,
             'moreStories' => $moreStories,
             'latestPosts' => $latestPosts,
+            'latestSidebarPosts' => $latestSidebarPosts,
+            'popularPosts' => $popularPosts,
             'trendingTopics' => $trendingTopics,
             'categorySections' => $categorySections,
             'latestVideos' => $latestVideos,
             'activePoll' => $activePoll,
             'currentDateBangla' => $currentDateBangla,
             'currentTimeBangla' => $currentTimeBangla,
+            'navCategories' => $navCategories,
+            'allCategories' => $allCategories,
+            'logoUrl' => $logoUrl,
         ]);
     }
 
