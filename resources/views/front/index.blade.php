@@ -260,7 +260,9 @@
                         <a href="{{ route('home', ['category' => $category->slug]) }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700">আরও দেখুন</a>
                     </div>
                     <div class="mt-6 grid gap-6 lg:grid-cols-[2fr,3fr]">
-                        @php($categoryLead = $category->posts->first())
+                        @php
+                            $categoryLead = $category->posts->first();
+                        @endphp
                         <div>
                             @if($categoryLead)
                                 <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
