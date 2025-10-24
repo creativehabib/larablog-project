@@ -1,21 +1,30 @@
 @font-face {
-	font-family: 'SolaimanLipi';
-	src: url('../fonts/subset-SolaimanLipi.eot');
-	src: url('../fonts/subset-SolaimanLipi.eot?#iefix') format('embedded-opentype'),
-	url('../fonts/subset-SolaimanLipi.woff2') format('woff2'),
-	url('../fonts/subset-SolaimanLipi.woff') format('woff'),
-	url('../fonts/subset-SolaimanLipi.ttf') format('truetype'),
-	url('../fonts/subset-SolaimanLipi.svg#SolaimanLipi') format('svg');
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
+        font-family: 'SolaimanLipi';
+        src: url('../fonts/subset-SolaimanLipi.eot');
+        src: url('../fonts/subset-SolaimanLipi.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/subset-SolaimanLipi.woff2') format('woff2'),
+        url('../fonts/subset-SolaimanLipi.woff') format('woff'),
+        url('../fonts/subset-SolaimanLipi.ttf') format('truetype'),
+        url('../fonts/subset-SolaimanLipi.svg#SolaimanLipi') format('svg');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+0980-09FF, U+200C-200D;
 }
 body{
-	font-family: 'SolaimanLipi','Calibri','SutonnyMJ','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
-	color: #333;
+        font-family: 'SolaimanLipi','Siyamrupali','Helvetica Neue','Helvetica','Arial',sans-serif;
+        color: #333;
 }
 body h1,h2,h3,h4,p,span,a{
-	font-family: 'SolaimanLipi','Calibri','SutonnyMJ','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
+        font-family: 'SolaimanLipi','Siyamrupali','Helvetica Neue','Helvetica','Arial',sans-serif;
+}
+:lang(en),
+.text-en{
+        font-family: 'Helvetica Neue','Helvetica','Arial',sans-serif;
+}
+:lang(bn),
+.text-bn{
+        font-family: 'SolaimanLipi','Siyamrupali','Helvetica Neue','Helvetica','Arial',sans-serif;
 }
 .mainDiv{
 	margin-top: 30px;
