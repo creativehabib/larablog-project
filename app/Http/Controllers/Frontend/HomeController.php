@@ -61,7 +61,7 @@ class HomeController extends Controller
         $moreStories = $postsForSections
             ->filter(fn ($post) => ! $highlightedIds->contains($post->id))
             ->values()
-            ->take(6)
+            ->take(8)
             ->values();
 
         $latestPosts = (clone $postsQuery)->paginate(12)->withQueryString();
@@ -97,6 +97,7 @@ class HomeController extends Controller
             ->withCount(['posts as published_posts_count' => fn ($query) => $query->where('is_indexable', true)])
             ->having('published_posts_count', '>', 0)
             ->orderByDesc('published_posts_count')
+            ->take(8)
             ->take(8)
             ->get();
 

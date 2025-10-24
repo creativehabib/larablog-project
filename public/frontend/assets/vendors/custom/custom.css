@@ -1,21 +1,21 @@
-@font-face {
-    font-family: 'SolaimanLipi';
-    src: url('../fonts/subset-SolaimanLipi.eot');
-    src: url('../fonts/subset-SolaimanLipi.eot?#iefix') format('embedded-opentype'),
-    url('../fonts/subset-SolaimanLipi.woff2') format('woff2'),
-    url('../fonts/subset-SolaimanLipi.woff') format('woff'),
-    url('../fonts/subset-SolaimanLipi.ttf') format('truetype'),
-    url('../fonts/subset-SolaimanLipi.svg#SolaimanLipi') format('svg');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+@import url('https://fonts.cdnfonts.com/css/solaimanlipi');
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@100..900&display=swap');
+/*@font-face {*/
+/*    font-family: 'SolaimanLipi';*/
+/*    src: url('../fonts/subset-SolaimanLipi.woff2') format('woff2'),*/
+/*    url('../fonts/SolaimanLipi_22-02-2012.ttf') format('truetype');*/
+/*    font-weight: normal;*/
+/*    font-style: normal;*/
+/*}*/
+
 body{
-    font-family: 'SolaimanLipi','Calibri','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
+    font-family: 'SolaimanLipi','Hind Siliguri', 'Noto Sans Bengali', sans-serif, Georgia, "Times New Roman", Times, serif;
+    font-size: 14px;
+    line-height: 1.42857143;
     color: #333;
 }
 body h1,h2,h3,h4,p,span,a{
-    font-family: 'SolaimanLipi','Calibri','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
+    font-family: 'SolaimanLipi','Hind Siliguri','Calibri','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
 }
 .mainDiv{
     margin-top: 30px;
@@ -50,7 +50,13 @@ body h1,h2,h3,h4,p,span,a{
 .bg2{
 	background-color: #f2f2f2 !important;
 }
-
+.truncate-2-lines {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;  /* আপনি যত লাইন দেখাতে চান (যেমন 2) */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 /*color css*/
 .colorWhite{
 	color: white !important;
@@ -923,7 +929,7 @@ body h1,h2,h3,h4,p,span,a{
 	height: 40px;
 	width: 40px;
 	color: white !important;
-	right: 0px !important;
+	right: 0 !important;
 	z-index: 9;
 	border-radius: 50%;
 	padding-top: 2px;

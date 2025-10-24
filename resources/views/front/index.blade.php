@@ -104,27 +104,36 @@
                 </div>
 
                 @if($moreStories->isNotEmpty())
-                    <div class="row marginLR-10 desktopFlexRow">
-                        @foreach($moreStories as $story)
-                            <div class="col-sm-3 col-md-3 paddingLR10 desktopSectionLead">
-                                <div class="thumbnail marginB15">
-                                    <div class="positionRelative">
-                                        @if($story->thumbnail_url)
-                                            <img src="{{ $story->thumbnail_url }}" class="img-responsive borderRadius5" alt="{{ $story->title }}">
-                                        @else
-                                            <img src="{{ asset('frontend/assets/images/sports-banner.jpg') }}" class="img-responsive borderRadius5" alt="{{ $story->title }}">
-                                        @endif
-                                        @if($story->isVideo())
-                                            <span class="fa fa-play pvIconMedium"></span>
-                                        @endif
-                                    </div>
-                                    <div class="caption">
-                                        <h3 class="title11 marginT0"><strong>{{ $story->title }}</strong></h3>
-                                    </div>
-                                    <a href="{{ route('posts.show', $story) }}" class="linkOverlay"></a>
+                    <div class="row">
+                            <div class="col-sm-12 col-md-12 marginT15">
+                                <div class="row marginLR-10 desktopFlexRow">
+                                    @foreach($moreStories as $story)
+                                        <div class="col-sm-3 col-md-3 paddingLR10 desktopSectionLead">
+                                            <div class="thumbnail marginB15">
+                                                <div class="positionRelative">
+                                                    @if($story->thumbnail_url)
+                                                        <img src="{{ $story->thumbnail_url }}" class="img-responsive borderRadius5" alt="{{ $story->title }}">
+                                                    @else
+                                                        <img src="{{ asset('frontend/assets/images/sports-banner.jpg') }}" class="img-responsive borderRadius5" alt="{{ $story->title }}">
+                                                    @endif
+                                                    @if($story->isVideo())
+                                                        <span class="fa fa-play pvIconMedium"></span>
+                                                    @endif
+                                                </div>
+                                                <div class="caption">
+                                                    <h3 class="title12 marginT0 truncate-2-lines"><strong>{{ $story->title }}</strong></h3>
+                                                </div>
+                                                <a href="{{ route('posts.show', $story) }}" class="linkOverlay"></a>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endforeach
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <p class="desktopDivider marginT0 marginB10"></p>
+                        </div>
                     </div>
                 @endif
 
@@ -156,7 +165,7 @@
                                                             <span class="fa fa-play pvIconMedium"></span>
                                                         </div>
                                                         <div class="caption paddingTB0 paddingLR10">
-                                                            <h3 class="title11 marginT0">{{ $video->title }}</h3>
+                                                            <h3 class="title12 marginT0 truncate-2-lines">{{ $video->title }}</h3>
                                                         </div>
                                                     </a>
                                                 </div>

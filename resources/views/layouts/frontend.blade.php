@@ -375,7 +375,108 @@
         $('.todaysYear').text(new Date().getFullYear());
     });
 </script>
+<!-- header fixed -->
+<script type="text/javascript">
+    var width = $(window).width();
+    if(width >= 768){
+        document.addEventListener("DOMContentLoaded", function(){
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 45) {
+                    document.getElementById('navbar_top').classList.add('fixed-top');
+                    navbar_height = document.querySelector('.navbar').offsetHeight;
+                    document.body.style.paddingTop = navbar_height + 'px';
+                } else {
+                    document.getElementById('navbar_top').classList.remove('fixed-top');
+                    document.body.style.paddingTop = '0';
+                }
+            });
+        });
+    }
+</script>
 
+
+<!-- device wise div remove -->
+<script type="text/javascript">
+    var width = $(window).width();
+    if(width >= 768){
+        $('.visible-xs').remove();
+    }
+    if(width <= 767){
+        $('.hidden-xs').remove();
+    }
+</script>
+
+
+
+<!-- sidebar desktop -->
+<script type="text/javascript">
+    function openNavDesktop() {
+        document.getElementById("desktopSidebar").style.width = "300px";
+    }
+    function closeNavDesktop() {
+        document.getElementById("desktopSidebar").style.width = "0";
+    }
+</script>
+
+<!-- sidebar mobile -->
+<script type="text/javascript">
+    function openNav() {
+        document.getElementById("mySidepanel").style.width = "100%";
+    }
+    function closeNav() {
+        document.getElementById("mySidepanel").style.width = "0";
+    }
+</script>
+
+<!-- go to top -->
+<script type="text/javascript">
+    $(window).scroll(function () {
+        if ($(window).scrollTop() > 300) {
+            $('.go-to-top').show();
+        } else {
+            $('.go-to-top').hide();
+        }
+    });
+    function gotop() {
+        var scrollStep = -window.scrollY / 300,
+            scrollInterval = setInterval(function () {
+                if (window.scrollY != 0) {
+                    window.scrollBy(0, scrollStep);
+                } else clearInterval(scrollInterval);
+            }, 2);
+    }
+</script>
+
+<!-- jquery onscroll image loader -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('img').loadScroll();
+    });
+</script>
+
+
+<!-- FlexSlider -->
+<script type="text/javascript">
+    $(function(){
+        // SyntaxHighlighter.all();
+    });
+    $(window).on('load', function(){
+        $('.flexslider').flexslider({
+            controlNav: false,
+            animation: "slide",
+            animationLoop: false,
+            directionNav: true,
+            itemWidth: 260,
+            itemMargin: 20,
+            pausePlay: true,
+            nextText: "",
+            prevText: "",
+            start: function(slider){
+                $('body').removeClass('loading');
+            }
+        });
+    });
+</script>
 @stack('scripts')
 </body>
 </html>
