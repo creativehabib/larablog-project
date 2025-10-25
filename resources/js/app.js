@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const successMessage = pollVoteForm.dataset.successMessage || '';
         const errorMessage = pollVoteForm.dataset.errorMessage || '';
         const alreadyVotedMessage = pollVoteForm.dataset.alreadyVotedMessage || '';
+        const autoSubmitEnabled = pollVoteForm.dataset.autoSubmit === 'true';
         const statusClasses = {
             base: ['rounded-lg', 'border', 'px-4', 'py-3', 'text-sm'],
             success: ['border-green-200', 'bg-green-50', 'text-green-700'],
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalBangla = document.querySelector('[data-poll-total-bangla]');
         const pollInputs = pollVoteForm.querySelectorAll('input[name="option"]');
+        let isSubmitting = false;
 
         const showStatus = (message, type = 'success') => {
             if (!statusElement) {
@@ -92,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitButton.disabled = false;
                 submitButton.classList.remove('opacity-60', 'cursor-not-allowed');
             }
+
+            isSubmitting = false;
         };
 
         const updatePollStats = (poll) => {
@@ -168,8 +172,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        if (autoSubmitEnabled) {
+            pollInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    if (input.disabled || isSubmitting) {
+                        return;
+                    }
+
+                    pollVoteForm.requestSubmit();
+                });
+            });
+        }
+
         const handleSubmit = async (event) => {
             event.preventDefault();
+
+            if (isSubmitting) {
+                return;
+            }
 
             if (!submitButton) {
                 return;
@@ -182,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            isSubmitting = true;
             disableForm();
 
             try {

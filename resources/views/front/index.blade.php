@@ -2,6 +2,7 @@
 
 @php
     use App\Support\BanglaFormatter;
+    use Illuminate\Support\Facades\Storage;
 @endphp
 
 @section('content')
@@ -312,62 +313,91 @@
                 @if($activePoll)
                     <div class="row">
                         <div class="col-sm-12 col-md-12 marginB30">
-                            <div class="marginCenter w300" id="pollContentDiv152">
-                                <div>
-                                    <p class="pollTitle"><a aria-label="অনলাইন জরিপ" href="https://bhorerkagoj.com/poll" class="colorWhite hoverBlue textDecorationNone">অনলাইন জরিপ</a> <span class="downloadPoll" data-pollid="152" data-polldate="২৬ আগস্ট ২০২৫"><i class="fa fa-download"></i></span></p>
-                                    <div>
-                                        <a class="textDecorationNone" href="https://bhorerkagoj.com/poll/152">
-                                            <img src="https://bhorerkagoj.com/uploads/settings/thumbnail.jpg" data-src="https://bhorerkagoj.com/uploads/polls/1756214840-68adb638672b3.jpg" class="img-responsive" alt="নির্বাচনবিরোধী কথা যে-ই বলুক, তারা রাজনীতির মাঠ থেকে মাইনাস হয়ে যাবেন, সালাহউদ্দিন আহমদের এ মন্তব্যের সঙ্গে আপনি কি একমত?">
-                                        </a>
-                                    </div>
+                            <div class="marginCenter w300" id="pollContent">
+                                <div class="pollCard">
+                                    <p class="pollTitle">
+                                        <a aria-label="অনলাইন জরিপ" href="{{ route('polls.index') }}" class="colorWhite hoverBlue textDecorationNone">অনলাইন জরিপ</a>
+                                        @if(!empty($activePoll->poll_date_bangla))
+                                            <span class="pollDate marginL5">{{ $activePoll->poll_date_bangla }}</span>
+                                        @endif
+                                    </p>
+
+                                    @if($activePoll->image)
+                                        <div class="marginB15">
+                                            <img
+                                                src="{{ Storage::url($activePoll->image) }}"
+                                                class="img-responsive borderRadius5"
+                                                alt="{{ $activePoll->question }}"
+                                            >
+                                        </div>
+                                    @endif
+
                                     <div class="paddingB0 pollTextDiv">
                                         <div class="thumbnail padding0 border0 marginB0">
                                             <div class="caption text-left paddingT0">
-                                                @if(!empty($activePoll->poll_date_bangla))
-                                                    <p class="desktopTime color1 marginB10"><i class="fa fa-regular fa-clock"></i>
-                                                        <span class="pollDate">{{ $activePoll->poll_date_bangla }}</span>
+                                                <h3 class="title12 marginT0">
+                                                    <a class="textDecorationNone colorBlack" href="{{ route('polls.index') }}">
+                                                        <span>{{ $activePoll->question }}</span>
+                                                    </a>
+                                                </h3>
+
+                                                @if($activePoll->source_url)
+                                                    <p class="marginT5 title1_4">
+                                                        <a href="{{ $activePoll->source_url }}" target="_blank" rel="noopener" class="hoverBlue">সূত্র দেখুন</a>
                                                     </p>
                                                 @endif
-                                                <h3 class="title12 marginT0"><a class="textDecorationNone colorBlack" href="https://bhorerkagoj.com/poll/152"><span>{{ $activePoll->question }}</span></a></h3>
 
-                                                <div class="marginT10">
-                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="yes"><input class="clickVoteInput152" type="radio" name="poll_vote" value="yes"> হ্যাঁ ভোট <span class="pull-right totalyesVote152" style="display: none;">৩৫ %</span></label></p>
+                                                <form
+                                                    id="pollVoteForm"
+                                                    action="{{ route('polls.vote', $activePoll) }}"
+                                                    method="POST"
+                                                    class="marginT10"
+                                                    data-poll-id="{{ $activePoll->id }}"
+                                                    data-success-message="আপনার ভোটের জন্য ধন্যবাদ!"
+                                                    data-error-message="দুঃখিত! ভোট সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।"
+                                                    data-already-voted-message="আপনি ইতোমধ্যেই এই জরিপে ভোট দিয়েছেন।"
+                                                    data-auto-submit="true"
+                                                >
+                                                    @csrf
+                                                    <p class="pollOption">
+                                                        <label class="clickVote">
+                                                            <input type="radio" name="option" value="yes">
+                                                            হ্যাঁ ভোট
+                                                            <span class="pull-right" data-poll-count-bangla="yes">{{ $activePoll->yes_vote_bangla }}</span>
+                                                            <span style="display: none;" data-poll-percent-bangla="yes">{{ $activePoll->yes_vote_percent_bangla }}%</span>
+                                                        </label>
+                                                    </p>
 
-                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="no"><input class="clickVoteInput152" type="radio" name="poll_vote" value="no"> না ভোট <span class="pull-right totalNoVote152" style="display: none;">৬১ %</span></label></p>
+                                                    <p class="pollOption">
+                                                        <label class="clickVote">
+                                                            <input type="radio" name="option" value="no">
+                                                            না ভোট
+                                                            <span class="pull-right" data-poll-count-bangla="no">{{ $activePoll->no_vote_bangla }}</span>
+                                                            <span style="display: none;" data-poll-percent-bangla="no">{{ $activePoll->no_vote_percent_bangla }}%</span>
+                                                        </label>
+                                                    </p>
 
-                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="no_comment"><input class="clickVoteInput152" type="radio" name="poll_vote" value="no_comment"> মন্তব্য নেই <span class="pull-right totalNoCommentVote152" style="display: none;">৪ %</span></label></p>
-                                                </div>
+                                                    <p class="pollOption">
+                                                        <label class="clickVote">
+                                                            <input type="radio" name="option" value="no_opinion">
+                                                            মন্তব্য নেই
+                                                            <span class="pull-right" data-poll-count-bangla="no_opinion">{{ $activePoll->no_opinion_bangla }}</span>
+                                                            <span style="display: none;" data-poll-percent-bangla="no_opinion">{{ $activePoll->no_opinion_vote_percent_bangla }}%</span>
+                                                        </label>
+                                                    </p>
+
+                                                    <button type="submit" class="btn btn-primary btn-block marginT10" style="display: none;">ভোট দিন</button>
+                                                </form>
 
                                                 <div class="text-center marginT20 marginB20">
-                                                    <p class="title12 color1">মোট ভোটদাতাঃ <span class="totalVoter152">{{ $activePoll->total_vote_bangla }}</span> জন</p>
+                                                    <p class="title12 color1">
+                                                        মোট ভোটদাতাঃ <span data-poll-total-bangla>{{ $activePoll->total_vote_bangla }}</span> জন
+                                                    </p>
                                                 </div>
 
-                                                <div class="text-center marginT10 pollDownloadTime" style="display: none;">
-                                                    <p class="marginT30 marginB0"><img src="https://bhorerkagoj.com/uploads/settings/logo-black.png" style="height: 50px;" class="img-responsive marginCenter" alt="Logo"></p>
-                                                    <p class="title1_6 colorBlack">ডাউনলোডঃ ২৫ অক্টোবর ২০২৫, ১৮:৩১ পিএম</p>
-                                                </div>
-
-                                                <div class="row downloadPollShareIcon">
-                                                    <div class="col-xs-12 text-center marginB10">
-                                                        <!-- sharethis -->
-                                                        <div class="sharethis-inline-share-buttons st-right st-hidden st-inline-share-buttons" data-url="https://bhorerkagoj.com/poll/152" data-title="নির্বাচনবিরোধী কথা যে-ই বলুক, তারা রাজনীতির মাঠ থেকে মাইনাস হয়ে যাবেন, সালাহউদ্দিন আহমদের এ মন্তব্যের সঙ্গে আপনি কি একমত?" id="st-1"><div class="st-total st-hidden">
-                                                                <span class="st-label"></span>
-                                                                <span class="st-shares">Shares</span>
-                                                            </div><div class="st-btn st-first st-remove-label" data-network="facebook" style="display: none;">
-                                                                <img alt="facebook sharing button" src="https://platform-cdn.sharethis.com/img/facebook.svg">
-                                                            </div><div class="st-btn st-remove-label" data-network="messenger" style="display: none;">
-                                                                <img alt="messenger sharing button" src="https://platform-cdn.sharethis.com/img/messenger.svg">
-                                                            </div><div class="st-btn st-remove-label" data-network="twitter" style="display: none;">
-                                                                <img alt="twitter sharing button" src="https://platform-cdn.sharethis.com/img/twitter.svg">
-                                                            </div><div class="st-btn st-remove-label" data-network="whatsapp" style="display: none;">
-                                                                <img alt="whatsapp sharing button" src="https://platform-cdn.sharethis.com/img/whatsapp.svg">
-                                                            </div><div class="st-btn st-remove-label" data-network="copy" style="display: none;">
-                                                                <img alt="copy sharing button" src="https://platform-cdn.sharethis.com/img/copy.svg">
-                                                            </div><div class="st-btn st-last st-remove-label" data-network="print" style="display: none;">
-                                                                <img alt="print sharing button" src="https://platform-cdn.sharethis.com/img/print.svg">
-                                                            </div></div>
-                                                    </div>
-                                                </div>
+                                                <p class="text-center marginB0">
+                                                    <a class="textDecorationNone hoverBlue" href="{{ route('polls.index') }}">সব জরিপ দেখুন</a>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
