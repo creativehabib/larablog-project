@@ -16,6 +16,7 @@ body{
 }
 body h1,h2,h3,h4,p,span,a{
     font-family: 'SolaimanLipi','Hind Siliguri','Calibri','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
+    font-size: 14px;
 }
 .mainDiv{
     margin-top: 30px;

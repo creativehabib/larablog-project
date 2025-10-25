@@ -40,8 +40,8 @@
                                     @endif
                                 </div>
                                 <div class="caption">
-                                    <h1 class="title8 marginT5 marginB5"><strong>{{ $leadStory->title }}</strong></h1>
-                                    <p class="desktopSummary marginB5">{{ $leadStory->excerpt }}</p>
+                                    <h1 class="title9 marginT5 marginB5"><strong>{{ $leadStory->title }}</strong></h1>
+                                    <p class="desktopSummary marginB5 title1_8">{{ $leadStory->excerpt }}</p>
                                 </div>
                                 <a href="{{ route('posts.show', $leadStory) }}" class="linkOverlay"></a>
                             </div>
@@ -83,7 +83,7 @@
                             @foreach($topStories->skip(1) as $story)
                                 <div class="media positionRelative">
                                     <div class="media-body">
-                                        <h3 class="title11">
+                                        <h3 class="title12">
                                             <strong>
                                                 @if($story->category)
                                                     <span class="shoulder">{{ $story->category->name }}</span>
@@ -92,7 +92,9 @@
                                                 {{ $story->title }}
                                             </strong>
                                         </h3>
-                                        <p class="desktopSummary marginT5 marginB0">{{ $story->excerpt }}</p>
+                                        <p class="desktopSummary marginT5 title1_6 marginB0 truncate-2-lines">
+                                            {{ $story->excerpt }}
+                                        </p>
                                     </div>
                                     <a href="{{ route('posts.show', $story) }}" class="linkOverlay"></a>
                                 </div>
@@ -249,8 +251,8 @@
                         <div class="hidden-xs borderRadius5 borderC1-1">
                             <div class="tabNews bgWhiteImp height100P width100P">
                                 <ul class="nav nav-tabs borderTRadius5" role="tablist">
-                                    <li role="presentation" class="text-center borderNone active"><a aria-label="সর্বশেষ" href="#latestTab" aria-controls="latestTab" role="tab" data-toggle="tab">সর্বশেষ</a></li>
-                                    <li role="presentation" class="text-center borderNone"><a aria-label="পঠিত" href="#popularTab" aria-controls="popularTab" role="tab" data-toggle="tab">সর্বাধিক আলোচিত</a></li>
+                                    <li role="presentation" class="text-center borderNone active"><a aria-label="সর্বশেষ" href="#latestTab" class="title1_8" aria-controls="latestTab" role="tab" data-toggle="tab">সর্বশেষ</a></li>
+                                    <li role="presentation" class="text-center borderNone"><a aria-label="পঠিত" href="#popularTab" class="title1_8" aria-controls="popularTab" role="tab" data-toggle="tab">সর্বাধিক আলোচিত</a></li>
                                 </ul>
                                 <div class="tab-content borderBRadius5 borderT0">
                                     <div role="tabpanel" class="tab-pane active" id="latestTab">
@@ -266,7 +268,7 @@
                                                             </div>
                                                         @endif
                                                         <div class="media-body">
-                                                            <h4 class="margin0 marginL5 hoverBlue title12">{{ $post->title }}</h4>
+                                                            <h4 class="margin0 marginL5 hoverBlue title1_8">{{ $post->title }}</h4>
                                                             <p class="margin0 marginL5 title1_4 colorC1 marginT5">{{ BanglaFormatter::shortDate($post->created_at) }}</p>
                                                         </div>
                                                         <a aria-label="{{ $post->title }}" href="{{ route('posts.show', $post) }}" class="linkOverlay"></a>
@@ -289,7 +291,7 @@
                                                             </div>
                                                         @endif
                                                         <div class="media-body">
-                                                            <h4 class="margin0 marginL5 hoverBlue title12">{{ $post->title }}</h4>
+                                                            <h4 class="margin0 marginL5 hoverBlue title1_8">{{ $post->title }}</h4>
                                                             @if($post->category)
                                                                 <p class="margin0 marginL5 title1_4 colorC1 marginT5">{{ $post->category->name }}</p>
                                                             @endif
@@ -310,18 +312,64 @@
                 @if($activePoll)
                     <div class="row">
                         <div class="col-sm-12 col-md-12 marginB30">
-                            <div class="marginCenter w300">
+                            <div class="marginCenter w300" id="pollContentDiv152">
                                 <div>
-                                    <p class="pollTitle">
-                                        <a aria-label="অনলাইন জরিপ" href="{{ route('polls.index') }}" class="colorWhite hoverBlue textDecorationNone">অনলাইন জরিপ</a>
-                                    </p>
-                                    <div class="pollContent paddingLR20 paddingTB15 borderC1-1 borderRadius5 bgWhite">
-                                        <h4 class="title11 marginT0 marginB10">{{ $activePoll->question }}</h4>
-                                        <p class="marginB5 title1_4">মোট ভোট: {{ $activePoll->total_vote_bangla }}</p>
-                                        @if(!empty($activePoll->poll_date_bangla))
-                                            <p class="marginB5 title1_4">তারিখ: {{ $activePoll->poll_date_bangla }}</p>
-                                        @endif
-                                        <a href="{{ route('polls.index') }}" class="btn btn-danger btn-block marginT10">এখনই ভোট দিন</a>
+                                    <p class="pollTitle"><a aria-label="অনলাইন জরিপ" href="https://bhorerkagoj.com/poll" class="colorWhite hoverBlue textDecorationNone">অনলাইন জরিপ</a> <span class="downloadPoll" data-pollid="152" data-polldate="২৬ আগস্ট ২০২৫"><i class="fa fa-download"></i></span></p>
+                                    <div>
+                                        <a class="textDecorationNone" href="https://bhorerkagoj.com/poll/152">
+                                            <img src="https://bhorerkagoj.com/uploads/settings/thumbnail.jpg" data-src="https://bhorerkagoj.com/uploads/polls/1756214840-68adb638672b3.jpg" class="img-responsive" alt="নির্বাচনবিরোধী কথা যে-ই বলুক, তারা রাজনীতির মাঠ থেকে মাইনাস হয়ে যাবেন, সালাহউদ্দিন আহমদের এ মন্তব্যের সঙ্গে আপনি কি একমত?">
+                                        </a>
+                                    </div>
+                                    <div class="paddingB0 pollTextDiv">
+                                        <div class="thumbnail padding0 border0 marginB0">
+                                            <div class="caption text-left paddingT0">
+                                                @if(!empty($activePoll->poll_date_bangla))
+                                                    <p class="desktopTime color1 marginB10"><i class="fa fa-regular fa-clock"></i>
+                                                        <span class="pollDate">{{ $activePoll->poll_date_bangla }}</span>
+                                                    </p>
+                                                @endif
+                                                <h3 class="title12 marginT0"><a class="textDecorationNone colorBlack" href="https://bhorerkagoj.com/poll/152"><span>{{ $activePoll->question }}</span></a></h3>
+
+                                                <div class="marginT10">
+                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="yes"><input class="clickVoteInput152" type="radio" name="poll_vote" value="yes"> হ্যাঁ ভোট <span class="pull-right totalyesVote152" style="display: none;">৩৫ %</span></label></p>
+
+                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="no"><input class="clickVoteInput152" type="radio" name="poll_vote" value="no"> না ভোট <span class="pull-right totalNoVote152" style="display: none;">৬১ %</span></label></p>
+
+                                                    <p class="pollOption"><label class="clickVote" data-pollid="152" data-votetype="no_comment"><input class="clickVoteInput152" type="radio" name="poll_vote" value="no_comment"> মন্তব্য নেই <span class="pull-right totalNoCommentVote152" style="display: none;">৪ %</span></label></p>
+                                                </div>
+
+                                                <div class="text-center marginT20 marginB20">
+                                                    <p class="title12 color1">মোট ভোটদাতাঃ <span class="totalVoter152">{{ $activePoll->total_vote_bangla }}</span> জন</p>
+                                                </div>
+
+                                                <div class="text-center marginT10 pollDownloadTime" style="display: none;">
+                                                    <p class="marginT30 marginB0"><img src="https://bhorerkagoj.com/uploads/settings/logo-black.png" style="height: 50px;" class="img-responsive marginCenter" alt="Logo"></p>
+                                                    <p class="title1_6 colorBlack">ডাউনলোডঃ ২৫ অক্টোবর ২০২৫, ১৮:৩১ পিএম</p>
+                                                </div>
+
+                                                <div class="row downloadPollShareIcon">
+                                                    <div class="col-xs-12 text-center marginB10">
+                                                        <!-- sharethis -->
+                                                        <div class="sharethis-inline-share-buttons st-right st-hidden st-inline-share-buttons" data-url="https://bhorerkagoj.com/poll/152" data-title="নির্বাচনবিরোধী কথা যে-ই বলুক, তারা রাজনীতির মাঠ থেকে মাইনাস হয়ে যাবেন, সালাহউদ্দিন আহমদের এ মন্তব্যের সঙ্গে আপনি কি একমত?" id="st-1"><div class="st-total st-hidden">
+                                                                <span class="st-label"></span>
+                                                                <span class="st-shares">Shares</span>
+                                                            </div><div class="st-btn st-first st-remove-label" data-network="facebook" style="display: none;">
+                                                                <img alt="facebook sharing button" src="https://platform-cdn.sharethis.com/img/facebook.svg">
+                                                            </div><div class="st-btn st-remove-label" data-network="messenger" style="display: none;">
+                                                                <img alt="messenger sharing button" src="https://platform-cdn.sharethis.com/img/messenger.svg">
+                                                            </div><div class="st-btn st-remove-label" data-network="twitter" style="display: none;">
+                                                                <img alt="twitter sharing button" src="https://platform-cdn.sharethis.com/img/twitter.svg">
+                                                            </div><div class="st-btn st-remove-label" data-network="whatsapp" style="display: none;">
+                                                                <img alt="whatsapp sharing button" src="https://platform-cdn.sharethis.com/img/whatsapp.svg">
+                                                            </div><div class="st-btn st-remove-label" data-network="copy" style="display: none;">
+                                                                <img alt="copy sharing button" src="https://platform-cdn.sharethis.com/img/copy.svg">
+                                                            </div><div class="st-btn st-last st-remove-label" data-network="print" style="display: none;">
+                                                                <img alt="print sharing button" src="https://platform-cdn.sharethis.com/img/print.svg">
+                                                            </div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

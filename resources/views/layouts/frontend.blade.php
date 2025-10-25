@@ -5,6 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $seo['title'] ?? ($settings->site_title ?? config('app.name')) }}</title>
+    <!-- FAVICONS -->
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ asset('assets/apple-touch-icon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/favicon.ico') }}">
+    <meta name="theme-color" content="#3063A0"><!-- End FAVICONS -->
     <meta name="description" content="{{ $seo['description'] ?? ($settings->site_meta_description ?? '') }}">
     @if(!empty($seo['keywords']))
         <meta name="keywords" content="{{ $seo['keywords'] }}">
@@ -48,12 +52,12 @@
         <div class="row">
             <div class="col-md-5">
                 <div class="marginT8">
-                    <span class="title2_0">ঢাকা, বাংলাদেশ</span>
+                    <span class="title1_8">ঢাকা, বাংলাদেশ</span>
                     <i class="fa fa-grip-lines-vertical title1_4 fontNormal marginLR3"></i>
-                    <span class="title2_0">{{ $currentDateBangla ?? now()->format('d F Y') }}</span>
+                    <span class="title1_8">{{ $currentDateBangla ?? now()->format('d F Y') }}</span>
                     @if(!empty($currentTimeBangla))
                         <i class="fa fa-grip-lines-vertical title1_4 fontNormal marginLR3"></i>
-                        <span class="title1_6"><strong>{{ $currentTimeBangla }}</strong></span>
+                        <span class="title1_8"><strong>{{ $currentTimeBangla }}</strong></span>
                     @endif
                 </div>
             </div>

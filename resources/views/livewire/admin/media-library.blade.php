@@ -194,6 +194,16 @@
                                 <textarea class="form-control" rows="3" x-ref="captionInput"></textarea>
                                 <small class="text-muted">Optional description displayed with the media.</small>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="media-url-input">File URL</label>
+                                <div class="input-group">
+                                    <input type="text" id="media-url-input" class="form-control" x-bind:value="fullUrl" x-ref="urlInput" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" x-on:click="copyUrlToClipboard()" title="Copy URL">
+                                        <i class="fas" :class="urlCopied ? 'fa-check text-success' : 'fa-copy'"></i>
+                                    </button>
+                                </div>
+                                <small class="text-success" x-show="urlCopied" x-transition x-cloak>Copied to clipboard!</small>
+                            </div>
                             <template x-if="isImage">
                                 <div class="border rounded p-3 mb-3">
                                     <h6 class="fw-semibold">Resize</h6>
@@ -272,6 +282,8 @@
                     mediaId: null,
                     dimensions: '—',
                     suppressRatioUpdate: false,
+                    fullUrl: '',
+                    urlCopied: false,
 
                     init() {
                         // Watchers for resize inputs
@@ -332,6 +344,9 @@
                             this.$refs.altInput.value = detail.altText || '';
                             this.$refs.captionInput.value = detail.caption || '';
 
+                            this.fullUrl = detail.url || '';
+                            this.urlCopied = false;
+
                             if (modalInstance) {
                                 modalInstance.show();
                             }
@@ -340,6 +355,7 @@
                                 this.setupEditor(detail);
                             });
                         });
+
 
                         // Event Listener to close the modal
                         window.addEventListener('mediaEditorClosed', () => {
@@ -358,6 +374,35 @@
                             });
                         }
                     },
+
+                    // ===============================================
+                    // START: পরিবর্তিত copyUrlToClipboard ফাংশন
+                    // ===============================================
+                    copyUrlToClipboard() {
+                        if (!this.fullUrl) return;
+                        const inputEl = this.$refs.urlInput;
+                        try {
+                            inputEl.select();
+                            inputEl.setSelectionRange(0, 999999);
+                            const successful = document.execCommand('copy');
+                            if (successful) {
+                                this.urlCopied = true;
+                                setTimeout(() => {
+                                    this.urlCopied = false;
+                                }, 2000); // ২ সেকেন্ড পর মেসেজ হাইড করুন
+                            } else {
+                                alert('Failed to copy URL. Please copy manually.');
+                            }
+                        } catch (err) {
+                            console.error('Failed to copy URL: ', err);
+                            alert('Failed to copy URL. Please copy manually.');
+                        }
+                        window.getSelection().removeAllRanges();
+                        inputEl.blur();
+                    },
+                    // ===============================================
+                    // END: পরিবর্তিত copyUrlToClipboard ফাংশন
+                    // ===============================================
 
                     handleDrop(event) {
                         this.dropping = false;
