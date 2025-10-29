@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pollVoteForm) {
         const statusElement = document.querySelector('[data-poll-status]');
         const submitButton = pollVoteForm.querySelector('button[type="submit"]');
-        const csrfToken = pollVoteForm.querySelector('input[name="_token"]').value;
+        const csrfInput = pollVoteForm.querySelector('input[name="_token"]');
+        const csrfToken = csrfInput?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const pollId = pollVoteForm.dataset.pollId;
         const successMessage = pollVoteForm.dataset.successMessage || '';
         const errorMessage = pollVoteForm.dataset.errorMessage || '';
@@ -50,8 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const totalBangla = document.querySelector('[data-poll-total-bangla]');
-        const pollInputs = pollVoteForm.querySelectorAll('input[name="option"]');
+        const pollInputs = pollVoteForm.querySelectorAll('input[name="option"], input[name="poll_vote"]');
         let isSubmitting = false;
+
+        const normalizeOption = (value) => {
+            if (!value) {
+                return value;
+            }
+
+            if (value === 'no_comment') {
+                return 'no_opinion';
+            }
+
+            return value;
+        };
 
         const showStatus = (message, type = 'success') => {
             if (!statusElement) {
@@ -196,10 +209,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formData = new FormData(pollVoteForm);
-            const selectedOption = formData.get('option');
+            let selectedOption = formData.get('option') || formData.get('poll_vote');
+            selectedOption = normalizeOption(selectedOption);
 
             if (!selectedOption) {
                 return;
+            }
+
+            formData.set('option', selectedOption);
+            if (formData.has('poll_vote')) {
+                formData.delete('poll_vote');
             }
 
             isSubmitting = true;
@@ -211,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         Accept: 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': csrfToken,
+                        ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
                     },
                     body: formData,
                 });
