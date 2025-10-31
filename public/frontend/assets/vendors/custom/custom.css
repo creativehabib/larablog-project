@@ -16,7 +16,6 @@ body{
 }
 body h1,h2,h3,h4,p,span,a{
     font-family: 'SolaimanLipi','Hind Siliguri','Calibri','Siyamrupali','Arial', Georgia, "Times New Roman", Times, serif;
-    font-size: 14px;
 }
 .mainDiv{
     margin-top: 30px;
@@ -711,9 +710,9 @@ body h1,h2,h3,h4,p,span,a{
 	/*line-height: 2.7rem !important;*/
 }
 .title12{
-	font-size: 2.1rem;
+	font-size: 2rem;
 	line-height: 2.5rem;
-}
+}া
 .sidebarCatTitle{
 	font-size: 2rem;
 	line-height: 2.4rem;
@@ -1942,8 +1941,8 @@ body h1,h2,h3,h4,p,span,a{
 	border: 1px solid #edebeb;
 }
 .desktopDetailBody{
-	font-size: 2.4rem !important;
-	line-height: 3rem;
+	font-size: 2rem !important;
+	line-height: 2.5rem;
 	text-align: justify !important;
 	color: #333;
 }
@@ -1990,9 +1989,9 @@ body h1,h2,h3,h4,p,span,a{
 	line-height: 2.8rem !important;
 }
 .desktopDetailBody p{
-	font-size: 2.4rem !important;
-	line-height: 3rem;
-	margin-bottom: 30px !important;
+	font-size: 2rem !important;
+	line-height: 2.5rem;
+	margin-bottom: 20px !important;
 }
 .desktopDetailBody a{
 	text-decoration: none !important;
@@ -2046,8 +2045,8 @@ body h1,h2,h3,h4,p,span,a{
 	padding-bottom: 10px;
 }
 .desktopDetailDocument p{
-	font-size: 2.3rem !important;
-	line-height: 3.2rem;
+	font-size: 2rem !important;
+	line-height: 3rem;
 	margin-bottom: 0px;
 }
 .desktopDetailDocument p a{
@@ -2079,8 +2078,8 @@ body h1,h2,h3,h4,p,span,a{
 	font-size: 1.6rem;
 }
 .desktopTrendingTopicItem{
-	font-size: 2rem !important;
-	line-height: 2rem;
+	font-size: 1.8rem !important;
+	line-height: 1.8rem;
 	padding: 5px 10px;
 	/* background-color: #f4f4f4; */
 	margin-top: 5px;
@@ -2088,7 +2087,7 @@ body h1,h2,h3,h4,p,span,a{
 	display: inline-block;
 	border-radius: 5px;
 	text-decoration: none !important;
-	margin-right: 5px;
+	/*margin-right: 5px;*/
 	border: 1px solid #edebeb;
 	color: #333;
 }
@@ -2370,7 +2369,7 @@ body h1,h2,h3,h4,p,span,a{
 	margin-bottom: 8px;
 }
 .desktopHeaderLogoRightDiv a{
-	font-size: 1.8rem;
+	font-size: 1.5rem;
 	color: #344054;
 	border: 1px solid #d0d5dd;
 	box-shadow: 0 1px 2px rgba(16,24,40,.05);
@@ -2496,7 +2495,7 @@ body h1,h2,h3,h4,p,span,a{
 	border-radius: 0px;
 }
 .navbar .headerMenu ul li a{
-	font-size: 2.2rem;
+	font-size: 1.8rem;
 	color: #333;
 	text-decoration: none !important;
 	padding: 5px 0px;
@@ -2947,7 +2946,7 @@ body h1,h2,h3,h4,p,span,a{
 	padding: 10px;border: 1px solid #edebeb;border-top: none; border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;
 }
 .pollOption{
-	font-size: 2rem;background-color: #ebf3f7;border-radius: 5px;padding: 2px 10px
+	font-size: 1.8rem;background-color: #ebf3f7;border-radius: 5px;padding: 2px 10px
 }
 .pollOption label{
 	font-weight: normal;margin-bottom: 0px;color: black;width: 100%

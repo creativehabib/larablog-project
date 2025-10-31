@@ -42,7 +42,6 @@
     <link rel="stylesheet" href="{{ asset('frontend/assets/vendors/fontawesome6/css/solid.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/vendors/flex-gallery/flexslider.css') }}" media="screen">
     <link rel="stylesheet" href="{{ asset('frontend/assets/vendors/custom/custom.css') }}">
-
     @stack('meta')
     @stack('styles')
 </head>
@@ -52,12 +51,12 @@
         <div class="row">
             <div class="col-md-5">
                 <div class="marginT8">
-                    <span class="title1_8">ঢাকা, বাংলাদেশ</span>
+                    <span class="title1_6">ঢাকা, বাংলাদেশ</span>
                     <i class="fa fa-grip-lines-vertical title1_4 fontNormal marginLR3"></i>
-                    <span class="title1_8">{{ $currentDateBangla ?? now()->format('d F Y') }}</span>
+                    <span class="title1_6">{{ $currentDateBangla ?? now()->format('d F Y') }}</span>
                     @if(!empty($currentTimeBangla))
                         <i class="fa fa-grip-lines-vertical title1_4 fontNormal marginLR3"></i>
-                        <span class="title1_8"><strong>{{ $currentTimeBangla }}</strong></span>
+                        <span class="title1_6"><strong>{{ $currentTimeBangla }}</strong></span>
                     @endif
                 </div>
             </div>
@@ -449,6 +448,56 @@
                 } else clearInterval(scrollInterval);
             }, 2);
     }
+</script>
+
+<!-- poll -->
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        $(".clickVote").on("change", function(){
+            var voteType = $(this).data('votetype');
+            var pollId = $(this).data('pollid');
+            $.ajax({
+                type: 'GET',
+                url: 'https://larasblog.test/poll/store'+"/"+pollId+"/"+voteType,
+                success: function (data) {
+                    if(data != ''){
+                        $('.clickVoteInput'+pollId).attr('disabled', true);
+                        $('.totalyesVote'+pollId).html(data.yes_vote_percent_bangla+' %');
+                        $('.totalNoVote'+pollId).html(data.no_vote_percent_bangla+' %');
+                        $('.totalNoCommentVote'+pollId).html(data.no_opinion_vote_percent_bangla+' %');
+                        $('.totalVoter'+pollId).html(data.total_vote_bangla);
+
+                        $('.totalyesVote'+pollId).show();
+                        $('.totalNoVote'+pollId).show();
+                        $('.totalNoCommentVote'+pollId).show();
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script type="text/javascript">
+    $(".downloadPoll").on('click', function () {
+        var pollId = $(this).data('pollid');
+        $('.downloadPoll').hide();
+        $('.downloadPollShareIcon').hide();
+        $('.pollDownloadTime').show();
+        var pollDate = $(this).data('polldate');
+        html2canvas(document.getElementById("pollContentDiv"+pollId)).then(function (canvas) {
+            var anchorTag = document.createElement("a");
+            document.body.appendChild(anchorTag);
+            anchorTag.download = pollDate+".png";
+            anchorTag.href = canvas.toDataURL();
+            anchorTag.target = '_blank';
+            anchorTag.click();
+            $('.downloadPoll').show();
+            $('.downloadPollShareIcon').show();
+            $('.pollDownloadTime').hide();
+        });
+    });
 </script>
 
 <!-- jquery onscroll image loader -->

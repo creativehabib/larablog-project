@@ -313,28 +313,34 @@
                 @if($activePoll)
                     <div class="row">
                         <div class="col-sm-12 col-md-12 marginB30">
-                            <div class="marginCenter w300" id="pollContent">
+                            <div class="marginCenter w300" id="pollContentDiv{{ $activePoll->id }}">
                                 <div class="pollCard">
                                     <p class="pollTitle">
                                         <a aria-label="অনলাইন জরিপ" href="{{ route('polls.index') }}" class="colorWhite hoverBlue textDecorationNone">অনলাইন জরিপ</a>
-                                        @if(!empty($activePoll->poll_date_bangla))
-                                            <span class="pollDate marginL5">{{ $activePoll->poll_date_bangla }}</span>
-                                        @endif
+                                        <span class="downloadPoll" data-pollid="{{$activePoll->id}}" data-polldate="{{ $activePoll->poll_date_bangla }}">
+                                            <i class="fa fa-download"></i>
+                                        </span>
                                     </p>
 
                                     @if($activePoll->image)
-                                        <div class="marginB15">
-                                            <img
-                                                src="{{ Storage::url($activePoll->image) }}"
-                                                class="img-responsive borderRadius5"
-                                                alt="{{ $activePoll->question }}"
-                                            >
+                                        <div>
+                                            <a class="textDecorationNone">
+                                                <img
+                                                    src="{{ Storage::url($activePoll->image) }}"
+                                                    class="img-responsive"
+                                                    alt="{{ $activePoll->question }}"
+                                                >
+                                            </a>
                                         </div>
                                     @endif
 
                                     <div class="paddingB0 pollTextDiv">
                                         <div class="thumbnail padding0 border0 marginB0">
                                             <div class="caption text-left paddingT0">
+                                                <p class="desktopTime color1 marginB10">
+                                                    <i class="fa fa-regular fa-clock"></i>
+                                                    <span class="pollDate">{{ $activePoll->poll_date_bangla }}</span>
+                                                </p>
                                                 <h3 class="title12 marginT0">
                                                     <a class="textDecorationNone colorBlack" href="{{ route('polls.index') }}">
                                                         <span>{{ $activePoll->question }}</span>
@@ -395,9 +401,17 @@
                                                     </p>
                                                 </div>
 
-                                                <p class="text-center marginB0">
-                                                    <a class="textDecorationNone hoverBlue" href="{{ route('polls.index') }}">সব জরিপ দেখুন</a>
-                                                </p>
+                                                <div class="text-center marginT10 pollDownloadTime" style="display: none">
+                                                    <p class="marginT30 marginB10">
+                                                        <img src="{{ $logoUrl }}" alt="logo" height="50"/>
+                                                    </p>
+                                                    <p class="title1_4 colorBlack">ডাউনলোডঃ
+                                                        <span class="title1_4">{{ $currentDateBangla ?? now()->format('d F Y') }}</span>
+                                                        @if(!empty($currentTimeBangla))
+                                                            <i class="fa fa-grip-lines-vertical title1_4 fontNormal marginLR3"></i>
+                                                            <span class="title1_4"><strong>{{ $currentTimeBangla }}</strong></span>
+                                                        @endif</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
