@@ -127,9 +127,9 @@ class Settings extends Component
 
         if ($query) {
             Cache::forget('general_settings');
-            $this->dispatch('showToastr', ['type' => 'success', 'message' => 'General Setting Updated Successfully']);
+            $this->dispatch('showToastr', type: 'success', message: 'General Setting Updated Successfully.');
         } else {
-            $this->dispatch('showToastr', ['type' => 'error', 'message' => 'General Setting Not Updated']);
+            $this->dispatch('showToastr', type: 'error', message: 'General Setting Not Updated');
         }
     }
 
@@ -175,11 +175,10 @@ class Settings extends Component
         if (! empty($data)) {
             $settings->update($data);
             Cache::forget('general_settings');
-            $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Branding updated successfully']);
+            $this->dispatch('showToastr', type: 'success', message: 'Branding Updated Successfully.');
             return;
         }
-
-        $this->dispatch('showToastr', ['type' => 'info', 'message' => 'Please upload a logo or favicon to update branding']);
+        $this->dispatch('showToastr', type: 'info', message: 'Please upload a favicon to update branding');
     }
 
     public function updateDashboardVisibility(): void
@@ -205,7 +204,7 @@ class Settings extends Component
 
         Cache::forget('general_settings');
 
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Dashboard visibility preferences saved successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'Dashboard visibility preferences saved successfully');
     }
 
     public function clearAllCache(): void
@@ -215,7 +214,7 @@ class Settings extends Component
 
         $this->refreshCacheStatistics();
 
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'All CMS caches cleared successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'All CMS caches cleared successfully');
     }
 
     public function clearCompiledViews(): void
@@ -224,7 +223,7 @@ class Settings extends Component
 
         $this->refreshCacheStatistics();
 
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Compiled views refreshed successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'Compiled views refreshed successfully');
     }
 
     public function clearConfigCache(): void
@@ -232,8 +231,7 @@ class Settings extends Component
         Artisan::call('config:clear');
 
         $this->refreshCacheStatistics();
-
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Configuration cache cleared successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'Configuration cache refreshed successfully');
     }
 
     public function clearRouteCache(): void
@@ -241,8 +239,7 @@ class Settings extends Component
         Artisan::call('route:clear');
 
         $this->refreshCacheStatistics();
-
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Route cache cleared successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'Route cache cleared successfully');
     }
 
     public function clearLogFiles(): void
@@ -258,7 +255,7 @@ class Settings extends Component
 
         $this->refreshCacheStatistics();
 
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'System log files cleared successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'System log files cleared successfully');
     }
 
     protected function refreshCacheStatistics(): void
@@ -383,7 +380,7 @@ class Settings extends Component
         Cache::forget('general_settings');
         Artisan::call('route:clear');
 
-        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Permalink settings updated successfully']);
+        $this->dispatch('showToastr', type: 'success', message: 'Permalink settings updated successfully');
     }
 
     public function getPermalinkPreviewProperty(): string

@@ -49,8 +49,6 @@
 
 @include('front.partials.header')
 
-@include('front.partials.sidebar')
-
 <div class="mainDiv">
     @yield('content')
 </div>

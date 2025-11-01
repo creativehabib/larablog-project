@@ -244,10 +244,6 @@
             @include('front.partials.sidebar')
         </div>
     </div>
-
-    <span onclick="gotop()" class="go-to-top hidden-print" style="display: none;">
-        <i class="fa fa-angle-up" aria-hidden="true"></i>
-    </span>
 @endsection
 
 @push('scripts')
