@@ -22,7 +22,7 @@ class PostController extends Controller
             'description' => $post->meta_description ?: $post->excerpt,
             'keywords' => $post->meta_keywords ?: $settings?->site_meta_keywords,
             'type' => 'article',
-            'canonical' => route('posts.show', $post),
+            'canonical' => post_permalink($post),
             'indexable' => (bool) $post->is_indexable,
             'image' => $image,
             'published_time' => optional($post->created_at)->toIso8601String(),

@@ -17,10 +17,10 @@ use App\Http\Controllers\Frontend\CategoryController as FrontCategoryController;
 use App\Http\Controllers\Frontend\PollController;
 use App\Http\Controllers\Frontend\PostController as FrontPostController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Support\PermalinkManager;
 
 Route::get('/', [FrontHomeController::class, 'index'])->name('home');
 Route::get('/category/{category:slug}', [FrontCategoryController::class, 'show'])->name('categories.show');
-Route::get('/news/{post:slug}', [FrontPostController::class, 'show'])->name('posts.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
@@ -66,3 +66,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::resource('users', UserManagementController::class);
     });
 });
+
+$permalinkRoute = PermalinkManager::routeDefinition();
+
+$postRoute = Route::get($permalinkRoute['uri'], [FrontPostController::class, 'show'])
+    ->name('posts.show');
+
+if (! empty($permalinkRoute['constraints'])) {
+    $postRoute->where($permalinkRoute['constraints']);
+}

@@ -191,6 +191,19 @@ class Post extends Model
         return $this->content_type === self::CONTENT_TYPE_ARTICLE;
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if ($field) {
+            return parent::resolveRouteBinding($value, $field);
+        }
+
+        if (is_numeric($value)) {
+            return $this->whereKey($value)->firstOrFail();
+        }
+
+        return $this->where($this->getRouteKeyName(), $value)->firstOrFail();
+    }
+
     public function videoThumbnailUrl(): ?string
     {
         if (! $this->isVideo()) {

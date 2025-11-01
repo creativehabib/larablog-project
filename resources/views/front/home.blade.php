@@ -22,7 +22,7 @@
         @forelse ($posts as $post)
             <article class="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                 @if ($post->thumbnail_url)
-                    <a href="{{ route('posts.show', $post) }}" class="relative block aspect-[16/9] overflow-hidden bg-slate-100">
+                    <a href="{{ post_permalink($post) }}" class="relative block aspect-[16/9] overflow-hidden bg-slate-100">
                         <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                         @if($post->isVideo())
                             <span class="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
@@ -56,11 +56,11 @@
                         @endif
                     </div>
                     <h2 class="mt-3 text-xl font-semibold text-slate-900 group-hover:text-indigo-600">
-                        <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
+                        <a href="{{ post_permalink($post) }}">{{ $post->title }}</a>
                     </h2>
                     <p class="mt-3 text-sm text-slate-600 flex-1">{{ $post->excerpt }}</p>
                     <div class="mt-6 flex items-center justify-between text-sm text-indigo-600">
-                        <a href="{{ route('posts.show', $post) }}" class="font-semibold hover:text-indigo-700">
+                        <a href="{{ post_permalink($post) }}" class="font-semibold hover:text-indigo-700">
                             {{ $post->isVideo() ? 'Watch video' : 'Read full story' }}
                         </a>
                         @if($post->author)

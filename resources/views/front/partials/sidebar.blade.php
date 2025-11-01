@@ -87,7 +87,7 @@
                 <ul class="desktopSidebarList">
                     @foreach(($latestSidebarPosts ?? collect())->take(6) as $post)
                         <li>
-                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ route('posts.show', $post) }}">
+                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ post_permalink($post) }}">
                                 {{ \Illuminate\Support\Str::limit($post->title, 90) }}
                             </a>
                             @if($post->category)
@@ -105,7 +105,7 @@
                 <ul class="desktopSidebarList">
                     @foreach(($popularPosts ?? collect())->take(6) as $post)
                         <li>
-                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ route('posts.show', $post) }}">
+                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ post_permalink($post) }}">
                                 {{ \Illuminate\Support\Str::limit($post->title, 90) }}
                             </a>
                             @if($post->category)

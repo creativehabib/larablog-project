@@ -4,6 +4,7 @@
             'general_settings' => ['icon' => 'user', 'label' => 'General Settings'],
             'logo_favicon' => ['icon' => 'settings', 'label' => 'Logo & Favicon'],
             'dashboard_visibility' => ['icon' => 'eye', 'label' => 'Dashboard Visibility'],
+            'permalinks' => ['icon' => 'link', 'label' => 'Permalinks'],
             'security_settings' => ['icon' => 'shield', 'label' => 'Security'],
             'notification' => ['icon' => 'bell', 'label' => 'Notification'],
             'billing' => ['icon' => 'credit-card', 'label' => 'Billing'],
@@ -199,6 +200,59 @@
                                     <button type="submit" class="btn btn-primary">Save visibility</button>
                                 </form>
                             @endif
+                        </div>
+
+                        <div class="tab-pane {{ $tab == 'permalinks' ? 'active show' : '' }}" id="permalinks">
+                            <h6>PERMALINK SETTINGS</h6>
+                            <hr>
+                            <form wire:submit.prevent="updatePermalinks">
+                                <p class="text-muted small">আপনার পোস্টের URL কোন ফরম্যাটে থাকবে তা নির্বাচন করুন। এসইও বান্ধব URL-এর জন্য "Post name" বা কাস্টম স্ট্রাকচার ব্যবহার করুন।</p>
+
+                                <div class="mb-4">
+                                    @foreach ($permalinkOptions as $key => $option)
+                                        @php
+                                            $inputId = 'permalink-' . $key;
+                                            $sampleUrl = \App\Support\PermalinkManager::previewSample($key);
+                                        @endphp
+                                        <div class="custom-control custom-radio mb-3">
+                                            <input type="radio" id="{{ $inputId }}" class="custom-control-input" wire:model="permalink_structure" value="{{ $key }}">
+                                            <label class="custom-control-label" for="{{ $inputId }}">
+                                                <span class="font-weight-semibold d-block">{{ $option['label'] }}</span>
+                                                <span class="text-muted small">{{ $sampleUrl }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="permalink-custom" class="custom-control-input" wire:model="permalink_structure" value="custom">
+                                        <label class="custom-control-label" for="permalink-custom">
+                                            <span class="font-weight-semibold d-block">Custom Structure</span>
+                                            <span class="text-muted small">নিজের ইচ্ছামতো URL প্যাটার্ন ব্যবহার করুন (যেমন: /news/%year%/%postname%).</span>
+                                        </label>
+                                    </div>
+                                    @error('permalink_structure')<span class="text-danger d-block mt-2">{{ $message }}</span>@enderror
+                                </div>
+
+                                @if ($permalink_structure === 'custom')
+                                    <div class="form-group">
+                                        <label for="custom-permalink"><b>Custom structure</b></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">{{ rtrim(url('/'), '/') }}/</span>
+                                            </div>
+                                            <input type="text" id="custom-permalink" class="form-control" wire:model.lazy="custom_permalink_structure" placeholder="%category%/%postname%">
+                                        </div>
+                                        <small class="form-text text-muted">সম্ভাব্য ট্যাগসমূহ: {{ implode(', ', $permalinkTokens) }}</small>
+                                        @error('custom_permalink_structure')<span class="text-danger">{{ $message }}</span>@enderror
+                                    </div>
+                                @endif
+
+                                <div class="form-group">
+                                    <label for="permalink-preview"><b>Sample URL</b></label>
+                                    <div id="permalink-preview" class="alert alert-secondary mb-0">{{ $this->permalinkPreview }}</div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Save permalinks</button>
+                            </form>
                         </div>
 
                         <div class="tab-pane {{ $tab == 'security_settings' ? 'active show' : '' }}" id="security_settings">

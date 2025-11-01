@@ -8,7 +8,7 @@
     </url>
     @foreach($posts as $post)
         <url>
-            <loc>{{ route('posts.show', $post) }}</loc>
+            <loc>{{ post_permalink($post) }}</loc>
             <lastmod>{{ optional($post->updated_at ?? $post->created_at)->tz('UTC')->toAtomString() }}</lastmod>
             <changefreq>daily</changefreq>
             <priority>0.8</priority>

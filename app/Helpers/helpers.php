@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\GeneralSetting;
+use App\Models\Post;
 use App\Models\Setting;
+use App\Support\PermalinkManager;
 use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('settings')) {
@@ -11,6 +13,13 @@ if (!function_exists('settings')) {
             return $setting ? $setting->value : null;
         }
         return Setting::pluck('value', 'key')->all();
+    }
+}
+
+if (! function_exists('post_permalink')) {
+    function post_permalink(Post $post, bool $absolute = true): string
+    {
+        return PermalinkManager::urlFor($post, $absolute);
     }
 }
 

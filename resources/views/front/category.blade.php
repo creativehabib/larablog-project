@@ -50,7 +50,7 @@
                                     <h2 class="title9 marginT5 marginB5"><strong>{{ $leadStory->title }}</strong></h2>
                                     <p class="desktopSummary marginB5 title1_8">{{ $leadStory->excerpt }}</p>
                                 </div>
-                                <a href="{{ route('posts.show', $leadStory) }}" class="linkOverlay"></a>
+                                <a href="{{ post_permalink($leadStory) }}" class="linkOverlay"></a>
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                                             <div class="caption paddingTB0 paddingLR10">
                                                 <h3 class="title11 marginT0"><strong>{{ $topHighlight->title }}</strong></h3>
                                             </div>
-                                            <a href="{{ route('posts.show', $topHighlight) }}" class="linkOverlay"></a>
+                                            <a href="{{ post_permalink($topHighlight) }}" class="linkOverlay"></a>
                                         </div>
                                     @endif
                                 </div>
@@ -90,7 +90,7 @@
                                                 {{ $story->excerpt }}
                                             </p>
                                         </div>
-                                        <a href="{{ route('posts.show', $story) }}" class="linkOverlay"></a>
+                                        <a href="{{ post_permalink($story) }}" class="linkOverlay"></a>
                                     </div>
                                 @endforeach
                             </div>
@@ -132,7 +132,7 @@
                                             <div class="caption">
                                                 <h3 class="title12 marginT0 truncate-2-lines"><strong>{{ $story->title }}</strong></h3>
                                             </div>
-                                            <a href="{{ route('posts.show', $story) }}" class="linkOverlay"></a>
+                                            <a href="{{ post_permalink($story) }}" class="linkOverlay"></a>
                                         </div>
                                     </div>
                                 @endforeach
@@ -167,7 +167,7 @@
                                 <div class="caption">
                                     <h3 class="title12 marginT0 truncate-2-lines"><strong>{{ $post->title }}</strong></h3>
                                 </div>
-                                <a href="{{ route('posts.show', $post) }}" class="linkOverlay"></a>
+                                <a href="{{ post_permalink($post) }}" class="linkOverlay"></a>
                             </div>
                         </div>
                     @empty
