@@ -38,7 +38,7 @@
             <div class="row">
                 <div class="col-xs-6"><a class="sidebarCatTitle" aria-label="প্রচ্ছদ" href="{{ route('home') }}"> প্রচ্ছদ</a></div>
                 @foreach($allCategories ?? [] as $category)
-                    <div class="col-xs-6"><a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('home', ['category' => $category->slug]) }}"> {{ $category->name }}</a></div>
+                    <div class="col-xs-6"><a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}"> {{ $category->name }}</a></div>
                 @endforeach
                 <div class="col-xs-6"><a class="sidebarCatTitle" aria-label="মতামত জরিপ" href="{{ route('polls.index') }}"><i class="fa fa-poll"></i> মতামত জরিপ</a></div>
                 <div class="col-xs-6"><a class="sidebarCatTitle" aria-label="আরএসএস" href="{{ route('feed') }}"><i class="fa fa-rss"></i> আরএসএস</a></div>

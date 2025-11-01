@@ -86,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
 
         // --- ২. সাইডবার ডেটা কম্পোজার ---
         // $latestSidebarPosts, $popularPosts, $trendingTopics, $activePoll এই ভেরিয়েবলগুলো টার্গেট করা হয়েছে।
-        View::composer(['front.partials.sidebar', 'front.index'], function ($view) {
+        View::composer(['front.partials.sidebar', 'front.index', 'front.category'], function ($view) {
 
             $latestSidebarPosts = Post::query()
                 ->with(['category'])

@@ -9,7 +9,7 @@
                         <p>
                             <span class="desktopTrendingTopicItem bgRed colorWhite">ট্রেন্ডিং</span>
                             @foreach($trendingTopics as $topic)
-                                <a class="desktopTrendingTopicItem" aria-label="{{ $topic->name }}" href="{{ route('home', ['category' => $topic->slug]) }}">{{ $topic->name }}</a>
+                                <a class="desktopTrendingTopicItem" aria-label="{{ $topic->name }}" href="{{ route('categories.show', $topic) }}">{{ $topic->name }}</a>
                             @endforeach
                         </p>
                     </div>
@@ -189,8 +189,8 @@
                                     <div class="row desktopFlexRow">
                                         <div class="col-sm-12 col-md-12">
                                             <h2 class="desktopSectionTitle">
-                                                <a aria-label="{{ $category->name }}" href="{{ route('home', ['category' => $category->slug]) }}"> {{ $category->name }}</a>
-                                                <a href="{{ route('home', ['category' => $category->slug]) }}" class="float-right"><i class="fa fa-angle-double-right title1_6"></i></a>
+                                                <a aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}"> {{ $category->name }}</a>
+                                                <a href="{{ route('categories.show', $category) }}" class="float-right"><i class="fa fa-angle-double-right title1_6"></i></a>
                                                 <span class="bottomMarked"></span>
                                             </h2>
                                         </div>
