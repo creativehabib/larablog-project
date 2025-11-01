@@ -21,7 +21,13 @@
 
     $errorToasts = [];
 
-    $viewErrors = $errors ?? session('errors');
+    if (isset($errors)) {
+        $viewErrors = $errors;
+    } elseif (session()->has('errors')) {
+        $viewErrors = session('errors');
+    } else {
+        $viewErrors = app('view')->shared('errors');
+    }
     if ($viewErrors instanceof \Illuminate\Support\ViewErrorBag) {
         $viewErrors = $viewErrors->getBag('default');
     }
