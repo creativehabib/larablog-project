@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -267,6 +268,7 @@ class Settings extends Component
         ]);
 
         Cache::forget('general_settings');
+        Artisan::call('route:clear');
 
         $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Permalink settings updated successfully']);
     }
