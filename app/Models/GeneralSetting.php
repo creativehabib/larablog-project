@@ -22,10 +22,16 @@ class GeneralSetting extends Model
         'permalink_structure',
         'custom_permalink_structure',
         'category_slug_prefix_enabled',
+        'sitemap_enabled',
+        'sitemap_items_per_page',
+        'sitemap_enable_index_now',
     ];
 
     protected $casts = [
         'dashboard_widget_visibility' => 'array',
         'category_slug_prefix_enabled' => 'boolean',
+        'sitemap_enabled' => 'boolean',
+        'sitemap_items_per_page' => 'integer',
+        'sitemap_enable_index_now' => 'boolean',
     ];
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
@@ -15,18 +16,30 @@ class SitemapController extends Controller
      */
     public function index(): Response
     {
-        // (পরিবর্তন) $itemsPerPage এবং post_count বাদ দেওয়া হয়েছে
+        $settings = general_settings();
+
+        if (! ($settings?->sitemap_enabled ?? true)) {
+            abort(404);
+        }
+
+        $itemsPerPage = max(1, (int) ($settings?->sitemap_items_per_page ?? 1000));
+
         $postGroups = Post::query()
             ->where('is_indexable', true)
             ->select(
                 DB::raw('YEAR(created_at) as year'),
                 DB::raw('MONTH(created_at) as month'),
-                DB::raw('MAX(updated_at) as lastmod')
+                DB::raw('MAX(updated_at) as lastmod'),
+                DB::raw('COUNT(*) as total_posts')
             )
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($group) use ($itemsPerPage) {
+                $group->pages = max(1, (int) ceil(($group->total_posts ?? 0) / $itemsPerPage));
+                return $group;
+            });
 
         $categoryLastUpdated = Category::query()
             ->orderByDesc('updated_at')
@@ -34,26 +47,41 @@ class SitemapController extends Controller
 
         return response()
             ->view('front.sitemap-index', [
-                'postGroups' => $postGroups, // শুধু মাস গ্রুপ পাস করুন
+                'postGroups' => $postGroups,
                 'categoryLastUpdated' => $categoryLastUpdated,
-                // '$itemsPerPage' পাস করা বন্ধ করা হয়েছে
+                'itemsPerPage' => $itemsPerPage,
             ])
             ->header('Content-Type', 'application/xml');
     }
 
     /**
      * sitemap-posts-{year}-{month}.xml (পোস্টের লিস্ট) দেখান।
-     * (পরিবর্তন) $page প্যারামিটার এবং pagination লজিক সরানো হয়েছে
      */
-    public function posts(string $year, string $month): Response
+    public function posts(string $year, string $month, Request $request): Response
     {
-        $posts = Post::query()
+        $settings = general_settings();
+
+        if (! ($settings?->sitemap_enabled ?? true)) {
+            abort(404);
+        }
+
+        $itemsPerPage = max(1, (int) ($settings?->sitemap_items_per_page ?? 1000));
+        $page = max(1, (int) $request->integer('page', 1));
+        $offset = ($page - 1) * $itemsPerPage;
+
+        $query = Post::query()
             ->where('is_indexable', true)
             ->with('category')
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->orderByDesc('updated_at')
-            ->get(); // সব পোস্ট আনুন (skip/take ছাড়া)
+            ->orderByDesc('updated_at');
+
+        $totalPosts = (clone $query)->count();
+
+        $posts = $query
+            ->skip($offset)
+            ->take($itemsPerPage)
+            ->get();
 
         if ($posts->isEmpty()) {
             abort(404);
@@ -62,6 +90,11 @@ class SitemapController extends Controller
         return response()
             ->view('front.sitemap-posts', [
                 'posts' => $posts,
+                'currentPage' => $page,
+                'totalPages' => max(1, (int) ceil($totalPosts / $itemsPerPage)),
+                'itemsPerPage' => $itemsPerPage,
+                'year' => $year,
+                'month' => $month,
             ])
             ->header('Content-Type', 'application/xml');
     }
@@ -71,6 +104,12 @@ class SitemapController extends Controller
      */
     public function categories(): Response
     {
+        $settings = general_settings();
+
+        if (! ($settings?->sitemap_enabled ?? true)) {
+            abort(404);
+        }
+
         $categories = Category::query()
             ->orderByDesc('updated_at')
             ->get();
@@ -87,6 +126,12 @@ class SitemapController extends Controller
      */
     public function pages(): Response
     {
+        $settings = general_settings();
+
+        if (! ($settings?->sitemap_enabled ?? true)) {
+            abort(404);
+        }
+
         $pages = [
             ['url' => route('home'), 'lastmod' => now()->subDay()],
             ['url' => route('polls.index'), 'lastmod' => now()->subWeek()],
