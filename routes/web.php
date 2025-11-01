@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
@@ -24,7 +25,16 @@ $categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
 $categoryPrefixEnabled = is_null($categoryPrefixEnabled) ? true : (bool) $categoryPrefixEnabled;
 $categoryRouteUri = $categoryPrefixEnabled ? '/category/{category:slug}' : '/{category:slug}';
 
-Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])->name('categories.show');
+$categoryRoute = Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])
+    ->name('categories.show');
+
+$permalinkRoute = PermalinkManager::routeDefinition();
+
+if (! $categoryPrefixEnabled && $permalinkRoute['template'] === '%postname%') {
+    $categoryRoute->missing(function (Request $request) {
+        return app(FrontPostController::class)->show($request->route('category'));
+    });
+}
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
@@ -70,8 +80,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::resource('users', UserManagementController::class);
     });
 });
-
-$permalinkRoute = PermalinkManager::routeDefinition();
 
 $postRoute = Route::get($permalinkRoute['uri'], [FrontPostController::class, 'show'])
     ->name('posts.show');
