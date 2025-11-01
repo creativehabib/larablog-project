@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -27,6 +28,7 @@ class Settings extends Component
     public $permalink_structure = PermalinkManager::DEFAULT_STRUCTURE;
     public $custom_permalink_structure;
     public $category_slug_prefix_enabled = true;
+    public string $cacheSize = '0 B';
 
     protected $queryString = [
         'tab' => ['keep' => true]
@@ -94,6 +96,8 @@ class Settings extends Component
             $savedRoles = $storedVisibility[$widgetKey] ?? $this->availableRoles;
             $this->dashboardVisibility[$widgetKey] = array_values(array_intersect($this->availableRoles, (array) $savedRoles));
         }
+
+        $this->refreshCacheStatistics();
     }
 
     public function updateSiteInfo()
@@ -202,6 +206,109 @@ class Settings extends Component
         Cache::forget('general_settings');
 
         $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Dashboard visibility preferences saved successfully']);
+    }
+
+    public function clearAllCache(): void
+    {
+        Artisan::call('optimize:clear');
+        Cache::flush();
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'All CMS caches cleared successfully']);
+    }
+
+    public function clearCompiledViews(): void
+    {
+        Artisan::call('view:clear');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Compiled views refreshed successfully']);
+    }
+
+    public function clearConfigCache(): void
+    {
+        Artisan::call('config:clear');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Configuration cache cleared successfully']);
+    }
+
+    public function clearRouteCache(): void
+    {
+        Artisan::call('route:clear');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'Route cache cleared successfully']);
+    }
+
+    public function clearLogFiles(): void
+    {
+        $logPath = storage_path('logs');
+
+        if (File::exists($logPath)) {
+            collect(File::files($logPath))->each(static function ($file) {
+                /** @var \SplFileInfo $file */
+                File::delete($file->getPathname());
+            });
+        }
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', ['type' => 'success', 'message' => 'System log files cleared successfully']);
+    }
+
+    protected function refreshCacheStatistics(): void
+    {
+        $this->cacheSize = $this->calculateCacheSize();
+    }
+
+    protected function calculateCacheSize(): string
+    {
+        $paths = [
+            storage_path('framework/cache'),
+            storage_path('framework/views'),
+            bootstrap_path('cache'),
+            storage_path('logs'),
+        ];
+
+        $total = 0;
+
+        foreach ($paths as $path) {
+            $total += $this->directorySize($path);
+        }
+
+        return $this->formatBytes($total);
+    }
+
+    protected function directorySize(string $path): int
+    {
+        if (! File::exists($path)) {
+            return 0;
+        }
+
+        return collect(File::allFiles($path))->sum(static function ($file) {
+            /** @var \SplFileInfo $file */
+            return $file->getSize();
+        });
+    }
+
+    protected function formatBytes(int $bytes, int $precision = 2): string
+    {
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $power = (int) floor(log($bytes, 1024));
+        $power = min($power, count($units) - 1);
+
+        $value = $bytes / (1024 ** $power);
+
+        return number_format($value, $precision) . ' ' . $units[$power];
     }
 
     public function updatePermalinks(): void
