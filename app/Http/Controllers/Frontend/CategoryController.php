@@ -12,6 +12,16 @@ class CategoryController extends Controller
 {
     public function show(Category $category)
     {
+        return $this->renderCategory($category);
+    }
+
+    public function showCategory(Category $category)
+    {
+        return $this->renderCategory($category);
+    }
+
+    protected function renderCategory(Category $category)
+    {
         $settings = $this->settings();
 
         $postsQuery = Post::query()

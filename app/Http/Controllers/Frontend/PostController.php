@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\GeneralSetting;
 use App\Models\Post;
+use App\Support\PermalinkManager;
 use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
@@ -12,6 +14,16 @@ class PostController extends Controller
     public function show(...$parameters)
     {
         $post = $this->resolvePostParameter($parameters);
+
+        if (! $post) {
+            $categoryResponse = $this->maybeHandleCategoryFallback($parameters);
+
+            if ($categoryResponse) {
+                return $categoryResponse;
+            }
+
+            abort(404);
+        }
 
         $post->loadMissing(['category', 'author', 'playlist']);
 
@@ -54,14 +66,14 @@ class PostController extends Controller
         });
     }
 
-    protected function resolvePostParameter(array $parameters): Post
+    protected function resolvePostParameter(array $parameters): ?Post
     {
         $parameter = array_values($parameters);
 
         $postParameter = array_pop($parameter);
 
         if (is_null($postParameter) || $postParameter === '') {
-            abort(404);
+            return null;
         }
 
         if ($postParameter instanceof Post) {
@@ -78,6 +90,59 @@ class PostController extends Controller
             $post = Post::query()->whereKey($postParameter)->first();
         }
 
-        return $post ?? abort(404);
+        return $post;
+    }
+
+    protected function maybeHandleCategoryFallback(array $parameters)
+    {
+        $slug = $this->extractTrailingSlug($parameters);
+
+        if ($slug === null) {
+            return null;
+        }
+
+        if ($this->categoryPrefixEnabled()) {
+            return null;
+        }
+
+        if (! $this->isPostNameStructure()) {
+            return null;
+        }
+
+        $category = Category::query()->where('slug', $slug)->first();
+
+        if (! $category) {
+            return null;
+        }
+
+        return app(CategoryController::class)->showCategory($category);
+    }
+
+    protected function extractTrailingSlug(array $parameters): ?string
+    {
+        $parameter = array_values($parameters);
+        $value = array_pop($parameter);
+
+        if ($value instanceof Post || $value === null) {
+            return null;
+        }
+
+        $slug = trim((string) $value);
+
+        return $slug === '' ? null : $slug;
+    }
+
+    protected function categoryPrefixEnabled(): bool
+    {
+        $setting = general_settings('category_slug_prefix_enabled');
+
+        return is_null($setting) ? true : (bool) $setting;
+    }
+
+    protected function isPostNameStructure(): bool
+    {
+        $routeDefinition = PermalinkManager::routeDefinition();
+
+        return $routeDefinition['template'] === '%postname%';
     }
 }
