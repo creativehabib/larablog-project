@@ -217,6 +217,42 @@ class Settings extends Component
         $this->dispatch('showToastr', type: 'success', message: 'All CMS caches cleared successfully');
     }
 
+    public function optimizeCaches(): void
+    {
+        Artisan::call('optimize');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', type: 'success', message: 'Application caches optimized successfully');
+    }
+
+    public function cacheConfig(): void
+    {
+        Artisan::call('config:cache');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', type: 'success', message: 'Configuration cached successfully');
+    }
+
+    public function cacheRoutes(): void
+    {
+        Artisan::call('route:cache');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', type: 'success', message: 'Route cache generated successfully');
+    }
+
+    public function cacheViews(): void
+    {
+        Artisan::call('view:cache');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', type: 'success', message: 'View cache generated successfully');
+    }
+
     public function clearCompiledViews(): void
     {
         Artisan::call('view:clear');
@@ -224,6 +260,15 @@ class Settings extends Component
         $this->refreshCacheStatistics();
 
         $this->dispatch('showToastr', type: 'success', message: 'Compiled views refreshed successfully');
+    }
+
+    public function clearOptimizationCaches(): void
+    {
+        Artisan::call('optimize:clear');
+
+        $this->refreshCacheStatistics();
+
+        $this->dispatch('showToastr', type: 'success', message: 'Optimization caches cleared successfully');
     }
 
     public function clearConfigCache(): void
