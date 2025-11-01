@@ -247,6 +247,15 @@
                                 @endif
 
                                 <div class="form-group">
+                                    <label for="category-prefix-toggle"><b>Category URL prefix</b></label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="category-prefix-toggle" wire:model.defer="category_slug_prefix_enabled">
+                                        <label class="custom-control-label" for="category-prefix-toggle">{{ $category_slug_prefix_enabled ? 'Category prefix enabled' : 'Category prefix disabled' }}</label>
+                                    </div>
+                                    <small class="form-text text-muted">এই অপশন চালু থাকলে ক্যাটাগরি স্লাগের আগে "category" যোগ হবে (যেমন: /category/news)। বন্ধ করলে স্লাগটি সরাসরি ব্যবহার হবে (যেমন: /news)।</small>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="permalink-preview"><b>Sample URL</b></label>
                                     <div id="permalink-preview" class="alert alert-secondary mb-0">{{ $this->permalinkPreview }}</div>
                                 </div>

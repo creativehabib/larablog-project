@@ -20,7 +20,11 @@ use App\Http\Controllers\Frontend\SitemapController;
 use App\Support\PermalinkManager;
 
 Route::get('/', [FrontHomeController::class, 'index'])->name('home');
-Route::get('/category/{category:slug}', [FrontCategoryController::class, 'show'])->name('categories.show');
+$categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
+$categoryPrefixEnabled = is_null($categoryPrefixEnabled) ? true : (bool) $categoryPrefixEnabled;
+$categoryRouteUri = $categoryPrefixEnabled ? '/category/{category:slug}' : '/{category:slug}';
+
+Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])->name('categories.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');

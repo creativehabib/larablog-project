@@ -26,6 +26,7 @@ class Settings extends Component
 
     public $permalink_structure = PermalinkManager::DEFAULT_STRUCTURE;
     public $custom_permalink_structure;
+    public $category_slug_prefix_enabled = true;
 
     protected $queryString = [
         'tab' => ['keep' => true]
@@ -67,11 +68,14 @@ class Settings extends Component
             $this->site_copyright = $settings->site_copyright;
             $this->permalink_structure = $settings->permalink_structure ?: PermalinkManager::DEFAULT_STRUCTURE;
             $this->custom_permalink_structure = $settings->custom_permalink_structure;
+            $this->category_slug_prefix_enabled = $settings->category_slug_prefix_enabled ?? true;
         }
 
         if ($this->permalink_structure === PermalinkManager::STRUCTURE_CUSTOM && blank($this->custom_permalink_structure)) {
             $this->permalink_structure = PermalinkManager::DEFAULT_STRUCTURE;
         }
+
+        $this->category_slug_prefix_enabled = (bool) $this->category_slug_prefix_enabled;
 
         $this->availableRoles = Role::query()->pluck('name')->sort()->values()->toArray();
         $this->dashboardWidgets = collect(config('dashboard.widgets', []))
@@ -208,6 +212,7 @@ class Settings extends Component
         $rules = [
             'permalink_structure' => ['required', Rule::in($availableStructures)],
             'custom_permalink_structure' => ['nullable', 'string'],
+            'category_slug_prefix_enabled' => ['boolean'],
         ];
 
         if ($this->permalink_structure === PermalinkManager::STRUCTURE_CUSTOM) {
@@ -265,6 +270,7 @@ class Settings extends Component
         $settings->update([
             'permalink_structure' => $structure,
             'custom_permalink_structure' => $customStructure,
+            'category_slug_prefix_enabled' => (bool) $this->category_slug_prefix_enabled,
         ]);
 
         Cache::forget('general_settings');
