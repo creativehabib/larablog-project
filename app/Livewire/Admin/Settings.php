@@ -271,7 +271,7 @@ class Settings extends Component
         $paths = [
             storage_path('framework/cache'),
             storage_path('framework/views'),
-            bootstrap_path('cache'),
+            base_path('bootstrap/cache'),
             storage_path('logs'),
         ];
 
