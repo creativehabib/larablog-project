@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
@@ -25,34 +24,7 @@ $categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
 $categoryPrefixEnabled = is_null($categoryPrefixEnabled) ? true : (bool) $categoryPrefixEnabled;
 $categoryRouteUri = $categoryPrefixEnabled ? '/category/{category:slug}' : '/{category:slug}';
 
-$categoryRoute = Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])
-    ->name('categories.show');
-
-$permalinkRoute = PermalinkManager::routeDefinition();
-
-if (! $categoryPrefixEnabled && $permalinkRoute['template'] === '%postname%') {
-    $categoryRoute->missing(function (Request $request) {
-        $slug = $request->route('category');
-
-        if ($slug instanceof \Illuminate\Database\Eloquent\Model) {
-            $slug = $slug->getRouteKey();
-        }
-
-        if (! is_string($slug) || $slug === '') {
-            $slug = trim($request->path(), '/');
-        }
-
-        if ($slug === '') {
-            abort(404);
-        }
-
-        $response = app()->call([FrontPostController::class, 'show'], ['parameters' => [$slug]]);
-
-        return $response instanceof \Symfony\Component\HttpFoundation\Response
-            ? $response
-            : response($response);
-    });
-}
+Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])->name('categories.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
@@ -66,24 +38,24 @@ Route::view('/example-auth', 'example-auth');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['guest','preventBackHistory'])->group(function () {
-       Route::controller(AuthController::class)->group(function(){
-              Route::get('/login', 'loginForm')->name('login');
-              Route::post('/login', 'login')->name('login.submit');
-              Route::get('/forgot-password', 'forgotForm')->name('forgot');
-              Route::post('/send-password-reset-link', 'sendPasswordResetLink')->name('send.password.reset.link');
-              Route::get('/password/reset/{token}', 'resetForm')->name('reset.password.form');
-              Route::post('/password/reset', 'resetPassword')->name('reset.password.submit');
-       });
+        Route::controller(AuthController::class)->group(function(){
+            Route::get('/login', 'loginForm')->name('login');
+            Route::post('/login', 'login')->name('login.submit');
+            Route::get('/forgot-password', 'forgotForm')->name('forgot');
+            Route::post('/send-password-reset-link', 'sendPasswordResetLink')->name('send.password.reset.link');
+            Route::get('/password/reset/{token}', 'resetForm')->name('reset.password.form');
+            Route::post('/password/reset', 'resetPassword')->name('reset.password.submit');
+        });
     });
 
     Route::middleware(['auth','preventBackHistory'])->group(function () {
-       Route::controller(AdminController::class)->group(function(){
-              Route::get('/dashboard', 'dashboard')->name('dashboard');
-              Route::post('/logout', 'logout')->name('logout');
-              Route::get('/profile', 'profile')->name('profile');
-              Route::post('/update-profile', 'updateProfile')->name('update.profile');
-              Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:setting.view');
-       });
+        Route::controller(AdminController::class)->group(function(){
+            Route::get('/dashboard', 'dashboard')->name('dashboard');
+            Route::post('/logout', 'logout')->name('logout');
+            Route::get('/profile', 'profile')->name('profile');
+            Route::post('/update-profile', 'updateProfile')->name('update.profile');
+            Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:setting.view');
+        });
 
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('subcategories', SubCategoryController::class)->except(['show']);
@@ -93,11 +65,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->middleware('permission:media.view');
         Route::resource('polls', AdminPollController::class)->only(['index', 'create', 'edit']);
 
-       Route::resource('roles', RoleController::class);
-       Route::resource('permissions', PermissionController::class);
-       Route::resource('users', UserManagementController::class);
+        Route::resource('roles', RoleController::class);
+        Route::resource('permissions', PermissionController::class);
+        Route::resource('users', UserManagementController::class);
     });
 });
+
+$permalinkRoute = PermalinkManager::routeDefinition();
 
 $postRoute = Route::get($permalinkRoute['uri'], [FrontPostController::class, 'show'])
     ->name('posts.show');
