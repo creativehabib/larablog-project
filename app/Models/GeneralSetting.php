@@ -20,10 +20,12 @@ class GeneralSetting extends Model
         'site_logo',
         'dashboard_widget_visibility',
         'permalink_structure',
-        'custom_permalink_structure'
+        'custom_permalink_structure',
+        'category_slug_prefix_enabled',
     ];
 
     protected $casts = [
         'dashboard_widget_visibility' => 'array',
+        'category_slug_prefix_enabled' => 'boolean',
     ];
 }
