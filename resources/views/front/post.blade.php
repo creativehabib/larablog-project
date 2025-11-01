@@ -1,7 +1,6 @@
 @extends('layouts.frontend')
 @php
     use App\Support\BanglaFormatter;
-    use Illuminate\Support\Facades\Storage;
 @endphp
 @section('content')
 
@@ -19,18 +18,12 @@
 
         <!-- desktop version start -->
         <div class="bgWHite hidden-xs marginT40">
-            <!-- article reached -->
-            <div class="articleReached1" data-url="https://www.bhorerkagoj.net/national/775196"></div>
-
-
-            <!-- justnow news -->
 
             <!-- breaking news -->
 
 
             <div class="container">
                 <div class="row">
-
                     <!-- category news -->
                     <div class="col-md-2 col-lg-2 hidden-print">
                         <div class="categoryNewsWidgetDesktop1">
@@ -42,7 +35,6 @@
 
                     <!-- news section -->
                     <div class="col-md-7 col-lg-7">
-
                         <!-- title section -->
                         <div class="marginB20">
                             <p class="desktopDetailCat marginB15 hidden-print">
@@ -107,7 +99,6 @@
 
                         <!-- news document -->
 
-
                         <!-- news tag -->
                         <div class="desktopDetailTag hidden-print">
                             <p>
@@ -117,27 +108,8 @@
                             </p>
                         </div>
 
-                        <!-- ad rits -->
-                        <div class="row hidden-print">
-                            <div class="col-sm-12 col-md-12 marginT20">
-                                <div class="adDiv h250 borderRadius5 overflowHidden">
-                                    <!--<div class="futureads" style="width:300px;height:250px;display:inline-block;" data-ad-slot="pw_31253"></div> <script type="text/javascript">(wapTag.Init = window.wapTag.Init || []).push(function () { wAPITag.display("pw_31253") })</script>-->
-
-                                    <!-- <ins class="adsbygoogle"
-                                    style="display:inline-block;width:300px;height:250px"
-                                    data-ad-client="ca-pub-6140828263407584"
-                                    data-ad-slot="9190197910"></ins>
-                                    <script>
-                                        (adsbygoogle = window.adsbygoogle || []).push({});
-                                    </script> -->
-                                </div>
-                            </div>
-                        </div>
-                        <!-- ad -->
-
                         <!-- load second detail -->
                         <div class="loadAjaxDetail1"></div>
-
 
                         <!-- timeline news -->
 
@@ -165,10 +137,10 @@
 
 
                         <!-- related news -->
-                        <!-- <div class="hidden-print relatedNewsWidgetDesktop1 marginT40" style="display: none;">
+                        <div class="hidden-print relatedNewsWidgetDesktop1 marginT40" >
                             <h2 class="desktopSectionTitle">এ সম্পর্কিত আরো খবর <span class="bottomMarked"></span></h2>
                             <div class="row marginLR-10 desktopSectionListMedia desktopFlexRow ajaxRelatedNewsDivDesktop1"></div>
-                        </div> -->
+                        </div>
 
                         <!-- comments -->
                         <div class="hidden-print marginT30">
@@ -182,261 +154,7 @@
 
 
                     <!-- sidebar -->
-                    <div class="col-md-3 col-lg-3 hidden-print">
-                        <!-- latest popular news -->
-                        <div class="row popularNewsWidgetDesktop">
-                            <div class="col-sm-12 col-md-12 marginB30">
-                                <div class="hidden-xs borderRadius5 borderC1-1">
-                                    <div class="tabNews bgWhiteImp height100P width100P">
-                                        <ul class="nav nav-tabs borderTRadius5" role="tablist">
-                                            <li role="presentation" class="text-center borderNone active"><a aria-label="সর্বশেষ" class="" href="#latestTab" aria-controls="highestTab" role="tab" data-toggle="tab" aria-expanded="false">সর্বশেষ</a></li>
-                                            <li role="presentation" class="text-center borderNone"><a aria-label="পঠিত" class="" href="#highestTab" aria-controls="highestTab" role="tab" data-toggle="tab" aria-expanded="false">সর্বাধিক পঠিত</a></li>
-                                        </ul>
-
-                                        <div class="tab-content borderBRadius5 borderT0">
-                                            <div role="tabpanel" class="tab-pane active" id="latestTab">
-                                                <div class="scrollbar1 latestDivHeight">
-                                                    <div class="desktopSectionListMedia listItemLastBB0">
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/omra-690489d504dfd.jpg" width="80" alt="ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব</h4>
-                                                            </div>
-                                                            <a aria-label="ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব" href="https://www.bhorerkagoj.com/international/775198" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/cultivate-hen-bk-690485bd6d577.jpg" width="80" alt="সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম</h4>
-                                                            </div>
-                                                            <a aria-label="সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম" href="https://www.bhorerkagoj.com/economics/775197" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/shafiq-6904838c9f43a.jpg" width="80" alt="নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম</h4>
-                                                            </div>
-                                                            <a aria-label="নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম" href="https://www.bhorerkagoj.com/national/775196" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/fakrul-6904811e26949.jpg" width="80" alt="অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল</h4>
-                                                            </div>
-                                                            <a aria-label="অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল" href="https://www.bhorerkagoj.com/politics/775195" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/Sorok-69038f42cbacf.jpg" width="80" alt="ব্র্যাক ড্রাইভিং স্কুলের সড়ক নিরাপত্তা বিষয়ক সচেতনতামূলক মানববন্ধন">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">ব্র্যাক ড্রাইভিং স্কুলের সড়ক নিরাপত্তা বিষয়ক সচেতনতামূলক মানববন্ধন</h4>
-                                                            </div>
-                                                            <a aria-label="ব্র্যাক ড্রাইভিং স্কুলের সড়ক নিরাপত্তা বিষয়ক সচেতনতামূলক মানববন্ধন" href="https://www.bhorerkagoj.com/national-other/775194" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/Medical-Tour-69038ee721867.jpg" width="80" alt="মেডিকেল ট্যুরিজমে চমক এনেছে সুহা ট্রাভেলস থাইল্যান্ড">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">মেডিকেল ট্যুরিজমে চমক এনেছে সুহা ট্রাভেলস থাইল্যান্ড</h4>
-                                                            </div>
-                                                            <a aria-label="মেডিকেল ট্যুরিজমে চমক এনেছে সুহা ট্রাভেলস থাইল্যান্ড" href="https://www.bhorerkagoj.com/tourism/775193" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/JCI-690388dbe515a.jpg" width="80" alt="সিংগাইরে মাদ্রাসায় বসার বেঞ্চ-টুল উপহার দিলো জেসিআই মানিকগঞ্জ">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">সিংগাইরে মাদ্রাসায় বসার বেঞ্চ-টুল উপহার দিলো জেসিআই মানিকগঞ্জ</h4>
-                                                            </div>
-                                                            <a aria-label="সিংগাইরে মাদ্রাসায় বসার বেঞ্চ-টুল উপহার দিলো জেসিআই মানিকগঞ্জ" href="https://www.bhorerkagoj.com/corporate/775192" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/Rahman-Mridha-Bangladesh-690382e533377.jpg" width="80" alt="স্বাধীনতার এক নির্মম পরিহাস">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">স্বাধীনতার এক নির্মম পরিহাস</h4>
-                                                            </div>
-                                                            <a aria-label="স্বাধীনতার এক নির্মম পরিহাস" href="https://www.bhorerkagoj.com/thinking/775190" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/Dr-Yunus-690381dc2343d.jpg" width="80" alt="ড. ইউনূস হতে পারেন জাতিসংঘের মহাসচিব!">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">ড. ইউনূস হতে পারেন জাতিসংঘের মহাসচিব!</h4>
-                                                            </div>
-                                                            <a aria-label="ড. ইউনূস হতে পারেন জাতিসংঘের মহাসচিব!" href="https://www.bhorerkagoj.com/thinking/775189" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/Legal-advisor-6903644b430a2.jpg" width="80" alt="গণভোটের বিষয়ে চূড়ান্ত সিদ্ধান্ত দেবেন প্রধান উপদেষ্টা : আইন উপদেষ্টা">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue title12">গণভোটের বিষয়ে চূড়ান্ত সিদ্ধান্ত দেবেন প্রধান উপদেষ্টা : আইন উপদেষ্টা</h4>
-                                                            </div>
-                                                            <a aria-label="গণভোটের বিষয়ে চূড়ান্ত সিদ্ধান্ত দেবেন প্রধান উপদেষ্টা : আইন উপদেষ্টা" href="https://www.bhorerkagoj.com/government/775188" class="linkOverlay"></a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p class="bg2 title11 padding10 text-center marginB0 borderBRadius5 shadow1"><a class="textDecorationNone colorBlack hoverBlue" href="https://www.bhorerkagoj.com/latest">সব খবর</a></p>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane" id="highestTab">
-                                                <div class="scrollbar1 latestDivHeight">
-                                                    <div class="desktopSectionListMedia listItemLastBB0 ajaxPopularNewsDivDesktop"><div class="popularNewsLoaderDiv text-center marginT50"><i class="fa fa-spinner"></i></div></div>
-                                                </div>
-                                                <p class="bg2 title11 padding10 text-center marginB0 borderBRadius5 shadow1"><a class="textDecorationNone colorBlack hoverBlue" href="https://www.bhorerkagoj.com/popular">সব খবর</a></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="visible-xs borderRadius5 borderC1-1">
-                                    <div class="tabNews bgWhiteImp height100P width100P">
-                                        <ul class="nav nav-tabs borderTRadius5" role="tablist">
-                                            <li role="presentation" class="text-center borderNone active"><a aria-label="সর্বশেষ" class="" href="#latestTab" aria-controls="latestTab" role="tab" data-toggle="tab" aria-expanded="false">সর্বশেষ</a></li>
-                                            <li role="presentation" class="text-center borderNone"><a aria-label="পঠিত" class="" href="#highestTab" aria-controls="highestTab" role="tab" data-toggle="tab" aria-expanded="false">সর্বাধিক পঠিত</a></li>
-                                        </ul>
-
-                                        <div class="tab-content borderBRadius5 borderT0">
-                                            <div role="tabpanel" class="tab-pane active" id="latestTab">
-                                                <div class="scrollbar1">
-                                                    <div class="sectionListMedia listItemLastBB0">
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/omra-690489d504dfd.jpg" width="140" alt="ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue">ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব</h4>
-                                                            </div>
-                                                            <a aria-label="ওমরাহ ভিসার মেয়াদ কমালো সৌদি আরব" href="https://www.bhorerkagoj.com/international/775198" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/cultivate-hen-bk-690485bd6d577.jpg" width="140" alt="সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue">সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম</h4>
-                                                            </div>
-                                                            <a aria-label="সবজি-মুরগিতে স্বস্তি, বেড়েছে আটার দাম" href="https://www.bhorerkagoj.com/economics/775197" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/shafiq-6904838c9f43a.jpg" width="140" alt="নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue">নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম</h4>
-                                                            </div>
-                                                            <a aria-label="নির্বাচন ১৫ ফেব্রুয়ারির আগে হবে, কোনও শক্তি নেই এটাকে পেছানোর: শফিকুল আলম" href="https://www.bhorerkagoj.com/national/775196" class="linkOverlay"></a>
-                                                        </div>
-                                                        <div class="media positionRelative paddingLR10">
-                                                            <div class="media-left paddingR5">
-                                                                <div class="positionRelative">
-                                                                    <img class="media-object borderRadius5" src="https://www.bhorerkagoj.com/uploads/2025/10/online/photos/small/fakrul-6904811e26949.jpg" width="140" alt="অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল">
-                                                                </div>
-                                                            </div>
-                                                            <div class="media-body">
-                                                                <h4 class="margin0 marginL5 hoverBlue">অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল</h4>
-                                                            </div>
-                                                            <a aria-label="অন্তর্বর্তী সরকার জনগণের সঙ্গে বিশ্বাসঘাতকতা করেছে: মির্জা ফখরুল" href="https://www.bhorerkagoj.com/politics/775195" class="linkOverlay"></a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p class="bg2 title12 padding10 text-center marginB0 borderBRadius5 shadow1"><a class="textDecorationNone colorBlack hoverBlue" href="https://www.bhorerkagoj.com/latest">সব খবর</a></p>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane" id="highestTab">
-                                                <div class="scrollbar1">
-                                                    <div class="sectionListMedia listItemLastBB0 ajaxPopularNewsDivMobile"><div class="popularNewsLoaderDiv text-center marginT50"><i class="fa fa-spinner"></i></div></div>
-                                                </div>
-                                                <p class="bg2 title12 padding10 text-center marginB0 borderBRadius5 shadow1"><a class="textDecorationNone colorBlack hoverBlue" href="https://www.bhorerkagoj.com/popular">সব খবর</a></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- latest popular news end -->
-
-                        <!-- facebook page -->
-                        <!-- <div class="row">
-                            <div class="col-sm-12 col-md-12 marginB30">
-                                <div class="marginCenter w300">
-                                    <div class="fb-page" data-href="https://www.facebook.com/DailyBhorerKagoj/" data-tabs="" data-width="300" data-height="" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/DailyBhorerKagoj/" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/DailyBhorerKagoj/">Bhorer Kagoj</a></blockquote></div>
-                                </div>
-                            </div>
-                        </div> -->
-                        <!-- facebook page end -->
-
-
-                        <!-- purple patch -->
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12 marginB30">
-                                <div class="adDiv w300 borderRadius5 overflowHidden">
-                                    <ins data-purplepatch-slotid="18"
-                                         data-purplepatch-ct0="%%CLICK_URL_UNESC%%"
-                                         data-purplepatch-id="53126d71827fcba70ff68055b9a73ca1pdt"></ins>
-                                    <script async="" src="//adserver.purplepatch.online/async.js" type="text/javascript"></script>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- ad -->
-                        <div class="row">
-                            <div class="col-sm-12 col-md-12 marginB30">
-                                <div class="adDiv w300 borderRadius5 overflowHidden">
-                                    <ins class="adsbygoogle"
-                                         style="display:inline-block;width:300px;height:250px"
-                                         data-ad-client="ca-pub-6140828263407584"
-                                         data-ad-slot="9190197910"></ins>
-                                    <script>
-                                        (adsbygoogle = window.adsbygoogle || []).push({});
-                                    </script>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- ad -->
-
-                        <!-- special news -->
-
-                    </div>
+                    @include('front.partials.sidebar')
 
                 </div>
             </div>
