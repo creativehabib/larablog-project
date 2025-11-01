@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
@@ -19,23 +20,42 @@ use App\Http\Controllers\Frontend\PostController as FrontPostController;
 use App\Http\Controllers\Frontend\SitemapController;
 use App\Support\PermalinkManager;
 
-Route::get('/', [FrontHomeController::class, 'index'])->name('home');
-$categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
-$categoryPrefixEnabled = is_null($categoryPrefixEnabled) ? true : (bool) $categoryPrefixEnabled;
-$categoryRouteUri = $categoryPrefixEnabled ? '/category/{category:slug}' : '/{category:slug}';
+// === (পরিবর্তন শুরু) ===
+// ১. সমস্ত সুনির্দিষ্ট (Specific) রুট প্রথমে ডিফাইন করুন।
 
-Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])->name('categories.show');
+Route::get('/', [FrontHomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
 
-
 //Testing route
 Route::view('/example-page', 'example-page');
 Route::view('/example-auth', 'example-auth');
-// Admin route
+// === (পরিবর্তন শেষ) ===
 
+
+// ২. এখন "Greedy" (ওয়াইল্ডকার্ড) ক্যাটাগরি রুট ডিফাইন করুন।
+$categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
+$categoryPrefixEnabled = is_null($categoryPrefixEnabled) ? true : (bool) $categoryPrefixEnabled;
+$categoryRouteUri = $categoryPrefixEnabled ? '/category/{category:slug}' : '/{category:slug}';
+
+$categoryRoute = Route::get($categoryRouteUri, [FrontCategoryController::class, 'show'])
+    ->name('categories.show');
+
+$permalinkRoute = PermalinkManager::routeDefinition();
+
+
+if (! $categoryPrefixEnabled && $permalinkRoute['template'] === '%postname%') {
+    $categoryRoute->missing(function (Request $request) {
+        $view = app(FrontPostController::class)->show($request->route('category'));
+
+        // "setCookie() on null" এরর সমাধানের জন্য response() হেল্পার
+        return response($view);
+    });
+}
+
+// Admin route (এটিও '/admin' প্রিফিক্স সহ একটি সুনির্দিষ্ট রুট, তাই এটি Greedy রুটের আগে বা পরে থাকতে পারে, কোনো সমস্যা নেই)
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['guest','preventBackHistory'])->group(function () {
         Route::controller(AuthController::class)->group(function(){
@@ -71,8 +91,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-$permalinkRoute = PermalinkManager::routeDefinition();
 
+// ৩. সবশেষে "Greedy" পোস্ট রুটটি ডিফাইন করুন।
 $postRoute = Route::get($permalinkRoute['uri'], [FrontPostController::class, 'show'])
     ->name('posts.show');
 

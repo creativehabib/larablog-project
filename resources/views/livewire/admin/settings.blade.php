@@ -291,17 +291,21 @@
 
                                                     <tr>
                                                         <td class="align-middle">
-                                                            <span class="tile bg-primary"><i class="fas fa-database"></i></span>
+                                                            <span class="tile bg-info"><i class="fas fa-database"></i></span>
                                                         </td>
                                                         <td class="align-middle">
                                                             <span><strong>Clear all CMS cache</strong></span>
                                                             <div class="small text-muted mt-n1">
                                                                 সমস্ত অপ্টিমাইজড ক্যাশ (config, route, view, events) এবং ডিফল্ট অ্যাপ্লিকেশন ক্যাশ একসাথে মুছে ফেলে।
                                                             </div>
-                                                            <div class="status-custom"><strong>Current Size:</strong> {{ $cacheSize }}</div>
+                                                            <div>
+                                                                <span class="badge badge-subtle badge-info">
+                                                                    <span class="spinner-grow text-primary spinner-grow-sm" role="status" style="width: 0.7rem; height: 0.7rem;">
+                                                                <span class="sr-only">Loading...</span> </span> <strong>Current Size:</strong> {{ $cacheSize }}</span>
+                                                            </div>
                                                         </td>
                                                         <td class="text-center align-middle">
-                                                            <button wire:click="clearAllCache" wire:loading.attr="disabled" wire:target="clearAllCache" class="btn btn-primary mt-auto">
+                                                            <button wire:click="clearAllCache" wire:loading.attr="disabled" wire:target="clearAllCache" class="btn btn-info mt-auto">
                                                                 <span wire:loading.remove wire:target="clearAllCache"><i class="fas fa-trash-alt mr-1"></i> Clear</span>
                                                                 <span wire:loading wire:target="clearAllCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
                                                             </button>
@@ -395,8 +399,8 @@
                                         </div>
                                         <div class="card-footer">
                                             <div class="p-3">
-                                                <i class="fas fa-circle-info"></i>
-                                                <small class="text-secondary text-black">Clear cache after making changes to your site to ensure they appear correctly.</small>
+                                                <i class="fas fa-circle-info text-gray"></i>
+                                                <small class="text-secondary text-gray">Clear cache after making changes to your site to ensure they appear correctly.</small>
                                             </div>
                                         </div>
                                     </div>
