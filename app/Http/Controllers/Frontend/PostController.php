@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
 {
-    public function show(Post $post)
+    public function show(...$parameters)
     {
+        $post = $this->resolvePostParameter($parameters);
+
         $post->loadMissing(['category', 'author', 'playlist']);
 
         $settings = $this->settings();
@@ -50,5 +52,32 @@ class PostController extends Controller
         return Cache::remember('general_settings', now()->addHour(), function () {
             return GeneralSetting::query()->first();
         });
+    }
+
+    protected function resolvePostParameter(array $parameters): Post
+    {
+        $parameter = array_values($parameters);
+
+        $postParameter = array_pop($parameter);
+
+        if (is_null($postParameter) || $postParameter === '') {
+            abort(404);
+        }
+
+        if ($postParameter instanceof Post) {
+            return $postParameter;
+        }
+
+        $postParameter = (string) $postParameter;
+
+        $post = Post::query()
+            ->where((new Post())->getRouteKeyName(), $postParameter)
+            ->first();
+
+        if (! $post && is_numeric($postParameter)) {
+            $post = Post::query()->whereKey($postParameter)->first();
+        }
+
+        return $post ?? abort(404);
     }
 }
