@@ -10,8 +10,8 @@
         @foreach($posts as $post)
             <item>
                 <title><![CDATA[{{ $post->title }}]]></title>
-                <link>{{ route('posts.show', $post) }}</link>
-                <guid isPermaLink="true">{{ route('posts.show', $post) }}</guid>
+                <link>{{ post_permalink($post) }}</link>
+                <guid isPermaLink="true">{{ post_permalink($post) }}</guid>
                 <pubDate>{{ optional($post->created_at)->toRfc2822String() }}</pubDate>
                 <description><![CDATA[{{ $post->meta_description ?? $post->excerpt }}]]></description>
                 @if($post->category)

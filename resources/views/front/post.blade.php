@@ -597,7 +597,7 @@
                 ],
             ],
             'image' => array_filter([$seo['image'] ?? null]),
-            'mainEntityOfPage' => $seo['canonical'] ?? route('posts.show', $post),
+            'mainEntityOfPage' => $seo['canonical'] ?? post_permalink($post),
             'articleSection' => $post->category?->name,
             'description' => $seo['description'] ?? $post->excerpt,
         ];
@@ -627,14 +627,14 @@
                 '@type' => 'ListItem',
                 'position' => 3,
                 'name' => $post->title,
-                'item' => $seo['canonical'] ?? route('posts.show', $post),
+                'item' => $seo['canonical'] ?? post_permalink($post),
             ];
         } else {
             $breadcrumbSchema['itemListElement'][] = [
                 '@type' => 'ListItem',
                 'position' => 2,
                 'name' => $post->title,
-                'item' => $seo['canonical'] ?? route('posts.show', $post),
+                'item' => $seo['canonical'] ?? post_permalink($post),
             ];
         }
     @endphp

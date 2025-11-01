@@ -18,7 +18,9 @@ class GeneralSetting extends Model
         'site_favicon',
         'site_copyright',
         'site_logo',
-        'dashboard_widget_visibility'
+        'dashboard_widget_visibility',
+        'permalink_structure',
+        'custom_permalink_structure'
     ];
 
     protected $casts = [
