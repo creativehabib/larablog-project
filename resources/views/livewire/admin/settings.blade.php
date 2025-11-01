@@ -5,6 +5,7 @@
             'logo_favicon' => ['icon' => 'settings', 'label' => 'Logo & Favicon'],
             'dashboard_visibility' => ['icon' => 'eye', 'label' => 'Dashboard Visibility'],
             'permalinks' => ['icon' => 'link', 'label' => 'Permalinks'],
+            'sitemap_setting' => ['icon' => 'sitemap', 'label' => 'Sitemap Settings'],
             'cache_management' => ['icon' => 'broom', 'label' => 'Cache Management'],
             'security_settings' => ['icon' => 'shield', 'label' => 'Security'],
             'notification' => ['icon' => 'bell', 'label' => 'Notification'],
@@ -263,6 +264,12 @@
 
                                 <button type="submit" class="btn btn-primary">Save permalinks</button>
                             </form>
+                        </div>
+
+                        <div class="tab-pane {{ $tab == 'sitemap_setting' ? 'active show' : '' }}" id="sitemap_setting">
+                            <h6>SITEMAP SETTINGS</h6>
+                            <hr>
+                            <livewire:admin.sitemap-settings :key="'sitemap-settings-tab'" />
                         </div>
 
                         <div class="tab-pane {{ $tab == 'cache_management' ? 'active show' : '' }}" id="cache_management">
