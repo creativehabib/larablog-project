@@ -381,7 +381,7 @@
                                                             </div>
                                                         </td>
                                                         <td class="text-center">
-                                                            <button wire:click="clearLogFiles" wire:loading.attr="disabled" wire:target="clearLogFiles" class="btn btn-danger mt-auto">
+                                                            <button wire:click="clearLogFiles" wire:loading.attr="disabled" wire:target="clearLogFiles" class="btn btn-info mt-auto">
                                                                 <span wire:loading.remove wire:target="clearLogFiles"><i class="fas fa-trash-alt mr-1"></i> Clear</span>
                                                                 <span wire:loading wire:target="clearLogFiles"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
                                                             </button>
