@@ -266,81 +266,137 @@
                         </div>
 
                         <div class="tab-pane {{ $tab == 'cache_management' ? 'active show' : '' }}" id="cache_management">
-                            <h6>CACHE MANAGEMENT</h6>
-                            <hr>
-                            <div class="alert alert-info" role="alert">
-                                <div class="d-flex flex-wrap align-items-center justify-content-between">
-                                    <div>
-                                        <strong>Clear CMS caching</strong>: ডাটাবেস ক্যাশিং, স্ট্যাটিক ব্লকসহ সকল ক্যাশ পরিষ্কার করুন। ডেটা আপডেট করার পরও পরিবর্তন দৃশ্যমান না হলে এই কমান্ডটি চালান।
-                                    </div>
-                                    <div class="badge badge-light text-primary mt-2 mt-md-0">
-                                        Current Size: {{ $cacheSize }}
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">Clear all CMS cache</h5>
-                                            <p class="card-text text-muted">সমস্ত অপ্টিমাইজড ক্যাশ (config, route, view, events) এবং ডিফল্ট অ্যাপ্লিকেশন ক্যাশ একসাথে মুছে ফেলে।</p>
-                                            <button wire:click="clearAllCache" wire:loading.attr="disabled" wire:target="clearAllCache" class="btn btn-danger mt-auto">
-                                                <span wire:loading.remove wire:target="clearAllCache">Clear all cache</span>
-                                                <span wire:loading wire:target="clearAllCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
-                                            </button>
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4 class="card-title mb-0">
+                                                <i class="fas fa-sync-alt mr-2"></i> Cache Management
+                                            </h4>
                                         </div>
-                                    </div>
-                                </div>
+                                        <div class="card-body">
+                                            <p class="text-secondary mb-3 text-gray">
+                                                Clear cache to make your site up to date. ডাটাবেস ক্যাশিং, স্ট্যাটিক ব্লকসহ সকল ক্যাশ পরিষ্কার করুন। ডেটা আপডেট করার পরও পরিবর্তন দৃশ্যমান না হলে এই কমান্ডটি চালান।
+                                            </p>
+                                            <div class="table-responsive">
+                                                <table class="table table-condensed mb-0">
+                                                    <thead class="small text-uppercase">
+                                                        <tr>
+                                                            <th scope="col" width="50">Type</th>
+                                                            <th scope="col">Description</th>
+                                                            <th scope="col" class="text-center" width="200">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
 
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">Refresh compiled views</h5>
-                                            <p class="card-text text-muted">ক্যাশ হওয়া ব্লেড ভিউগুলো পরিষ্কার করে সর্বশেষ টেমপ্লেট পরিবর্তনগুলো তাৎক্ষণিকভাবে প্রতিফলিত করবে।</p>
-                                            <button wire:click="clearCompiledViews" wire:loading.attr="disabled" wire:target="clearCompiledViews" class="btn btn-outline-primary mt-auto">
-                                                <span wire:loading.remove wire:target="clearCompiledViews">Clear compiled views</span>
-                                                <span wire:loading wire:target="clearCompiledViews"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
-                                            </button>
+                                                    <tr>
+                                                        <td class="align-middle">
+                                                            <span class="tile bg-primary"><i class="fas fa-database"></i></span>
+                                                        </td>
+                                                        <td class="align-middle">
+                                                            <span><strong>Clear all CMS cache</strong></span>
+                                                            <div class="small text-muted mt-n1">
+                                                                সমস্ত অপ্টিমাইজড ক্যাশ (config, route, view, events) এবং ডিফল্ট অ্যাপ্লিকেশন ক্যাশ একসাথে মুছে ফেলে।
+                                                            </div>
+                                                            <div class="status-custom"><strong>Current Size:</strong> {{ $cacheSize }}</div>
+                                                        </td>
+                                                        <td class="text-center align-middle">
+                                                            <button wire:click="clearAllCache" wire:loading.attr="disabled" wire:target="clearAllCache" class="btn btn-primary mt-auto">
+                                                                <span wire:loading.remove wire:target="clearAllCache"><i class="fas fa-trash-alt mr-1"></i> Clear</span>
+                                                                <span wire:loading wire:target="clearAllCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="align-middle">
+                                                        <td>
+                                                            <span class="tile bg-warning">
+                                                                <i class="fas fa-file-code"></i>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <strong>Refresh compiled views</strong>
+                                                            <div class="small text-muted mt-n1">
+                                                                ক্যাশ হওয়া ব্লেড ভিউগুলো পরিষ্কার করে সর্বশেষ টেমপ্লেট পরিবর্তনগুলো তাৎক্ষণিকভাবে প্রতিফলিত করবে।
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button wire:click="clearCompiledViews" wire:loading.attr="disabled" wire:target="clearCompiledViews" class="btn btn-warning text-white mt-auto">
+                                                                <span wire:loading.remove wire:target="clearCompiledViews"><i class="fas fa-sync-alt mr-1"></i> Refresh</span>
+                                                                <span wire:loading wire:target="clearCompiledViews"><i class="fa fa-spinner fa-spin mr-2"></i>Refreshing...</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="align-middle">
+                                                        <td>
+                                                            <span class="tile bg-success">
+                                                                <i class="fas fa-cogs"></i>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <strong>Clear config cache</strong>
+                                                            <div class="small text-muted mt-n1">
+                                                                প্রোডাকশন পরিবেশে কনফিগ ফাইল পরিবর্তনের পর কনফিগ ক্যাশ রিফ্রেশ করতে এই অপশনটি ব্যবহার করুন।
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button wire:click="clearConfigCache" wire:loading.attr="disabled" wire:target="clearConfigCache" class="btn btn-success mt-auto">
+                                                                <span wire:loading.remove wire:target="clearConfigCache"><i class="fas fa-sync-alt mr-1"></i> Clear</span>
+                                                                <span wire:loading wire:target="clearConfigCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="align-middle">
+                                                        <td>
+                                                            <span class="tile bg-danger">
+                                                                <i class="fas fa-route"></i>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <strong>Clear route cache</strong>
+                                                            <div class="small text-muted mt-n1">
+                                                                রাউটিং সংক্রান্ত পরিবর্তন কার্যকর করতে রুট ক্যাশ পরিষ্কার করুন।
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button class="btn btn-success">
+                                                                <i class="fas fa-sync-alt mr-1"></i> Clear
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr class="align-middle">
+                                                        <td>
+                                                            <span class="tile bg-info">
+                                                                <i class="fas fa-file-alt"></i>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <strong>Clear log</strong>
+                                                            <div class="small text-muted mt-n1">
+                                                                storage/logs ডিরেক্টরির সকল লগ ফাইল মুছে ফেলে ডিস্ক স্পেস খালি করুন এবং নতুন লগ সংগ্রহ করুন।
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <button wire:click="clearLogFiles" wire:loading.attr="disabled" wire:target="clearLogFiles" class="btn btn-danger mt-auto">
+                                                                <span wire:loading.remove wire:target="clearLogFiles"><i class="fas fa-trash-alt mr-1"></i> Clear</span>
+                                                                <span wire:loading wire:target="clearLogFiles"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
                                         </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">Clear config cache</h5>
-                                            <p class="card-text text-muted">প্রোডাকশন পরিবেশে কনফিগ ফাইল পরিবর্তনের পর কনফিগ ক্যাশ রিফ্রেশ করতে এই অপশনটি ব্যবহার করুন।</p>
-                                            <button wire:click="clearConfigCache" wire:loading.attr="disabled" wire:target="clearConfigCache" class="btn btn-outline-primary mt-auto">
-                                                <span wire:loading.remove wire:target="clearConfigCache">Clear config cache</span>
-                                                <span wire:loading wire:target="clearConfigCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">Clear route cache</h5>
-                                            <p class="card-text text-muted">রাউটিং সংক্রান্ত পরিবর্তন কার্যকর করতে রুট ক্যাশ পরিষ্কার করুন।</p>
-                                            <button wire:click="clearRouteCache" wire:loading.attr="disabled" wire:target="clearRouteCache" class="btn btn-outline-primary mt-auto">
-                                                <span wire:loading.remove wire:target="clearRouteCache">Clear route cache</span>
-                                                <span wire:loading wire:target="clearRouteCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 shadow-sm">
-                                        <div class="card-body d-flex flex-column">
-                                            <h5 class="card-title">Clear system log</h5>
-                                            <p class="card-text text-muted">storage/logs ডিরেক্টরির সকল লগ ফাইল মুছে ফেলে ডিস্ক স্পেস খালি করুন এবং নতুন লগ সংগ্রহ করুন।</p>
-                                            <button wire:click="clearLogFiles" wire:loading.attr="disabled" wire:target="clearLogFiles" class="btn btn-outline-warning mt-auto">
-                                                <span wire:loading.remove wire:target="clearLogFiles">Clear log files</span>
-                                                <span wire:loading wire:target="clearLogFiles"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
-                                            </button>
+                                        <div class="card-footer">
+                                            <div class="p-3">
+                                                <i class="fas fa-circle-info"></i>
+                                                <small class="text-secondary text-black">Clear cache after making changes to your site to ensure they appear correctly.</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
