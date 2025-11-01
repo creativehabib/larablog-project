@@ -361,8 +361,9 @@
                                                             </div>
                                                         </td>
                                                         <td class="text-center">
-                                                            <button class="btn btn-success">
-                                                                <i class="fas fa-sync-alt mr-1"></i> Clear
+                                                            <button wire:click="clearRouteCache" wire:loading.attr="disabled" wire:target="clearRouteCache" class="btn btn-danger mt-auto">
+                                                                <span wire:loading.remove wire:target="clearRouteCache"><i class="fas fa-sync-alt mr-1"></i> Clear</span>
+                                                                <span wire:loading wire:target="clearRouteCache"><i class="fa fa-spinner fa-spin mr-2"></i>Clearing...</span>
                                                             </button>
                                                         </td>
                                                     </tr>
