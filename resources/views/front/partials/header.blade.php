@@ -1,5 +1,6 @@
 @php
     $activeCategory = $activeCategory ?? null;
+    $isHomeRoute = request()->routeIs('home');
 @endphp
 <div class="hidden-xs hidden-print">
     <div class="container bgWhite">
@@ -41,10 +42,10 @@
                             </a>
                         </span>
                         <ul class="headerMenuUl">
-                            <li class="{{ request('category') ? '' : 'active' }}"><a aria-label="প্রচ্ছদ" href="{{ route('home') }}">প্রচ্ছদ</a></li>
+                            <li class="{{ $isHomeRoute ? 'active' : '' }}"><a aria-label="প্রচ্ছদ" href="{{ route('home') }}">প্রচ্ছদ</a></li>
                             @foreach($navCategories ?? [] as $category)
                                 <li class="{{ optional($activeCategory)->id === $category->id ? 'active' : '' }}">
-                                    <a aria-label="{{ $category->name }}" href="{{ route('home', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                    <a aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -90,7 +91,7 @@
                                 <div class="col-md-2 paddingL0">
                                     @foreach($chunk as $category)
                                         <div class="paddingT5 paddingB5">
-                                            <a class="title11 textDecorationNone colorBlack hoverBlue" aria-label="{{ $category->name }}" href="{{ route('home', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                            <a class="title11 textDecorationNone colorBlack hoverBlue" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
                                         </div>
                                     @endforeach
                                 </div>
@@ -141,10 +142,10 @@
             <div>
                 <table>
                     <tr>
-                        <td class="{{ request('category') ? '' : 'mobileSecondHeaderActive' }}"><a href="{{ route('home') }}"><i class="fa fa-house"></i></a></td>
+                        <td class="{{ $isHomeRoute ? 'mobileSecondHeaderActive' : '' }}"><a href="{{ route('home') }}"><i class="fa fa-house"></i></a></td>
                         @foreach(($navCategories ?? collect())->take(5) as $category)
                             <td class="{{ optional($activeCategory)->id === $category->id ? 'mobileSecondHeaderActive' : '' }}">
-                                <a href="{{ route('home', ['category' => $category->slug]) }}">{{ $category->name }}</a>
+                                <a href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
                             </td>
                         @endforeach
                         <td class="clickLoadMenubarCategories"><a href="javascript:void(0)"><i class="fa fa-ellipsis"></i></a></td>
@@ -156,7 +157,7 @@
             <div class="row loadMenubarCategories">
                 @foreach(($allCategories ?? collect()) as $category)
                     <div class="col-xs-6">
-                        <a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('home', ['category' => $category->slug]) }}"> {{ $category->name }}</a>
+                        <a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}"> {{ $category->name }}</a>
                     </div>
                 @endforeach
             </div>

@@ -37,11 +37,13 @@
                     <div class="col-md-7 col-lg-7">
                         <!-- title section -->
                         <div class="marginB20">
-                            <p class="desktopDetailCat marginB15 hidden-print">
-                                <a aria-label="{{ $post->category->name }}" href="/{{ $post->category->slug }}">
-                                    <strong>{{ $post->category->name }}</strong>
-                                </a>
-                            </p>
+                            @if($post->category)
+                                <p class="desktopDetailCat marginB15 hidden-print">
+                                    <a aria-label="{{ $post->category->name }}" href="{{ route('categories.show', $post->category) }}">
+                                        <strong>{{ $post->category->name }}</strong>
+                                    </a>
+                                </p>
+                            @endif
                             <h1 class="desktopDetailHeadline marginT0 title8"><strong>{{ $post->title }}</strong></h1>
                         </div>
 

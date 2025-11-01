@@ -13,11 +13,13 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Frontend\FeedController;
 use App\Http\Controllers\Frontend\HomeController as FrontHomeController;
+use App\Http\Controllers\Frontend\CategoryController as FrontCategoryController;
 use App\Http\Controllers\Frontend\PollController;
 use App\Http\Controllers\Frontend\PostController as FrontPostController;
 use App\Http\Controllers\Frontend\SitemapController;
 
 Route::get('/', [FrontHomeController::class, 'index'])->name('home');
+Route::get('/category/{category:slug}', [FrontCategoryController::class, 'show'])->name('categories.show');
 Route::get('/news/{post:slug}', [FrontPostController::class, 'show'])->name('posts.show');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
