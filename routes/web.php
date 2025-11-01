@@ -24,7 +24,6 @@ use App\Support\PermalinkManager;
 // ১. সমস্ত সুনির্দিষ্ট (Specific) রুট প্রথমে ডিফাইন করুন।
 
 Route::get('/', [FrontHomeController::class, 'index'])->name('home');
-Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/feed', FeedController::class)->name('feed');
 Route::get('/polls', [PollController::class, 'index'])->name('polls.index');
 Route::post('/polls/{poll}/vote', [PollController::class, 'vote'])->name('polls.vote');
@@ -34,6 +33,14 @@ Route::view('/example-page', 'example-page');
 Route::view('/example-auth', 'example-auth');
 // === (পরিবর্তন শেষ) ===
 
+// --- নতুন সাইটম্যাপ রুট ---
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-posts-{year}-{month}.xml', [SitemapController::class, 'posts'])
+    ->where(['year' => '[0-9]{4}', 'month' => '[0-9]{2}']) // YYYY-MM ফরম্যাট নিশ্চিত করা
+    ->name('sitemap.posts');
+Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages'])->name('sitemap.pages');
+// --- সাইটম্যাপ রুট শেষ ---
 
 // ২. এখন "Greedy" (ওয়াইল্ডকার্ড) ক্যাটাগরি রুট ডিফাইন করুন।
 $categoryPrefixEnabled = general_settings('category_slug_prefix_enabled');
@@ -75,6 +82,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/profile', 'profile')->name('profile');
             Route::post('/update-profile', 'updateProfile')->name('update.profile');
             Route::get('/settings', 'generalSettings')->name('settings')->middleware('permission:setting.view');
+            Route::get('/settings/sitemap', 'sitemapSettings')->name('settings.sitemap');
         });
 
         Route::resource('categories', CategoryController::class)->except(['show']);

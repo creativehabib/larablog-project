@@ -99,6 +99,11 @@
             <div class="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
                 <!-- .nav -->
                 <ul class="header-nav nav">
+
+                    <!-- .nav-item -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('home') }}" target="_blank"><span class="oi oi-globe"></span> Visit Website</a>
+                    </li><!-- /.nav-item -->
                     <!-- .nav-item -->
                     <li class="nav-item dropdown header-nav-dropdown has-notified">
                         <a class="nav-link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="oi oi-pulse"></span></a> <!-- .dropdown-menu -->

@@ -1,0 +1,32 @@
+@php echo '<?xml version="1.0" encoding="UTF-8"?>'; @endphp
+@php echo '<?xml-stylesheet type="text/xsl" href="'.asset('xsl/sitemap-index.xsl').'"?>'; @endphp
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <sitemap>
+        <loc>{{ route('sitemap.pages') }}</loc>
+        <lastmod>{{ now()->tz('UTC')->toAtomString() }}</lastmod>
+    </sitemap>
+
+    @foreach($postGroups as $group)
+        <sitemap>
+            <loc>{{ route('sitemap.posts', [
+                'year' => $group->year,
+                'month' => str_pad($group->month, 2, '0', STR_PAD_LEFT)
+                // 'page' প্যারামিটার সরানো হয়েছে
+            ]) }}</loc>
+            <lastmod>
+                @if($group->lastmod)
+                    {{ \Carbon\Carbon::parse($group->lastmod)->tz('UTC')->toAtomString() }}
+                @endif
+            </lastmod>
+        </sitemap>
+    @endforeach
+
+    <sitemap>
+        <loc>{{ route('sitemap.categories') }}</loc>
+        @if($categoryLastUpdated)
+            <lastmod>
+                {{ \Carbon\Carbon::parse($categoryLastUpdated)->tz('UTC')->toAtomString() }}
+            </lastmod>
+        @endif
+    </sitemap>
+</sitemapindex>

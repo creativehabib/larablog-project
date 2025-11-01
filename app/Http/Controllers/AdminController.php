@@ -171,4 +171,10 @@ class AdminController extends Controller
         ];
         return view('back.pages.settings.general_settings', $data);
     }
+
+    public function sitemapSettings()
+    {
+        $settings = GeneralSetting::first();
+        return view('back.pages.settings.sitemap', compact('settings'));
+    }
 }

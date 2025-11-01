@@ -20,7 +20,7 @@
                 <div class="desktopHeaderLogoRightDiv">
                     <a aria-label="মতামত জরিপ" href="{{ route('polls.index') }}"><i class="fa fa-poll"></i> মতামত জরিপ</a>
                     <a aria-label="আরএসএস" href="{{ route('feed') }}"><i class="fa fa-rss"></i> আরএসএস</a>
-                    <a aria-label="সাইটম্যাপ" href="{{ route('sitemap') }}"><i class="fa fa-sitemap"></i> সাইটম্যাপ</a>
+                    <a aria-label="সাইটম্যাপ" href="{{ route('sitemap.index') }}"><i class="fa fa-sitemap"></i> সাইটম্যাপ</a>
                     <a aria-label="যোগাযোগ" href="mailto:{{ $settings->site_email ?? '' }}"><i class="fa fa-envelope"></i> যোগাযোগ</a>
                 </div>
             </div>

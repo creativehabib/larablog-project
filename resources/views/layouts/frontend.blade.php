@@ -77,7 +77,7 @@
             <div class="linkDiv hidden-print">
                 <a aria-label="পোল" href="{{ route('polls.index') }}">অনলাইন জরিপ</a>
                 <a aria-label="আরএসএস" href="{{ route('feed') }}">আরএসএস</a>
-                <a aria-label="সাইটম্যাপ" href="{{ route('sitemap') }}">সাইটম্যাপ</a>
+                <a aria-label="সাইটম্যাপ" href="{{ route('sitemap.index') }}">সাইটম্যাপ</a>
             </div>
         </div>
     </div>
