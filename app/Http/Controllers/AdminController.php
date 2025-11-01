@@ -174,7 +174,6 @@ class AdminController extends Controller
 
     public function sitemapSettings()
     {
-        $settings = GeneralSetting::first();
-        return view('back.pages.settings.sitemap', compact('settings'));
+        return redirect()->route('admin.settings', ['tab' => 'sitemap_setting']);
     }
 }
