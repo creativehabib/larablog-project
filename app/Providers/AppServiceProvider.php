@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
 
         // --- ১. গ্লোবাল ডেটা কম্পোজার (Header, Footer, Layout) ---
         // $settings, $logoUrl, $navCategories, $currentDateBangla এই ভেরিয়েবলগুলো টার্গেট করা হয়েছে।
-        View::composer(['front.partials.header', 'front.partials.footer', 'front.layouts.frontend'], function ($view) {
+        View::composer(['front.partials.header', 'front.partials.footer', 'front.partials.sidebar', 'layouts.frontend'], function ($view) {
 
             // সেটিংস ডেটা (ক্যাশিং সহ)
             $settings = Cache::remember('general_settings', now()->addHour(), function () {
