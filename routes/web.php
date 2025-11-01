@@ -32,7 +32,25 @@ $permalinkRoute = PermalinkManager::routeDefinition();
 
 if (! $categoryPrefixEnabled && $permalinkRoute['template'] === '%postname%') {
     $categoryRoute->missing(function (Request $request) {
-        return app(FrontPostController::class)->show($request->route('category'));
+        $slug = $request->route('category');
+
+        if ($slug instanceof \Illuminate\Database\Eloquent\Model) {
+            $slug = $slug->getRouteKey();
+        }
+
+        if (! is_string($slug) || $slug === '') {
+            $slug = trim($request->path(), '/');
+        }
+
+        if ($slug === '') {
+            abort(404);
+        }
+
+        $response = app()->call([FrontPostController::class, 'show'], ['parameters' => [$slug]]);
+
+        return $response instanceof \Symfony\Component\HttpFoundation\Response
+            ? $response
+            : response($response);
     });
 }
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
