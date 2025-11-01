@@ -20,8 +20,14 @@
     }
 
     $errorToasts = [];
-    if (isset($errors) && $errors->any()) {
-        foreach ($errors->all() as $errorMessage) {
+
+    $viewErrors = $errors ?? session('errors');
+    if ($viewErrors instanceof \Illuminate\Support\ViewErrorBag) {
+        $viewErrors = $viewErrors->getBag('default');
+    }
+
+    if ($viewErrors instanceof \Illuminate\Support\MessageBag && $viewErrors->any()) {
+        foreach ($viewErrors->all() as $errorMessage) {
             $errorToasts[] = [
                 'type' => 'error',
                 'message' => $errorMessage,
