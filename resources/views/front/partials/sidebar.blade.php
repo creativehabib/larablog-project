@@ -46,3 +46,104 @@
         </div>
     </div>
 </div>
+
+<div class="col-sm-3 col-md-3 hidden-xs hidden-print">
+    <aside class="desktopSidebar" aria-label="Sidebar navigation">
+        <div class="desktopSidebarCard borderC1-1 shadow1 borderRadius5 marginB20 paddingLR20 paddingT15 paddingB15">
+            <form method="get" action="{{ route('home') }}">
+                <label for="desktopSidebarSearch" class="sr-only">Search</label>
+                <div class="input-group">
+                    <input
+                        id="desktopSidebarSearch"
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        value="{{ request('search') }}"
+                        placeholder="এখানে খুঁজুন..."
+                    >
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-danger"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+            </form>
+        </div>
+
+        @if(!empty($activePoll))
+            <div class="desktopSidebarCard borderC1-1 borderRadius5 marginB20 paddingLR20 paddingT15 paddingB15">
+                <h3 class="desktopSidebarCardHeading title11 marginT0 marginB10">মতামত জরিপ</h3>
+                <p class="title1_8 marginB15">
+                    {{ $activePoll->question }}
+                </p>
+                <a href="{{ route('polls.index') }}" class="btn btn-danger btn-block">ভোট দিন</a>
+                @if(!empty($activePoll->poll_date_bangla))
+                    <p class="marginT10 marginB0 time">{{ $activePoll->poll_date_bangla }} পর্যন্ত</p>
+                @endif
+            </div>
+        @endif
+
+        @if(($latestSidebarPosts ?? collect())->isNotEmpty())
+            <div class="desktopSidebarCard borderC1-1 borderRadius5 marginB20 paddingLR20 paddingT15 paddingB15">
+                <h3 class="desktopSidebarCardHeading title11 marginT0 marginB15">সর্বশেষ সংবাদ</h3>
+                <ul class="desktopSidebarList">
+                    @foreach(($latestSidebarPosts ?? collect())->take(6) as $post)
+                        <li>
+                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ route('posts.show', $post) }}">
+                                {{ \Illuminate\Support\Str::limit($post->title, 90) }}
+                            </a>
+                            @if($post->category)
+                                <span class="time">{{ $post->category->name }}</span>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if(($popularPosts ?? collect())->isNotEmpty())
+            <div class="desktopSidebarCard borderC1-1 borderRadius5 marginB20 paddingLR20 paddingT15 paddingB15">
+                <h3 class="desktopSidebarCardHeading title11 marginT0 marginB15">জনপ্রিয় সংবাদ</h3>
+                <ul class="desktopSidebarList">
+                    @foreach(($popularPosts ?? collect())->take(6) as $post)
+                        <li>
+                            <a class="title12 textDecorationNone colorBlack hoverBlue" href="{{ route('posts.show', $post) }}">
+                                {{ \Illuminate\Support\Str::limit($post->title, 90) }}
+                            </a>
+                            @if($post->category)
+                                <span class="time">{{ $post->category->name }}</span>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @php
+            $sidebarCategories = ($allCategories ?? collect())->take(12);
+        @endphp
+        @if($sidebarCategories->isNotEmpty())
+            <div class="desktopSidebarCard borderC1-1 borderRadius5 marginB0 paddingLR20 paddingT15 paddingB15">
+                <h3 class="desktopSidebarCardHeading title11 marginT0 marginB15">দ্রুত লিংক</h3>
+                <ul class="desktopSidebarList">
+                    <li>
+                        <a class="sidebarCatTitle textDecorationNone colorBlack hoverBlue" aria-label="প্রচ্ছদ" href="{{ route('home') }}">প্রচ্ছদ</a>
+                    </li>
+                    @foreach($sidebarCategories as $category)
+                        <li>
+                            <a class="sidebarCatTitle textDecorationNone colorBlack hoverBlue" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
+                        </li>
+                    @endforeach
+                    <li>
+                        <a class="sidebarCatTitle textDecorationNone colorBlack hoverBlue" aria-label="মতামত জরিপ" href="{{ route('polls.index') }}">
+                            <i class="fa fa-poll marginR5"></i> মতামত জরিপ
+                        </a>
+                    </li>
+                    <li>
+                        <a class="sidebarCatTitle textDecorationNone colorBlack hoverBlue" aria-label="আরএসএস" href="{{ route('feed') }}">
+                            <i class="fa fa-rss marginR5"></i> আরএসএস
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        @endif
+    </aside>
+</div>

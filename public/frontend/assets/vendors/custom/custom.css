@@ -2318,39 +2318,70 @@ body h1,h2,h3,h4,p,span,a{
 
 
 #desktopSidebar{
-	right: 0 !important;
-	left: unset !important;
+        right: 0 !important;
+        left: unset !important;
 }
 #desktopSidebar a{
-	border-top: 1px solid #c7e5e5;
-	border-bottom: none;
-	color: #333;
+        border-top: 1px solid #c7e5e5;
+        border-bottom: none;
+        color: #333;
 }
 #desktopSidebar a:hover{
-	color: #fff !important;
-	background-color: #344054;
-	border-top: 1px solid #344054;
+        color: #fff !important;
+        background-color: #344054;
+        border-top: 1px solid #344054;
 }
 #desktopSidebar .closebtn{
-	border: none;
+        border: none;
 }
 #desktopSidebar .closebtn:hover{
-	background-color: unset;
-	color: black !important;
-	border: none;
+        background-color: unset;
+        color: black !important;
+        border: none;
 }
 .desktopSidebarCatTitle {
-	font-size: 2.3rem;
-	line-height: 2.7rem;
-	/*padding-top: 8px !important;*/
-	/*padding-bottom: 8px !important;*/
+        font-size: 2.3rem;
+        line-height: 2.7rem;
+        /*padding-top: 8px !important;*/
+        /*padding-bottom: 8px !important;*/
 }
 .desktopSidebarCatTitle i{
-	font-size: 1.8rem;
+        font-size: 1.8rem;
+}
+.desktopSidebar{
+        display: block;
+}
+.desktopSidebarCard{
+        background-color: #fff;
+}
+.desktopSidebarCard + .desktopSidebarCard{
+        margin-top: 20px;
+}
+.desktopSidebarCardHeading{
+        font-weight: 600;
+}
+.desktopSidebarList{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+}
+.desktopSidebarList li{
+        margin-bottom: 12px;
+}
+.desktopSidebarList li:last-child{
+        margin-bottom: 0;
+}
+.desktopSidebarList .title12,
+.desktopSidebarList .sidebarCatTitle{
+        display: block;
+}
+.desktopSidebarCard .time{
+        display: block;
+        margin-top: 4px;
 }
 .desktopHeaderLogoLeftDiv{
-	margin-top: 30px;
-	text-align: left;
+        margin-top: 30px;
+        text-align: left;
 }
 .desktopHeaderLogoLeftDiv span{
 	font-size: 2rem;
