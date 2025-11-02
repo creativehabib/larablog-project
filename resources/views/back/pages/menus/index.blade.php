@@ -90,7 +90,7 @@
             }).on('change', function (e) {
                 const list = e.length ? e : $(e.target);
                 const structure = list.nestable('serialize');
-                Livewire.dispatch('menuOrderUpdated', structure);
+                Livewire.dispatch('menuOrderUpdated', { items: structure });
             });
         };
 

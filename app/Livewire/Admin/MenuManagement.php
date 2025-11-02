@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Post;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -299,13 +300,19 @@ class MenuManagement extends Component
     }
 
     #[On('menuOrderUpdated')]
-    public function updateMenuOrder($items): void
+    public function updateMenuOrder($payload): void
     {
         if (! $this->ensureSelectedMenu()) {
             return;
         }
 
         $this->ensureAuthorized('menu.edit');
+
+        $items = $this->normalizeMenuOrderPayload($payload);
+
+        if (empty($items)) {
+            return;
+        }
 
         DB::transaction(function () use ($items) {
             $this->persistOrder($items);
@@ -487,6 +494,31 @@ class MenuManagement extends Component
                 $this->persistOrder($children, $menuItem->id);
             }
         }
+    }
+
+    protected function normalizeMenuOrderPayload($payload): array
+    {
+        if ($payload instanceof \Illuminate\Support\Collection) {
+            $payload = $payload->toArray();
+        }
+
+        if (is_string($payload)) {
+            $decoded = json_decode($payload, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $payload = $decoded;
+            }
+        }
+
+        if (is_object($payload)) {
+            $payload = (array) $payload;
+        }
+
+        if (is_array($payload) && Arr::isAssoc($payload) && isset($payload['items']) && is_array($payload['items'])) {
+            $payload = $payload['items'];
+        }
+
+        return is_array($payload) ? $payload : [];
     }
 
     protected function afterMenuItemsMutated(string $message): void
