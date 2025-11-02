@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Livewire\Admin\MenuManagement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -72,6 +73,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/send-password-reset-link', 'sendPasswordResetLink')->name('send.password.reset.link');
             Route::get('/password/reset/{token}', 'resetForm')->name('reset.password.form');
             Route::post('/password/reset', 'resetPassword')->name('reset.password.submit');
+            Route::get('/menus', MenuManagement::class)->name('admin.menus');
         });
     });
 
@@ -88,9 +90,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::resource('subcategories', SubCategoryController::class)->except(['show']);
         Route::resource('posts', AdminPostController::class)->only(['index', 'create', 'edit']);
-        Route::get('media-library', MediaLibraryController::class)
-            ->name('media-library.index')
-            ->middleware('permission:media.view');
+        Route::get('media-library', MediaLibraryController::class)->name('media-library.index')->middleware('permission:media.view');
         Route::resource('polls', AdminPollController::class)->only(['index', 'create', 'edit']);
 
         Route::resource('roles', RoleController::class);
