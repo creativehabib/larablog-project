@@ -24,6 +24,24 @@
             max-width: 100%;
         }
 
+        .dd3-handle {
+            height: 40px;
+            width: 40px;
+            margin: 5px 0;
+            background: #4c6ef5;
+            border-radius: 0.25rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: move;
+        }
+
+        .dd3-handle:before {
+            content: '\2630';
+            font-size: 18px;
+        }
+
         .dd3-content {
             margin: 5px 0;
             padding: 0.75rem 1rem;
@@ -31,11 +49,6 @@
             border-radius: 0.25rem;
             background: #fff;
             box-shadow: 0 1px 1px rgba(15, 23, 42, 0.08);
-            cursor: move;
-        }
-
-        .dd3-content .dd-nodrag {
-            cursor: auto;
         }
 
         .menu-picker {
