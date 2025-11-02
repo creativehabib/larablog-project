@@ -435,7 +435,24 @@ class MenuManagement extends Component
     protected function persistOrder(array $items, ?int $parentId = null): void
     {
         foreach ($items as $index => $item) {
-            $menuItem = MenuItem::where('menu_id', $this->selectedMenuId)->find($item['id']);
+            $itemId = null;
+            $children = [];
+
+            if (is_array($item)) {
+                $itemId = $item['id'] ?? null;
+
+                if (! empty($item['children']) && is_array($item['children'])) {
+                    $children = $item['children'];
+                }
+            } elseif (is_numeric($item)) {
+                $itemId = (int) $item;
+            }
+
+            if (! $itemId) {
+                continue;
+            }
+
+            $menuItem = MenuItem::where('menu_id', $this->selectedMenuId)->find($itemId);
 
             if (! $menuItem) {
                 continue;
@@ -446,8 +463,8 @@ class MenuManagement extends Component
                 'parent_id' => $parentId,
             ]);
 
-            if (! empty($item['children'])) {
-                $this->persistOrder($item['children'], $menuItem->id);
+            if (! empty($children)) {
+                $this->persistOrder($children, $menuItem->id);
             }
         }
     }
