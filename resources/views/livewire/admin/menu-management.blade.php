@@ -9,7 +9,7 @@
                     @if(!empty($menus))
                         <div class="form-group mb-3">
                             <label class="form-label">Select menu</label>
-                            <select class="form-control" wire:model="selectedMenuId">
+                            <select class="form-control" wire:model.live="selectedMenuId">
                                 @foreach($menus as $menu)
                                     <option value="{{ $menu['id'] }}">{{ $menu['name'] }} ({{ $menu['location'] }})</option>
                                 @endforeach
