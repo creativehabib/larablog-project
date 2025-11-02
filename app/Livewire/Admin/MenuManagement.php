@@ -450,6 +450,10 @@ class MenuManagement extends Component
             $itemId = null;
             $children = [];
 
+            if (is_object($item)) {
+                $item = (array) $item;
+            }
+
             if (is_array($item)) {
                 $itemId = $item['id'] ?? null;
 
@@ -476,6 +480,10 @@ class MenuManagement extends Component
             ]);
 
             if (! empty($children)) {
+                if (is_object($children)) {
+                    $children = (array) $children;
+                }
+
                 $this->persistOrder($children, $menuItem->id);
             }
         }
