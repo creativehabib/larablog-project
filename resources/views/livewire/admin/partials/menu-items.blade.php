@@ -29,7 +29,7 @@
 
                     @if($isEditing)
                         <div class="mt-3 border-top pt-3">
-                            <form wire:submit.prevent="updateMenuItem">
+                            <form wire:submit.prevent="updateMenuItem({{ $item['id'] }})">
                                 <div class="form-group mb-2">
                                     <label class="form-label">Navigation label</label>
                                     <input type="text" class="form-control" wire:model.defer="editingItem.title">
