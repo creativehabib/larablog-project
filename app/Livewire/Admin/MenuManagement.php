@@ -76,9 +76,19 @@ class MenuManagement extends Component
 
     public function updatedSelectedMenuId($value): void
     {
-        if ($value) {
-            $this->selectMenu((int) $value);
+        $this->selectedMenuId = filled($value) ? (int) $value : null;
+
+        if ($this->selectedMenuId) {
+            $this->selectMenu($this->selectedMenuId);
+
+            return;
         }
+
+        $this->selectedMenu = null;
+        $this->editMenuName = '';
+        $this->editMenuLocation = '';
+
+        $this->dispatch('refreshNestable');
     }
 
     public function selectMenu(int $menuId): void
