@@ -264,9 +264,11 @@ class MenuManagement extends Component
         ];
     }
 
-    public function updateMenuItem(): void
+    public function updateMenuItem(?int $itemId = null): void
     {
-        if (! $this->editingItemId || ! $this->ensureSelectedMenu()) {
+        $itemId ??= $this->editingItemId;
+
+        if (! $itemId || ! $this->ensureSelectedMenu()) {
             return;
         }
 
@@ -278,7 +280,7 @@ class MenuManagement extends Component
             'editingItem.target' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
         ]);
 
-        $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($this->editingItemId);
+        $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($itemId);
 
         $item->update($this->editingItem);
 
