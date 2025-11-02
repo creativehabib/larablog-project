@@ -91,6 +91,13 @@
                         </ul>
                     </li>
 
+                    @can('menu.view')
+                    <li class="menu-header">Appearance</li>
+                    <li class="menu-item {{ request()->routeIs('admin.menus.*') ? 'has-active' : '' }}">
+                        <a href="{{ route('admin.menus.index') }}" class="menu-link"><span class="menu-icon fas fa-bars"></span> <span class="menu-text">Menus</span></a>
+                    </li>
+                    @endcan
+
                     @can('setting.view')
                     <li class="menu-item has-child {{ request()->routeIs('admin.settings*') ? 'has-active' : '' }}">
                         <a href="#" class="menu-link"><span class="menu-icon oi oi-wrench"></span> <span class="menu-text">Setting</span></a>

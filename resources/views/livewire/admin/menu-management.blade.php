@@ -1,87 +1,184 @@
 <div>
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-xl-4">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h5>Add Menu Item</h5>
+                    <h5 class="card-title mb-0">Menus</h5>
                 </div>
                 <div class="card-body">
-                    <form wire:submit.prevent="addMenuItem">
-                        <div class="form-group">
-                            <label for="title">Title</label>
-                            <input type="text" class="form-control" wire:model="title" placeholder="Enter title">
-                            @error('title') <span class="text-danger">{{ $message }}</span> @enderror
+                    @if(!empty($menus))
+                        <div class="form-group mb-3">
+                            <label class="form-label">Select menu</label>
+                            <select class="form-control" wire:model="selectedMenuId">
+                                @foreach($menus as $menu)
+                                    <option value="{{ $menu['id'] }}">{{ $menu['name'] }} ({{ $menu['location'] }})</option>
+                                @endforeach
+                            </select>
+                            @error('selectedMenuId') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        <div class="form-group">
-                            <label for="url">URL</label>
-                            <input type="text" class="form-control" wire:model="url" placeholder="https://example.com">
-                            @error('url') <span class="text-danger">{{ $message }}</span> @enderror
+                    @endif
+
+                    <form wire:submit.prevent="createMenu" class="border-top pt-3 mt-3">
+                        <h6 class="mb-3">Create new menu</h6>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Menu name</label>
+                            <input type="text" class="form-control" wire:model.defer="newMenuName" placeholder="Primary navigation">
+                            @error('newMenuName') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary">Add Item</button>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Location</label>
+                            <input list="menu-locations" class="form-control" wire:model.defer="newMenuLocation" placeholder="primary">
+                            <datalist id="menu-locations">
+                                @foreach($locationSuggestions as $locationKey => $label)
+                                    <option value="{{ $locationKey }}">{{ $label }}</option>
+                                @endforeach
+                            </datalist>
+                            <small class="form-text text-muted">Locations help you reuse menus in different parts of the site.</small>
+                            @error('newMenuLocation') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Create menu</button>
                     </form>
+
+                    @if($selectedMenu)
+                        <form wire:submit.prevent="updateMenu" class="border-top pt-3 mt-4">
+                            <h6 class="mb-3">Menu settings</h6>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Menu name</label>
+                                <input type="text" class="form-control" wire:model.defer="editMenuName">
+                                @error('editMenuName') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">Location</label>
+                                <input list="menu-locations" class="form-control" wire:model.defer="editMenuLocation">
+                                @error('editMenuLocation') <span class="text-danger small">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center">
+                                <button type="submit" class="btn btn-primary mr-2 mb-2">Save changes</button>
+                                <button type="button" class="btn btn-outline-danger mb-2"
+                                    wire:click="deleteMenu({{ $selectedMenuId }})"
+                                    onclick="confirm('This will delete the menu and all of its items. Continue?') || event.stopImmediatePropagation()">
+                                    Delete menu
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Add menu items</h5>
+                </div>
+                <div class="card-body">
+                    @if(! $selectedMenu)
+                        <p class="text-muted mb-0">Create a menu first to start adding links.</p>
+                    @else
+                        <ul class="nav nav-tabs" id="menu-item-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="tab-custom-link" data-toggle="tab" href="#panel-custom-link" role="tab">Custom link</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="tab-categories" data-toggle="tab" href="#panel-categories" role="tab">Categories</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="tab-posts" data-toggle="tab" href="#panel-posts" role="tab">Posts</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-3">
+                            <div class="tab-pane fade show active" id="panel-custom-link" role="tabpanel" aria-labelledby="tab-custom-link">
+                                <form wire:submit.prevent="addCustomLink">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Navigation label</label>
+                                        <input type="text" class="form-control" wire:model.defer="customTitle">
+                                        @error('customTitle') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">URL</label>
+                                        <input type="text" class="form-control" wire:model.defer="customUrl" placeholder="https://example.com">
+                                        @error('customUrl') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="form-label">Open link in</label>
+                                        <select class="form-control" wire:model.defer="customTarget">
+                                            @foreach($availableTargets as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('customTarget') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Add to menu</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories">
+                                <form wire:submit.prevent="addCategoriesToMenu">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Search categories</label>
+                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.debounce.500ms="categorySearch">
+                                    </div>
+                                    <div class="menu-picker">
+                                        @forelse($this->categoryOptions as $category)
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="{{ $category->id }}" id="category-{{ $category->id }}" wire:model="selectedCategories">
+                                                <label class="form-check-label" for="category-{{ $category->id }}">{{ $category->name }}</label>
+                                            </div>
+                                        @empty
+                                            <p class="text-muted small mb-0">No categories found.</p>
+                                        @endforelse
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-3" @if(empty($selectedCategories)) disabled @endif>Add to menu</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="panel-posts" role="tabpanel" aria-labelledby="tab-posts">
+                                <form wire:submit.prevent="addPostsToMenu">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Search posts</label>
+                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.debounce.500ms="postSearch">
+                                    </div>
+                                    <div class="menu-picker">
+                                        @forelse($this->postOptions as $post)
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="{{ $post->id }}" id="post-{{ $post->id }}" wire:model="selectedPosts">
+                                                <label class="form-check-label" for="post-{{ $post->id }}">{{ $post->title }}</label>
+                                            </div>
+                                        @empty
+                                            <p class="text-muted small mb-0">No posts found.</p>
+                                        @endforelse
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-3" @if(empty($selectedPosts)) disabled @endif>Add to menu</button>
+                                </form>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
-
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Manage Menu</h5>
-                    <div class="form-group mb-0">
-                        <label for="menuSelect">Select Menu:</label>
-                        <select class="form-control" wire:change="selectMenu($event.target.value)">
-                            @foreach($menus as $menu)
-                                <option value="{{ $menu->id }}" @if($selectedMenu && $selectedMenu->id == $menu->id) selected @endif>{{ $menu->name }}</option>
-                            @endforeach
-                        </select>
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h5 class="card-title mb-0">Menu structure</h5>
+                        <small class="text-muted">Drag and drop items to reorder. Nest items to create dropdowns.</small>
                     </div>
+                    @if($selectedMenu)
+                        <span class="badge badge-light text-uppercase">{{ $selectedMenu['location'] }}</span>
+                    @endif
                 </div>
                 <div class="card-body">
                     @if(session()->has('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
 
-                    <div class="dd" id="nestable">
-                        <ol class="dd-list">
-                            @foreach($selectedMenu->items as $item)
-                                <li class="dd-item" data-id="{{ $item->id }}">
-                                    <div class="dd-handle">{{ $item->title }}</div>
-                                    @if($item->children->isNotEmpty())
-                                        <ol class="dd-list">
-                                            @foreach($item->children as $child)
-                                                <li class="dd-item" data-id="{{ $child->id }}">
-                                                    <div class="dd-handle">{{ $child->title }}</div>
-                                                </li>
-                                            @endforeach
-                                        </ol>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ol>
-                    </div>
+                    @if(! $selectedMenu)
+                        <p class="text-muted mb-0">Create a menu to start organising links.</p>
+                    @elseif(empty($selectedMenu['items']))
+                        <p class="text-muted mb-0">This menu does not have any items yet.</p>
+                    @else
+                        <div id="menuNestable" data-menu-structure class="dd">
+                            @include('livewire.admin.partials.menu-items', ['items' => $selectedMenu['items']])
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-
-    @push('scripts')
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.css" />
-
-        <script>
-            $(document).ready(function() {
-                // Nestable চালু করুন
-                $('#nestable').nestable({
-                    maxDepth: 3 // আপনি কতগুলো সাব-মেনু লেভেল চান
-                }).on('change', function(e) {
-                    // যখন ড্র্যাগ-এন্ড-ড্রপ করা হয়, তখন এই ফাংশনটি কাজ করে
-                    var list = e.length ? e : $(e.target);
-                    var output = list.nestable('serialize'); // মেনুর নতুন স্ট্রাকচার JSON ফরম্যাটে নিন
-
-                    // Livewire কম্পোনেন্টের updateMenuOrder মেথডকে কল করুন
-                @this.call('updateMenuOrder', output);
-                });
-            });
-        </script>
-    @endpush
 </div>

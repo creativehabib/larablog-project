@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Livewire\Admin\MenuManagement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -73,7 +72,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/send-password-reset-link', 'sendPasswordResetLink')->name('send.password.reset.link');
             Route::get('/password/reset/{token}', 'resetForm')->name('reset.password.form');
             Route::post('/password/reset', 'resetPassword')->name('reset.password.submit');
-            Route::get('/menus', MenuManagement::class)->name('admin.menus');
         });
     });
 
@@ -96,6 +94,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('users', UserManagementController::class);
+
+        Route::view('menus', 'back.pages.menus.index')
+            ->name('menus.index')
+            ->middleware('permission:menu.view');
     });
 });
 

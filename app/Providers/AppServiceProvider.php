@@ -73,6 +73,9 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('name')
                 ->get();
 
+            $primaryMenu = get_menu_by_location('primary');
+            $footerMenu = get_menu_by_location('footer');
+
             $view->with([
                 'settings' => $settings,
                 'logoUrl' => $logoUrl,
@@ -80,6 +83,8 @@ class AppServiceProvider extends ServiceProvider
                 'currentTimeBangla' => $currentTimeBangla,
                 'navCategories' => $navCategories,
                 'allCategories' => $allCategories,
+                'primaryMenu' => $primaryMenu,
+                'footerMenu' => $footerMenu,
             ]);
         });
 
