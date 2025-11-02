@@ -170,19 +170,21 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    @if(session()->has('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
+                    <div wire:key="menu-structure-{{ $selectedMenuId ?? 'none' }}">
+                        @if(session()->has('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
 
-                    @if(! $selectedMenu)
-                        <p class="text-muted mb-0">Create a menu to start organising links.</p>
-                    @elseif(empty($selectedMenu['items']))
-                        <p class="text-muted mb-0">This menu does not have any items yet.</p>
-                    @else
-                        <div id="menuNestable" data-menu-structure class="dd">
-                            @include('livewire.admin.partials.menu-items', ['items' => $selectedMenu['items']])
-                        </div>
-                    @endif
+                        @if(! $selectedMenu)
+                            <p class="text-muted mb-0">Create a menu to start organising links.</p>
+                        @elseif(empty($selectedMenu['items']))
+                            <p class="text-muted mb-0">This menu does not have any items yet.</p>
+                        @else
+                            <div id="menuNestable" data-menu-structure class="dd">
+                                @include('livewire.admin.partials.menu-items', ['items' => $selectedMenu['items']])
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
