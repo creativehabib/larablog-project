@@ -55,8 +55,8 @@
                             <div class="d-flex flex-wrap align-items-center">
                                 <button type="submit" class="btn btn-primary mr-2 mb-2">Save changes</button>
                                 <button type="button" class="btn btn-outline-danger mb-2"
-                                    wire:click="deleteMenu({{ $selectedMenuId }})"
-                                    onclick="confirm('This will delete the menu and all of its items. Continue?') || event.stopImmediatePropagation()">
+                                        wire:click="deleteMenu({{ $selectedMenuId }})"
+                                        onclick="confirm('This will delete the menu and all of its items. Continue?') || event.stopImmediatePropagation()">
                                     Delete menu
                                 </button>
                             </div>
@@ -153,7 +153,7 @@
                                         @endforelse
                                     </div>
                                     @error('selectedCategories')
-                                        <span class="text-danger small d-block mt-2">{{ $message }}</span>
+                                    <span class="text-danger small d-block mt-2">{{ $message }}</span>
                                     @enderror
                                     <button type="submit" class="btn btn-primary mt-3" wire:loading.attr="disabled" @disabled(empty($selectedCategories))>Add to menu</button>
                                 </form>
@@ -175,7 +175,7 @@
                                         @endforelse
                                     </div>
                                     @error('selectedPosts')
-                                        <span class="text-danger small d-block mt-2">{{ $message }}</span>
+                                    <span class="text-danger small d-block mt-2">{{ $message }}</span>
                                     @enderror
                                     <button type="submit" class="btn btn-primary mt-3" wire:loading.attr="disabled" @disabled(empty($selectedPosts))>Add to menu</button>
                                 </form>
