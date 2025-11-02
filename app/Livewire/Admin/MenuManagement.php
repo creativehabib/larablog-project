@@ -434,6 +434,8 @@ class MenuManagement extends Component
 
     protected function persistOrder(array $items, ?int $parentId = null): void
     {
+        $items = array_values($items);
+
         foreach ($items as $index => $item) {
             $itemId = null;
             $children = [];
