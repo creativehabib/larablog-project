@@ -113,38 +113,44 @@
                                 <form wire:submit.prevent="addCategoriesToMenu">
                                     <div class="form-group mb-3">
                                         <label class="form-label">Search categories</label>
-                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.debounce.500ms="categorySearch">
+                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.live.debounce.500ms="categorySearch">
                                     </div>
                                     <div class="menu-picker">
                                         @forelse($this->categoryOptions as $category)
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="{{ $category->id }}" id="category-{{ $category->id }}" wire:model="selectedCategories">
+                                            <div class="form-check" wire:key="category-option-{{ $category->id }}">
+                                                <input class="form-check-input" type="checkbox" value="{{ $category->id }}" id="category-{{ $category->id }}" wire:model.live="selectedCategories">
                                                 <label class="form-check-label" for="category-{{ $category->id }}">{{ $category->name }}</label>
                                             </div>
                                         @empty
                                             <p class="text-muted small mb-0">No categories found.</p>
                                         @endforelse
                                     </div>
-                                    <button type="submit" class="btn btn-primary mt-3" @if(empty($selectedCategories)) disabled @endif>Add to menu</button>
+                                    @error('selectedCategories')
+                                        <span class="text-danger small d-block mt-2">{{ $message }}</span>
+                                    @enderror
+                                    <button type="submit" class="btn btn-primary mt-3" wire:loading.attr="disabled" @disabled(empty($selectedCategories))>Add to menu</button>
                                 </form>
                             </div>
                             <div class="tab-pane fade" id="panel-posts" role="tabpanel" aria-labelledby="tab-posts">
                                 <form wire:submit.prevent="addPostsToMenu">
                                     <div class="form-group mb-3">
                                         <label class="form-label">Search posts</label>
-                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.debounce.500ms="postSearch">
+                                        <input type="text" class="form-control" placeholder="Type to filter..." wire:model.live.debounce.500ms="postSearch">
                                     </div>
                                     <div class="menu-picker">
                                         @forelse($this->postOptions as $post)
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="{{ $post->id }}" id="post-{{ $post->id }}" wire:model="selectedPosts">
+                                            <div class="form-check" wire:key="post-option-{{ $post->id }}">
+                                                <input class="form-check-input" type="checkbox" value="{{ $post->id }}" id="post-{{ $post->id }}" wire:model.live="selectedPosts">
                                                 <label class="form-check-label" for="post-{{ $post->id }}">{{ $post->title }}</label>
                                             </div>
                                         @empty
                                             <p class="text-muted small mb-0">No posts found.</p>
                                         @endforelse
                                     </div>
-                                    <button type="submit" class="btn btn-primary mt-3" @if(empty($selectedPosts)) disabled @endif>Add to menu</button>
+                                    @error('selectedPosts')
+                                        <span class="text-danger small d-block mt-2">{{ $message }}</span>
+                                    @enderror
+                                    <button type="submit" class="btn btn-primary mt-3" wire:loading.attr="disabled" @disabled(empty($selectedPosts))>Add to menu</button>
                                 </form>
                             </div>
                         </div>
