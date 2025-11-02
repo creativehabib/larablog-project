@@ -75,17 +75,44 @@
                     @else
                         <ul class="nav nav-tabs" id="menu-item-tabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link active" id="tab-custom-link" data-toggle="tab" href="#panel-custom-link" role="tab">Custom link</a>
+                                <a
+                                    class="nav-link {{ $activeTab === 'custom-link' ? 'active' : '' }}"
+                                    id="tab-custom-link"
+                                    data-toggle="tab"
+                                    href="#panel-custom-link"
+                                    role="tab"
+                                    wire:click.prevent="$set('activeTab', 'custom-link')"
+                                >
+                                    Custom link
+                                </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="tab-categories" data-toggle="tab" href="#panel-categories" role="tab">Categories</a>
+                                <a
+                                    class="nav-link {{ $activeTab === 'categories' ? 'active' : '' }}"
+                                    id="tab-categories"
+                                    data-toggle="tab"
+                                    href="#panel-categories"
+                                    role="tab"
+                                    wire:click.prevent="$set('activeTab', 'categories')"
+                                >
+                                    Categories
+                                </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="tab-posts" data-toggle="tab" href="#panel-posts" role="tab">Posts</a>
+                                <a
+                                    class="nav-link {{ $activeTab === 'posts' ? 'active' : '' }}"
+                                    id="tab-posts"
+                                    data-toggle="tab"
+                                    href="#panel-posts"
+                                    role="tab"
+                                    wire:click.prevent="$set('activeTab', 'posts')"
+                                >
+                                    Posts
+                                </a>
                             </li>
                         </ul>
                         <div class="tab-content pt-3">
-                            <div class="tab-pane fade show active" id="panel-custom-link" role="tabpanel" aria-labelledby="tab-custom-link">
+                            <div class="tab-pane fade {{ $activeTab === 'custom-link' ? 'show active' : '' }}" id="panel-custom-link" role="tabpanel" aria-labelledby="tab-custom-link">
                                 <form wire:submit.prevent="addCustomLink">
                                     <div class="form-group mb-3">
                                         <label class="form-label">Navigation label</label>
@@ -109,7 +136,7 @@
                                     <button type="submit" class="btn btn-primary">Add to menu</button>
                                 </form>
                             </div>
-                            <div class="tab-pane fade" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories">
+                            <div class="tab-pane fade {{ $activeTab === 'categories' ? 'show active' : '' }}" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories">
                                 <form wire:submit.prevent="addCategoriesToMenu">
                                     <div class="form-group mb-3">
                                         <label class="form-label">Search categories</label>
@@ -131,7 +158,7 @@
                                     <button type="submit" class="btn btn-primary mt-3" wire:loading.attr="disabled" @disabled(empty($selectedCategories))>Add to menu</button>
                                 </form>
                             </div>
-                            <div class="tab-pane fade" id="panel-posts" role="tabpanel" aria-labelledby="tab-posts">
+                            <div class="tab-pane fade {{ $activeTab === 'posts' ? 'show active' : '' }}" id="panel-posts" role="tabpanel" aria-labelledby="tab-posts">
                                 <form wire:submit.prevent="addPostsToMenu">
                                     <div class="form-group mb-3">
                                         <label class="form-label">Search posts</label>

@@ -64,6 +64,8 @@ class MenuManagement extends Component
         'target' => '_self',
     ];
 
+    public string $activeTab = 'custom-link';
+
     public array $locationSuggestions = Menu::AVAILABLE_LOCATIONS;
 
     public function mount(): void
@@ -375,6 +377,7 @@ class MenuManagement extends Component
             $this->selectedMenuId = null;
             $this->editMenuName = '';
             $this->editMenuLocation = '';
+            $this->activeTab = 'custom-link';
             $this->dispatch('refreshNestable');
 
             return;
