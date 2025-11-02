@@ -300,7 +300,7 @@ class MenuManagement extends Component
     }
 
     #[On('menuOrderUpdated')]
-    public function updateMenuOrder($payload): void
+    public function updateMenuOrder($items): void
     {
         if (! $this->ensureSelectedMenu()) {
             return;
@@ -308,7 +308,7 @@ class MenuManagement extends Component
 
         $this->ensureAuthorized('menu.edit');
 
-        $items = $this->normalizeMenuOrderPayload($payload);
+        $items = $this->normalizeMenuOrderPayload($items);
 
         if (empty($items)) {
             return;
