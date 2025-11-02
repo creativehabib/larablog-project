@@ -38,6 +38,19 @@
                     <p class="marginB0 marginT10">{{ $seo['description'] ?? ($settings->site_meta_description ?? '') }}</p>
                 </div>
             </div>
+            @if(($footerMenu?->items ?? collect())->isNotEmpty())
+                <div class="col-sm-12 col-md-12">
+                    <div class="footerMenuWrapper marginT20">
+                        <ul class="footerMenu">
+                            @foreach($footerMenu->items as $item)
+                                <li>
+                                    <a href="{{ $item->url }}" target="{{ $item->target }}">{{ $item->title }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
             <div class="col-sm-12 col-md-12">
                 <div class="footerBottom">
                     <p><span class="todaysYear"></span> <i class="fa fa-copyright title1_4"></i> {{ $settings->site_title ?? config('app.name') }} কর্তৃক সর্বস্বত্ব সংরক্ষিত।</p>

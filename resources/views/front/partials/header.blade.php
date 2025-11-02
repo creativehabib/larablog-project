@@ -1,6 +1,7 @@
 @php
     $activeCategory = $activeCategory ?? null;
     $isHomeRoute = request()->routeIs('home');
+    $primaryMenuItems = ($primaryMenu?->items ?? collect());
 @endphp
 <div class="hidden-xs hidden-print">
     <div class="container bgWhite">
@@ -41,14 +42,18 @@
                                 @endif
                             </a>
                         </span>
-                        <ul class="headerMenuUl">
-                            <li class="{{ $isHomeRoute ? 'active' : '' }}"><a aria-label="প্রচ্ছদ" href="{{ route('home') }}">প্রচ্ছদ</a></li>
-                            @foreach($navCategories ?? [] as $category)
-                                <li class="{{ optional($activeCategory)->id === $category->id ? 'active' : '' }}">
-                                    <a aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
-                                </li>
-                            @endforeach
-                        </ul>
+                        @if($primaryMenuItems->isNotEmpty())
+                            @include('front.partials.primary-menu', ['items' => $primaryMenuItems])
+                        @else
+                            <ul class="headerMenuUl">
+                                <li class="{{ $isHomeRoute ? 'active' : '' }}"><a aria-label="প্রচ্ছদ" href="{{ route('home') }}">প্রচ্ছদ</a></li>
+                                @foreach($navCategories ?? [] as $category)
+                                    <li class="{{ optional($activeCategory)->id === $category->id ? 'active' : '' }}">
+                                        <a aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </div>
                 </div>
                 <div class="col-md-1">
@@ -138,29 +143,69 @@
                 </form>
             </div>
         </div>
-        <div class="col-xs-12 padding0 margin0 mobileSecondHeader">
-            <div>
-                <table>
-                    <tr>
-                        <td class="{{ $isHomeRoute ? 'mobileSecondHeaderActive' : '' }}"><a href="{{ route('home') }}"><i class="fa fa-house"></i></a></td>
-                        @foreach(($navCategories ?? collect())->take(5) as $category)
-                            <td class="{{ optional($activeCategory)->id === $category->id ? 'mobileSecondHeaderActive' : '' }}">
-                                <a href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
-                            </td>
+        @if($primaryMenuItems->isNotEmpty())
+            <div class="col-xs-12 padding0 margin0 mobileSecondHeader">
+                <div>
+                    <table>
+                        <tr>
+                            @foreach($primaryMenuItems->take(5) as $menuItem)
+                                @php
+                                    $itemActive = rtrim(url()->current(), '/') === rtrim($menuItem->url, '/');
+                                @endphp
+                                <td class="{{ $itemActive ? 'mobileSecondHeaderActive' : '' }}">
+                                    <a href="{{ $menuItem->url }}" target="{{ $menuItem->target }}">{{ $menuItem->title }}</a>
+                                </td>
+                            @endforeach
+                            @if($primaryMenuItems->count() > 5)
+                                <td class="clickLoadMenubarCategories"><a href="javascript:void(0)"><i class="fa fa-ellipsis"></i></a></td>
+                            @endif
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            @if($primaryMenuItems->count() > 5)
+                <div class="col-xs-12 padding0" id="mobileCategoryDrawer" style="display: none;">
+                    <div class="row loadMenubarCategories">
+                        @foreach($primaryMenuItems as $menuItem)
+                            <div class="col-xs-6">
+                                <a class="sidebarCatTitle" href="{{ $menuItem->url }}" target="{{ $menuItem->target }}">{{ $menuItem->title }}</a>
+                                @if($menuItem->children->isNotEmpty())
+                                    <ul class="mobileMenuChildren">
+                                        @foreach($menuItem->children as $child)
+                                            <li><a href="{{ $child->url }}" target="{{ $child->target }}">{{ $child->title }}</a></li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </div>
                         @endforeach
-                        <td class="clickLoadMenubarCategories"><a href="javascript:void(0)"><i class="fa fa-ellipsis"></i></a></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <div class="col-xs-12 padding0" id="mobileCategoryDrawer" style="display: none;">
-            <div class="row loadMenubarCategories">
-                @foreach(($allCategories ?? collect()) as $category)
-                    <div class="col-xs-6">
-                        <a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}"> {{ $category->name }}</a>
                     </div>
-                @endforeach
+                </div>
+            @endif
+        @else
+            <div class="col-xs-12 padding0 margin0 mobileSecondHeader">
+                <div>
+                    <table>
+                        <tr>
+                            <td class="{{ $isHomeRoute ? 'mobileSecondHeaderActive' : '' }}"><a href="{{ route('home') }}"><i class="fa fa-house"></i></a></td>
+                            @foreach(($navCategories ?? collect())->take(5) as $category)
+                                <td class="{{ optional($activeCategory)->id === $category->id ? 'mobileSecondHeaderActive' : '' }}">
+                                    <a href="{{ route('categories.show', $category) }}">{{ $category->name }}</a>
+                                </td>
+                            @endforeach
+                            <td class="clickLoadMenubarCategories"><a href="javascript:void(0)"><i class="fa fa-ellipsis"></i></a></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
-        </div>
+            <div class="col-xs-12 padding0" id="mobileCategoryDrawer" style="display: none;">
+                <div class="row loadMenubarCategories">
+                    @foreach(($allCategories ?? collect()) as $category)
+                        <div class="col-xs-6">
+                            <a class="sidebarCatTitle" aria-label="{{ $category->name }}" href="{{ route('categories.show', $category) }}"> {{ $category->name }}</a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 </div>
