@@ -1,4 +1,4 @@
-@props(['items' => [], 'level' => 0])
+@props(['items' => [], 'level' => 0, 'editingItemId' => null, 'availableTargets' => []])
 
 @if(!empty($items))
     <ol class="dd-list">
@@ -29,7 +29,8 @@
 
                     @if($isEditing)
                         <div class="mt-3 border-top pt-3">
-                            <form wire:submit.prevent="updateMenuItem({{ $item['id'] }})">
+                            {{-- (পরিবর্তন) <form> ট্যাগে wire:loading.class যোগ করা হয়েছে --}}
+                            <form wire:submit.prevent="updateMenuItem({{ $item['id'] }})" wire:loading.class="opacity-50">
                                 <div class="form-group mb-2">
                                     <label class="form-label">Navigation label</label>
                                     <input type="text" class="form-control" wire:model.defer="editingItem.title">
@@ -50,8 +51,12 @@
                                     @error('editingItem.target') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="d-flex flex-wrap align-items-center">
-                                    <button type="submit" class="btn btn-primary btn-sm mr-2 mb-2">Save</button>
-                                    <button type="button" class="btn btn-light btn-sm mb-2" wire:click="cancelEditing">Cancel</button>
+                                    {{-- (পরিবর্তন) বাটনে wire:loading.attr="disabled" যোগ করা হয়েছে --}}
+                                    <button type="submit" class="btn btn-primary btn-sm mr-2 mb-2" wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="updateMenuItem">Save</span>
+                                        <span wire:loading wire:target="updateMenuItem">Saving...</span>
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm mb-2" wire:click="cancelEditing" wire:loading.attr="disabled">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -59,7 +64,12 @@
                 </div>
 
                 @if($hasChildren)
-                    @include('livewire.admin.partials.menu-items', ['items' => $item['children'], 'level' => $level + 1])
+                    @include('livewire.admin.partials.menu-items', [
+                        'items' => $item['children'],
+                        'level' => $level + 1,
+                        'editingItemId' => $editingItemId,
+                        'availableTargets' => $availableTargets
+                    ])
                 @endif
             </li>
         @endforeach
