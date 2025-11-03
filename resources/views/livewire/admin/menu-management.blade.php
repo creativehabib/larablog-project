@@ -272,12 +272,24 @@
                         maxDepth: 3
                     });
 
+                    const serializeItems = (items) => {
+                        return items.map(item => {
+                            const children = Array.isArray(item.children) ? serializeItems(item.children) : [];
+
+                            return {
+                                id: item.id,
+                                ...(children.length ? { children } : {})
+                            };
+                        });
+                    };
+
                     nestableInstance.on('change', function(e) {
                         var list = e.length ? e : $(e.target);
                         var output = list.nestable('serialize');
+                        var serialized = Array.isArray(output) ? serializeItems(output) : [];
 
                         // Livewire-এর 'menuOrderUpdated' ইভেন্টে ডেটা পাঠান (JSON Circular Structure এরর এড়ানোর জন্য)
-                        Livewire.dispatch('menuOrderUpdated', { items: output });
+                        Livewire.dispatch('menuOrderUpdated', { items: serialized });
                     });
                 }
 
