@@ -189,7 +189,7 @@ class MenuManagement extends Component
 
         $this->editTitle = $item->title;
         $this->editUrl = $item->url;
-        $this->editTarget = $item->target;
+        $this->editTarget = $item->target ?? array_key_first($this->availableTargets);
 
         $this->resetValidation();
     }
