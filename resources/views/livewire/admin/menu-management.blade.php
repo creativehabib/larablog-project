@@ -10,6 +10,7 @@
                         <div class="form-group mb-3">
                             <label class="form-label">Select menu</label>
                             <select class="form-control" wire:model.live="selectedMenuId">
+                                <option value="">— Select a Menu —</option>
                                 @foreach($menus as $menu)
                                     <option value="{{ $menu['id'] }}">{{ $menu['name'] }} ({{ $menu['location'] }})</option>
                                 @endforeach
@@ -121,7 +122,7 @@
                                     </div>
                                     <div class="form-group mb-3">
                                         <label class="form-label">URL</label>
-                                        <input type="text" class="form-control" wire:model.defer="customUrl" placeholder="https://example.com">
+                                        <input type="text" class="form-control" wire:model.defer="customUrl" placeholder="/relative or https://absolute">
                                         @error('customUrl') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="form-group mb-4">
@@ -142,7 +143,7 @@
                                         <label class="form-label">Search categories</label>
                                         <input type="text" class="form-control" placeholder="Type to filter..." wire:model.live.debounce.500ms="categorySearch">
                                     </div>
-                                    <div class="menu-picker">
+                                    <div class="menu-picker" style="max-height: 200px; overflow-y: auto;">
                                         @forelse($this->categoryOptions as $category)
                                             <div class="form-check" wire:key="category-option-{{ $category->id }}">
                                                 <input class="form-check-input" type="checkbox" value="{{ $category->id }}" id="category-{{ $category->id }}" wire:model.live="selectedCategories">
@@ -164,7 +165,7 @@
                                         <label class="form-label">Search posts</label>
                                         <input type="text" class="form-control" placeholder="Type to filter..." wire:model.live.debounce.500ms="postSearch">
                                     </div>
-                                    <div class="menu-picker">
+                                    <div class="menu-picker" style="max-height: 200px; overflow-y: auto;">
                                         @forelse($this->postOptions as $post)
                                             <div class="form-check" wire:key="post-option-{{ $post->id }}">
                                                 <input class="form-check-input" type="checkbox" value="{{ $post->id }}" id="post-{{ $post->id }}" wire:model.live="selectedPosts">
@@ -202,17 +203,18 @@
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
 
-                        @if($errors->has('editingItemId'))
-                            <div class="alert alert-danger">{{ $errors->first('editingItemId') }}</div>
-                        @endif
-
                         @if(! $selectedMenu)
                             <p class="text-muted mb-0">Create a menu to start organising links.</p>
                         @elseif(empty($selectedMenu['items']))
                             <p class="text-muted mb-0">This menu does not have any items yet.</p>
                         @else
                             <div id="menuNestable" data-menu-structure class="dd">
-                                @include('livewire.admin.partials.menu-items', ['items' => $selectedMenu['items']])
+                                {{-- === (সমাধান) $editingItemId এবং $availableTargets এখানে পাস করুন === --}}
+                                @include('livewire.admin.partials.menu-items', [
+                                    'items' => $selectedMenu['items'],
+                                    'editingItemId' => $editingItemId,
+                                    'availableTargets' => $availableTargets
+                                ])
                             </div>
                         @endif
                     </div>
@@ -220,4 +222,74 @@
             </div>
         </div>
     </div>
+
+    {{-- এই @push('scripts') সেকশনটি আপনার মেইন লেআউট ফাইলে (@stack('scripts')) রেন্ডার হবে --}}
+    @push('scripts')
+        {{-- Nestable.js লাইব্রেরি (আপনার মেইন লেআউটে jQuery থাকতে হবে) --}}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.css" />
+
+        <style>
+            /* Nestable.js-এর জন্য কিছু স্টাইল ফিক্স */
+            .dd { max-width: 100%; }
+            .dd-handle { height: auto; }
+            .dd3-content {
+                height: auto;
+                padding: 10px 15px;
+                display: block;
+            }
+            .dd-placeholder {
+                background: #f2f2f2;
+                border: 1px dashed #b6bcbf;
+                box-sizing: border-box;
+                min-height: 50px;
+                margin: 5px 0;
+            }
+            .dd3-item > button { margin-left: 40px; } /* Drag handle-এর জন্য জায়গা */
+            .dd-list { list-style: none; padding-left: 0; }
+            .dd3-content .btn-group { margin-left: auto; }
+            .dd3-content .me-3 { margin-right: 1rem; }
+            .dd-handle.dd3-handle { left: -40px; }
+            .dd-item.dd3-item { padding-left: 40px; }
+
+            /* Livewire লোডিং স্টাইল */
+            .opacity-50 { opacity: 0.5; }
+            /* বুটস্ট্র্যাপ ৪-এর জন্য রাইট মার্জিন ফিক্স */
+            .mr-2 { margin-right: 0.5rem !important; }
+        </style>
+
+        <script>
+            document.addEventListener('livewire:init', () => {
+
+                let nestableInstance = null;
+
+                function initializeNestable() {
+                    if (nestableInstance) {
+                        nestableInstance.nestable('destroy');
+                    }
+
+                    nestableInstance = $('#menuNestable').nestable({
+                        maxDepth: 3
+                    });
+
+                    nestableInstance.on('change', function(e) {
+                        var list = e.length ? e : $(e.target);
+                        var output = list.nestable('serialize');
+
+                        // Livewire-এর 'menuOrderUpdated' ইভেন্টে ডেটা পাঠান (JSON Circular Structure এরর এড়ানোর জন্য)
+                        Livewire.dispatch('menuOrderUpdated', { items: output });
+                    });
+                }
+
+                // পেজ প্রথমবার লোড হলে Nestable চালু করুন
+                initializeNestable();
+
+                // Livewire যখন মেনু রিফ্রেশ করে
+                Livewire.on('refreshNestable', () => {
+                    initializeNestable();
+                });
+
+            });
+        </script>
+    @endpush
 </div>
