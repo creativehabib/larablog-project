@@ -14,22 +14,22 @@
                             <strong>{{ $item['title'] }}</strong>
                             <div class="text-muted small text-break">{{ $item['url'] }}</div>
                         </div>
-                        <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-outline-secondary" wire:click="startEditing({{ $item['id'] }})">
-                                Edit
-                            </button>
-                            <button type="button" class="btn btn-outline-danger"
-                                    wire:click="deleteMenuItem({{ $item['id'] }})"
-                                    onclick="confirm('Are you sure you want to remove this item?') || event.stopImmediatePropagation()">
-                                Remove
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-link btn-sm text-decoration-none"
+                            wire:click="toggleEditing({{ $item['id'] }})"
+                        >
+                            <span class="mr-1">{{ $isEditing ? 'Hide options' : 'Edit item' }}</span>
+                            <i class="fas fa-chevron-{{ $isEditing ? 'up' : 'down' }}"></i>
+                        </button>
                     </div>
 
                     @if($isEditing)
                         <div class="mt-3 border-top pt-3">
                             {{-- সম্পাদনার সময় নির্বাচিত আইটেম আইডি সিঙ্কে রাখতে হিডেন ইনপুট যোগ করা হয়েছে --}}
-                            <form wire:key="menu-item-edit-form-{{ $item['id'] }}" wire:submit.prevent="updateMenuItem" wire:loading.class="opacity-50">
+                            <form wire:key="menu-item-edit-form-{{ $item['id'] }}"
+                                  wire:submit.prevent="updateMenuItem({{ $item['id'] }})"
+                                  wire:loading.class="opacity-50">
                                 <input type="hidden" wire:model.defer="editingItemId">
                                 <div class="form-group mb-2">
                                     <label class="form-label">Navigation label</label>
@@ -54,9 +54,15 @@
                                     @error('editTarget') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="d-flex flex-wrap align-items-center">
-                                    <button type="submit" class="btn btn-primary btn-sm mr-2 mb-2" wire:loading.attr="disabled">
+                                    <button type="submit" class="btn btn-primary btn-sm mr-2 mb-2" wire:loading.attr="disabled" wire:target="updateMenuItem">
                                         <span wire:loading.remove wire:target="updateMenuItem">Save</span>
                                         <span wire:loading wire:target="updateMenuItem">Saving...</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm mr-2 mb-2"
+                                            wire:click="deleteMenuItem({{ $item['id'] }})"
+                                            wire:loading.attr="disabled"
+                                            onclick="confirm('Are you sure you want to remove this item?') || event.stopImmediatePropagation()">
+                                        Remove
                                     </button>
                                     <button type="button" class="btn btn-light btn-sm mb-2" wire:click="cancelEditing" wire:loading.attr="disabled">Cancel</button>
                                 </div>
