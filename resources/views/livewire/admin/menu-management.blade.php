@@ -202,6 +202,10 @@
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
 
+                        @if($errors->has('editingItemId'))
+                            <div class="alert alert-danger">{{ $errors->first('editingItemId') }}</div>
+                        @endif
+
                         @if(! $selectedMenu)
                             <p class="text-muted mb-0">Create a menu to start organising links.</p>
                         @elseif(empty($selectedMenu['items']))
