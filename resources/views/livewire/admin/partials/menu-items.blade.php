@@ -11,7 +11,7 @@
                 <div class="dd3-content">
                     <div class="menu-item-header d-flex justify-content-between align-items-center">
                         <div class="drag-handle dd-handle me-3">
-                            <strong>{{ $item['title'] }}</strong>
+                            <span>{{ $item['title'] }}</span>
                         </div>
                         <button
                             type="button"
