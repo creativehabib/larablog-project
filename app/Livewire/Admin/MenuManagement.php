@@ -202,7 +202,7 @@ class MenuManagement extends Component
         $this->resetValidation();
     }
 
-    public function updateMenuItem(): void
+    public function updateMenuItem(?int $itemId = null): void
     {
         $itemId = $this->editingItemId ? (int) $this->editingItemId : null;
 
