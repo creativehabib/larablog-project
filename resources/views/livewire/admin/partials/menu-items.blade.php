@@ -29,8 +29,8 @@
 
                     @if($isEditing)
                         <div class="mt-3 border-top pt-3">
-                            {{-- (পরিবর্তন) <form> ট্যাগ থেকে প্যারামিটার সরানো হয়েছে --}}
-                            <form wire:submit.prevent="updateMenuItem" wire:loading.class="opacity-50">
+                            {{-- সম্পাদনার সময় সঠিক আইটেম আইডি সার্ভারে পাঠাতে ফর্মে প্যারামিটার যুক্ত করা হয়েছে --}}
+                            <form wire:submit.prevent="updateMenuItem({{ $item['id'] }})" wire:loading.class="opacity-50">
                                 <div class="form-group mb-2">
                                     <label class="form-label">Navigation label</label>
                                     {{-- (পরিবর্তন) editingItem.title -> editTitle --}}
