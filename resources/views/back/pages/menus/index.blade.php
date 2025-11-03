@@ -83,6 +83,17 @@
                 $el.nestable('destroy');
             }
 
+            const serializeItems = (items) => {
+                return items.map(item => {
+                    const children = Array.isArray(item.children) ? serializeItems(item.children) : [];
+
+                    return {
+                        id: item.id,
+                        ...(children.length ? { children } : {})
+                    };
+                });
+            };
+
             $el.nestable({
                 maxDepth: 3,
                 expandBtnHTML: '',
@@ -90,7 +101,8 @@
             }).on('change', function (e) {
                 const list = e.length ? e : $(e.target);
                 const structure = list.nestable('serialize');
-                Livewire.dispatch('menuOrderUpdated', { items: structure });
+                const serialized = Array.isArray(structure) ? serializeItems(structure) : [];
+                Livewire.dispatch('menuOrderUpdated', { items: serialized });
             });
         };
 
