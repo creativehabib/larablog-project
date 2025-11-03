@@ -203,6 +203,10 @@
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
 
+                        @if(session()->has('error'))
+                            <div class="alert alert-danger">{{ session('error') }}</div>
+                        @endif
+
                         @if(! $selectedMenu)
                             <p class="text-muted mb-0">Create a menu to start organising links.</p>
                         @elseif(empty($selectedMenu['items']))

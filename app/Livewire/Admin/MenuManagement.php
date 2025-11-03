@@ -204,11 +204,23 @@ class MenuManagement extends Component
 
     public function updateMenuItem(?int $itemId = null): void
     {
-        $itemId = $this->editingItemId ? (int) $this->editingItemId : null;
+        $this->resetErrorBag('menuItemUpdate');
 
-        if (! $itemId || ! $this->ensureSelectedMenu()) {
+        $itemId = $itemId ?? $this->editingItemId;
+        $itemId = $itemId ? (int) $itemId : null;
+
+        if (! $itemId) {
+            $this->addError('menuItemUpdate', 'Select a menu item to edit before saving.');
+            session()->flash('error', 'Select a menu item to edit before saving.');
             return;
         }
+
+        if (! $this->ensureSelectedMenu()) {
+            session()->flash('error', 'Create or select a menu before updating menu items.');
+            return;
+        }
+
+        $this->editingItemId = $itemId;
 
          $this->ensureAuthorized('menu.edit');
 
@@ -219,7 +231,13 @@ class MenuManagement extends Component
             'editTarget' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
         ]);
 
-        $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($itemId);
+        $item = MenuItem::where('menu_id', $this->selectedMenuId)->find($itemId);
+
+        if (! $item) {
+            $this->addError('menuItemUpdate', 'The selected menu item could not be found. Please refresh the page and try again.');
+            session()->flash('error', 'The selected menu item could not be found. Please refresh the page and try again.');
+            return;
+        }
 
         $item->update([
             'title' => $validated['editTitle'],
