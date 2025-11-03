@@ -8,10 +8,9 @@
                 $isEditing = $editingItemId === $item['id'];
             @endphp
             <li class="dd-item dd3-item" data-id="{{ $item['id'] }}" wire:key="menu-item-{{ $item['id'] }}">
-                <div class="dd-handle dd3-handle" title="Drag to reorder"></div>
                 <div class="dd3-content">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="me-3">
+                    <div class="menu-item-header d-flex justify-content-between align-items-start">
+                        <div class="drag-handle dd-handle me-3">
                             <strong>{{ $item['title'] }}</strong>
                             <div class="text-muted small text-break">{{ $item['url'] }}</div>
                         </div>

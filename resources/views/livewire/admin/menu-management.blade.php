@@ -232,12 +232,28 @@
         <style>
             /* Nestable.js-এর জন্য কিছু স্টাইল ফিক্স */
             .dd { max-width: 100%; }
-            .dd-handle { height: auto; }
             .dd3-content {
                 height: auto;
-                padding: 10px 15px;
+                padding: 0;
                 display: block;
             }
+            .dd3-content .menu-item-header {
+                gap: 1rem;
+                padding: 10px 15px;
+                flex-wrap: wrap;
+            }
+            .dd3-content .drag-handle {
+                cursor: grab;
+                flex: 1;
+                user-select: none;
+            }
+            .dd3-content .drag-handle:active {
+                cursor: grabbing;
+            }
+            .dd3-content .btn-group {
+                margin-left: auto;
+            }
+            .dd3-content .me-3 { margin-right: 1rem; }
             .dd-placeholder {
                 background: #f2f2f2;
                 border: 1px dashed #b6bcbf;
@@ -245,10 +261,7 @@
                 min-height: 50px;
                 margin: 5px 0;
             }
-            .dd3-item > button { margin-left: 40px; } /* Drag handle-এর জন্য জায়গা */
             .dd-list { list-style: none; padding-left: 0; }
-            .dd3-content .btn-group { margin-left: auto; }
-            .dd3-content .me-3 { margin-right: 1rem; }
 
             /* Livewire লোডিং স্টাইল */
             .opacity-50 { opacity: 0.5; }
