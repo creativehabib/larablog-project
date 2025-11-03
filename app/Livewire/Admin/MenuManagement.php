@@ -204,11 +204,14 @@ class MenuManagement extends Component
 
     public function updateMenuItem(?int $itemId = null): void
     {
-        $itemId = $this->editingItemId ? (int) $this->editingItemId : null;
+        $itemId = $itemId ?? $this->editingItemId;
+        $itemId = $itemId ? (int) $itemId : null;
 
         if (! $itemId || ! $this->ensureSelectedMenu()) {
             return;
         }
+
+        $this->editingItemId = $itemId;
 
          $this->ensureAuthorized('menu.edit');
 
