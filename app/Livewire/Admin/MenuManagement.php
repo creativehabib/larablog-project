@@ -264,14 +264,14 @@ class MenuManagement extends Component
         ];
     }
 
-    public function updateMenuItem(?int $itemId = null): void
+    public function updateMenuItem(?int $itemId ): void
     {
-        $itemId ??= $this->editingItemId;
-        if (! $itemId || ! $this->ensureSelectedMenu()) {
+        if (! $this->ensureSelectedMenu()) {
             return;
         }
 
         $this->ensureAuthorized('menu.edit');
+        $this->editingItemId = $itemId;
 
         $this->validate([
             'editingItem.title' => ['required', 'string', 'max:255'],
@@ -279,9 +279,15 @@ class MenuManagement extends Component
             'editingItem.target' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
         ]);
 
-        $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($itemId);
+        $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($this->editingItemId);
 
-        $item->update($this->editingItem);
+        $payload = [
+            'title' => $this->editingItem['title'],
+            'url' => $this->editingItem['url'],
+            'target' => $this->editingItem['target'] ?? array_key_first($this->availableTargets),
+        ];
+
+        $item->update($payload);
 
         $this->cancelEditing();
 
