@@ -29,7 +29,8 @@
 
                     @if($isEditing)
                         <div class="mt-3 border-top pt-3">
-                            <form wire:key="menu-item-edit-form-{{ $item['id'] }}" wire:submit.prevent="updateMenuItem({{ $item['id'] }})" wire:loading.class="opacity-50">
+                            {{-- সম্পাদনার সময় নির্বাচিত আইটেম আইডি সিঙ্কে রাখতে হিডেন ইনপুট যোগ করা হয়েছে --}}
+                            <form wire:key="menu-item-edit-form-{{ $item['id'] }}" wire:submit.prevent="updateMenuItem" wire:loading.class="opacity-50">
                                 <input type="hidden" wire:model.defer="editingItemId">
                                 <div class="form-group mb-2">
                                     <label class="form-label">Navigation label</label>
