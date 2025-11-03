@@ -176,7 +176,7 @@ class MenuManagement extends Component
 
         $this->validate([
             'customTitle' => ['required', 'string', 'max:255'],
-            'customUrl' => ['required', 'url', 'max:2048'],
+            'customUrl' => ['required', 'string', 'max:2048'],
             'customTarget' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
         ]);
 
@@ -274,7 +274,7 @@ class MenuManagement extends Component
 
         $this->validate([
             'editingItem.title' => ['required', 'string', 'max:255'],
-            'editingItem.url' => ['required', 'url', 'max:2048'],
+            'editingItem.url' => ['required', 'string', 'max:2048'],
             'editingItem.target' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
         ]);
 
