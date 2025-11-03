@@ -27,7 +27,6 @@
         .dd3-handle {
             height: 40px;
             width: 40px;
-            margin: 5px 0;
             background: #4c6ef5;
             border-radius: 0.25rem;
             color: #fff;

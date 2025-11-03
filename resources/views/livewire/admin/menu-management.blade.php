@@ -249,8 +249,6 @@
             .dd-list { list-style: none; padding-left: 0; }
             .dd3-content .btn-group { margin-left: auto; }
             .dd3-content .me-3 { margin-right: 1rem; }
-            .dd-handle.dd3-handle { left: -40px; }
-            .dd-item.dd3-item { padding-left: 40px; }
 
             /* Livewire লোডিং স্টাইল */
             .opacity-50 { opacity: 0.5; }
