@@ -264,16 +264,25 @@ class MenuManagement extends Component
         ];
     }
 
-    public function updateMenuItem(?int $itemId ): void
+    public function updateMenuItem(?int $itemId = null): void
     {
         if (! $this->ensureSelectedMenu()) {
             return;
         }
 
         $this->ensureAuthorized('menu.edit');
-        $this->editingItemId = $itemId;
 
-        $this->validate([
+        if ($itemId) {
+            $this->editingItemId = $itemId;
+        }
+
+        if (! $this->editingItemId) {
+            $this->addError('editingItemId', 'Select a menu item to edit before saving changes.');
+
+            return;
+        }
+
+        $validated = $this->validate([
             'editingItem.title' => ['required', 'string', 'max:255'],
             'editingItem.url' => ['required', 'string', 'max:2048'],
             'editingItem.target' => ['required', 'in:' . implode(',', array_keys($this->availableTargets))],
@@ -282,9 +291,9 @@ class MenuManagement extends Component
         $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($this->editingItemId);
 
         $payload = [
-            'title' => $this->editingItem['title'],
-            'url' => $this->editingItem['url'],
-            'target' => $this->editingItem['target'] ?? array_key_first($this->availableTargets),
+            'title' => $validated['editingItem']['title'],
+            'url' => $validated['editingItem']['url'],
+            'target' => $validated['editingItem']['target'] ?? array_key_first($this->availableTargets),
         ];
 
         $item->update($payload);
