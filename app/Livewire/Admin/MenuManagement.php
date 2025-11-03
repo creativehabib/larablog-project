@@ -185,11 +185,13 @@ class MenuManagement extends Component
          $this->ensureAuthorized('menu.edit');
 
         $item = MenuItem::where('menu_id', $this->selectedMenuId)->findOrFail($itemId);
-        $this->editingItemId = $item->id;
+        $this->editingItemId = (int) $item->id;
 
         $this->editTitle = $item->title;
         $this->editUrl = $item->url;
-        $this->editTarget = $item->target;
+        $this->editTarget = $item->target ?? array_key_first($this->availableTargets);
+
+        $this->resetValidation();
     }
 
     public function cancelEditing(): void
@@ -197,11 +199,13 @@ class MenuManagement extends Component
         $this->editingItemId = null;
         $this->reset('editTitle', 'editUrl', 'editTarget');
         $this->editTarget = array_key_first($this->availableTargets);
+        $this->resetValidation();
     }
 
-    public function updateMenuItem(): void
+    public function updateMenuItem(?int $itemId = null): void
     {
-        $itemId = $this->editingItemId;
+        $activeItemId = $itemId ?? $this->editingItemId;
+        $itemId = $activeItemId ? (int) $activeItemId : null;
 
         if (! $itemId || ! $this->ensureSelectedMenu()) {
             return;
