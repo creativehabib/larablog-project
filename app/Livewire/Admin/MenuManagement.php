@@ -199,9 +199,10 @@ class MenuManagement extends Component
         $this->editTarget = array_key_first($this->availableTargets);
     }
 
-    public function updateMenuItem(): void
+    public function updateMenuItem(?int $itemId = null): void
     {
-        $itemId = $this->editingItemId;
+        $itemId = $itemId ?? $this->editingItemId;
+        $this->editingItemId = $itemId;
 
         if (! $itemId || ! $this->ensureSelectedMenu()) {
             return;
