@@ -10,7 +10,6 @@
                         <div class="form-group mb-3">
                             <label class="form-label">Select menu</label>
                             <select class="form-control" wire:model.live="selectedMenuId">
-                                <option value="">— Select a Menu —</option>
                                 @foreach($menus as $menu)
                                     <option value="{{ $menu['id'] }}">{{ $menu['name'] }} ({{ $menu['location'] }})</option>
                                 @endforeach
@@ -223,7 +222,6 @@
         </div>
     </div>
 
-    {{-- এই @push('scripts') সেকশনটি আপনার মেইন লেআউট ফাইলে (@stack('scripts')) রেন্ডার হবে --}}
     @push('scripts')
         {{-- Nestable.js লাইব্রেরি (আপনার মেইন লেআউটে jQuery থাকতে হবে) --}}
         <script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
@@ -231,6 +229,18 @@
 
         <style>
             /* Nestable.js-এর জন্য কিছু স্টাইল ফিক্স */
+            .dd-handle {
+                display: block;
+                padding: 5px 10px;
+                color: #333;
+                cursor: move !important;
+                text-decoration: none;
+                font-weight: 700;
+                border: none !important;
+                background: none !important;
+                border-radius: 3px;
+                box-sizing: border-box;
+            }
             .dd { max-width: 100%; }
             .dd3-content {
                 height: auto;
@@ -238,12 +248,10 @@
                 display: block;
             }
             .dd3-content .menu-item-header {
-                gap: 1rem;
-                padding: 10px 15px;
                 flex-wrap: wrap;
             }
             .dd3-content .drag-handle {
-                cursor: grab;
+                cursor: move;
                 flex: 1;
                 user-select: none;
             }
