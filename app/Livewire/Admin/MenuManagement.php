@@ -194,6 +194,16 @@ class MenuManagement extends Component
         $this->resetValidation();
     }
 
+    public function toggleEditing(int $itemId): void
+    {
+        if ($this->editingItemId === $itemId) {
+            $this->cancelEditing();
+            return;
+        }
+
+        $this->startEditing($itemId);
+    }
+
     public function cancelEditing(): void
     {
         $this->editingItemId = null;
