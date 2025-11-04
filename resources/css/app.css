@@ -37,18 +37,45 @@
     padding: 0;
 }
 
+
+.headerMenu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
 .headerMenuUl {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.navbar .headerMenu > .headerMenuUl {
+    display: flex !important;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+    float: none !important;
+    margin-top: 0 !important;
+}
+
+.navbar .headerMenu > .headerMenuUl > .headerMenuItem {
+    display: block;
+    padding: 0 !important;
+    margin: 0;
 }
 
 .headerMenuItem {
     position: relative;
-    margin-right: 18px;
+    margin-right: 0;
 }
 
 .headerMenuItem:last-child {
+    margin-right: 0;
+}
+
+.navbar .headerMenu > .headerMenuUl > .headerMenuItem:last-child {
     margin-right: 0;
 }
 
@@ -59,6 +86,7 @@
     color: #111827;
     text-decoration: none;
     padding: 0.75rem 0;
+    white-space: nowrap;
 }
 
 .headerMenuItem.active > .headerMenuLink,
@@ -66,6 +94,16 @@
 .headerMenuLink:focus {
     color: #2563eb;
     text-decoration: none;
+}
+
+.navbar .headerMenu > .headerMenuUl > .headerMenuItem > .headerMenuLink {
+    padding: 0.75rem 0;
+    border-bottom: none !important;
+}
+
+.navbar .headerMenu > .headerMenuUl > .headerMenuItem > .headerMenuLink:hover,
+.navbar .headerMenu > .headerMenuUl > .headerMenuItem > .headerMenuLink:focus {
+    border-bottom: none;
 }
 
 .headerMenuItem.has-children > .headerMenuLink::after {
@@ -76,7 +114,7 @@
 
 .headerSubMenu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     left: 0;
     min-width: 220px;
     background: #ffffff;
@@ -85,6 +123,7 @@
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
     display: none;
     z-index: 1050;
+    padding: 0.5rem 0;
 }
 
 .headerSubMenuItem {
@@ -97,6 +136,7 @@
     color: #111827;
     font-size: 0.95rem;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .headerSubMenuLink:hover,
@@ -108,7 +148,9 @@
 }
 
 .headerMenuItem.has-children:hover > .headerSubMenu,
-.headerSubMenuItem.has-children:hover > .headerSubMenu {
+.headerSubMenuItem.has-children:hover > .headerSubMenu,
+.headerMenuItem.has-children:focus-within > .headerSubMenu,
+.headerSubMenuItem.has-children:focus-within > .headerSubMenu {
     display: block;
 }
 
@@ -170,6 +212,12 @@
 }
 
 @media (max-width: 991.98px) {
+    .headerMenu {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
     .headerMenuUl {
         flex-direction: column;
         align-items: flex-start;
@@ -178,6 +226,11 @@
     .headerMenuItem {
         width: 100%;
         margin-right: 0;
+    }
+
+    .navbar .headerMenu > .headerMenuUl {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     .headerSubMenu {
