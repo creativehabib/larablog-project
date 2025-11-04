@@ -16,8 +16,8 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        $role = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
 
-        $role = Role::create(['name' => 'admin', 'guard_name' => 'web']);
         $permissionsAll = [
             [
                 'group_name' => 'Roles',
@@ -26,6 +26,15 @@ class RolePermissionSeeder extends Seeder
                     'role.create',
                     'role.edit',
                     'role.delete',
+                ]
+            ],
+            [
+                'group_name' => 'Permissions',
+                'permissions' => [
+                    'permission.view',
+                    'permission.create',
+                    'permission.edit',
+                    'permission.delete',
                 ]
             ],
             [
@@ -38,12 +47,27 @@ class RolePermissionSeeder extends Seeder
                 ]
             ],
             [
+                'group_name' => 'Settings',
+                'permissions' => [
+                    'setting.view'
+                ]
+            ],
+            [
                 'group_name' => 'Categories',
                 'permissions' => [
                     'category.view',
                     'category.create',
                     'category.edit',
                     'category.delete',
+                ]
+            ],
+            [
+                'group_name' => 'Sub Categories',
+                'permissions' => [
+                    'subcategory.view',
+                    'subcategory.create',
+                    'subcategory.edit',
+                    'subcategory.delete',
                 ]
             ],
             [
@@ -83,21 +107,24 @@ class RolePermissionSeeder extends Seeder
                 ]
             ]
         ];
+
         foreach ($permissionsAll as $permGroup) {
             $permissionGroup = $permGroup['group_name'];
             foreach($permGroup['permissions'] as $permissionName) {
-                $permission = Permission::create([
-                    'name' => $permissionName,
-                    'group_name' => $permissionGroup,
-                    'guard_name' => 'web'
-                ]);
+
+                $permission = Permission::firstOrCreate(
+                    ['name' => $permissionName, 'guard_name' => 'web'],
+                    ['group_name' => $permissionGroup]
+                );
+
                 $role->givePermissionTo($permission);
-                $permission->assignRole($role);
             }
         }
+
         $user = User::find(1);
         if($user){
             $user->assignRole($role);
         }
     }
 }
+
