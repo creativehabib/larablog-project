@@ -49,6 +49,7 @@
                     @if ($content_type === Post::CONTENT_TYPE_VIDEO)
                         <div class="card card-body border mb-4">
                             <h5 class="card-title mb-3">Video Details</h5>
+                            {{-- আপনার ভিডিও ডিটেইলস ফর্ম এখানে থাকবে --}}
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="videoSource">Video Source <span class="text-danger">*</span></label>
@@ -82,42 +83,22 @@
                                 </div>
                             </div>
 
+                            {{-- এমবেড বা আপলোড কোড --}}
                             @if ($video_source === Post::VIDEO_SOURCE_EMBED)
                                 <div class="form-group">
                                     <label for="videoEmbedCode">Embed Code</label>
                                     <textarea id="videoEmbedCode" rows="4" class="form-control @error('video_embed_code') is-invalid @enderror" wire:model.live.debounce.500ms="video_embed_code" placeholder="Paste the iframe embed code from YouTube, Vimeo, etc."></textarea>
-                                    <small class="form-text text-muted">Embedding keeps your server fast and avoids heavy bandwidth usage.</small>
                                     @error('video_embed_code')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label for="videoUrl">Video URL</label>
-                                    <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
-                                    <small class="form-text text-muted">Optional fallback – we’ll detect the platform automatically.</small>
-                                    @error('video_url')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    @if ($video_provider)
-                                        <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
-                                    @endif
                                 </div>
                             @else
                                 <div class="form-group">
                                     <label for="videoUpload">Video File @if (! $existingVideoPath)<span class="text-danger">*</span>@endif</label>
                                     <input type="file" id="videoUpload" class="form-control-file @error('video_upload') is-invalid @enderror" wire:model="video_upload" accept="video/mp4,video/quicktime,video/webm">
-                                    <small class="form-text text-muted">Upload MP4, MOV or WEBM files (max 200MB). Direct uploads use more storage and bandwidth.</small>
                                     @error('video_upload')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                    <div class="mt-3">
-                                        @if ($existingVideoPath && ! $video_upload)
-                                            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-                                                <span class="text-muted small">Current file: <code>{{ $existingVideoPath }}</code></span>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingVideo">Remove current video</button>
-                                            </div>
-                                        @endif
-                                    </div>
                                 </div>
                             @endif
 
@@ -132,11 +113,14 @@
 
                     @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
                         <div class="form-group">
-                            <label for="postDescription">Post Description <span class="text-danger">*</span></label>
+                            <label for="content">Post Description <span class="text-danger">*</span></label>
+
+                            {{-- জাভাস্ক্রিপ্ট থেকে wire:model সেট করা হবে --}}
                             <div wire:ignore data-post-description-editor>
-                                <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
+                                {{-- ID টি "content" করা হয়েছে --}}
+                                <textarea id="content" class="form-control">{!! $description !!}</textarea>
                             </div>
-                            <input type="hidden" id="postDescriptionData" wire:model="description" value="{{ $description }}">
+
                             @error('description')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -219,28 +203,31 @@
                         @enderror
                     </div>
 
-                    {{--Post Thumbnail--}}
+                    {{-- থাম্বনেইল সেকশন (মিডিয়া লাইব্রেরি টেমপ্লেট অনুযায়ী) --}}
                     @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
-                        <div class="form-group border p-2">
-                            <label for="thumbnail">Post Thumbnail</label>
-                            <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
-                            @error('thumbnail')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                            <div class="mt-3">
-                                @if ($thumbnail)
-                                    <p class="text-muted small mb-2">Preview:</p>
-                                    <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
-                                @elseif ($existingThumbnail)
-                                    <p class="text-muted small mb-2">Current thumbnail:</p>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <img src="{{ asset('storage/' . $existingThumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-height: 180px;">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingThumbnail">Remove</button>
-                                    </div>
-                                @endif
+                        {{-- আপনার লাইভওয়্যার কম্পোনেন্টে $cover_image প্রপার্টি থাকতে হবে --}}
+                        <div class="form-group border p-2" x-data="{ imageUrl: @entangle('cover_image') }">
+                            <label class="d-block mb-1">Post Thumbnail</label>
+
+                            {{-- এই ব্লকটি আপনার JS-এর 'window.selectingThumbnail = true' লজিকের সাথে মিলবে --}}
+                            <div x-show="!imageUrl" @click="window.selectingThumbnail = true; window.dispatchEvent(new CustomEvent('open-media-modal'))"
+                                 class="border rounded p-4 text-center"
+                                 style="border-style: dashed; cursor: pointer;">
+                                <p class="text-muted mb-0">Select Thumbnail</p>
+                            </div>
+
+                            <div x-show="imageUrl" class="mt-2">
+                                <p class="text-muted small mb-2">Current thumbnail:</p>
+                                <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;" />
+
+                                {{-- এই বাটনটি আপনার JS-এর '@this.set('cover_image', null)' লজিকের সাথে মিলবে --}}
+                                <button type="button" @click="imageUrl = null; @this.set('cover_image', null)" class="btn btn-sm btn-outline-danger mt-2">
+                                    Remove
+                                </button>
                             </div>
                         </div>
                     @endif
+
                     {{--Post Options--}}
                     <div class="form-group">
                         <label>Post Options</label>
@@ -262,74 +249,47 @@
         </div>
 
     </form>
+
+    {{-- মিডিয়া মডালটি এখানে কল করা হয়েছে --}}
+    <x-media-modal />
 </div>
 
+{{-- জাভাস্ক্রিপ্ট (মিডিয়া লাইব্রেরি এবং CKEditor রিলোড লজিকসহ) --}}
 @pushOnce('scripts')
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
     <script>
+        {{-- আমরা 'livewire:init' ব্যবহার করছি --}}
         document.addEventListener('livewire:init', () => {
-            const debounce = (callback, wait = 300) => {
-                let timeoutId;
-
-                return (...args) => {
-                    if (timeoutId) {
-                        clearTimeout(timeoutId);
-                    }
-
-                    timeoutId = setTimeout(() => {
-                        callback(...args);
-                    }, wait);
-                };
-            };
 
             let editorInstance = null;
-            const editorState = {
-                hiddenField: null,
-                lastSetValue: '',
-            };
-
-            const syncHiddenField = (value) => {
-                if (!editorState.hiddenField) {
-                    return;
-                }
-
-                if (editorState.hiddenField.value === value) {
-                    return;
-                }
-
-                editorState.hiddenField.value = value;
-                editorState.hiddenField.dispatchEvent(new Event('input', { bubbles: true }));
-            };
-
-            const syncToLivewire = (data) => {
-                const normalized = data || '';
-
-                if (normalized === editorState.lastSetValue) {
-                    return;
-                }
-
-                editorState.lastSetValue = normalized;
-                syncHiddenField(normalized);
-            };
+            let imageToReplace = null;
+            let savedSelection = null;
+            window.selectingThumbnail = false;
 
             const destroyEditor = () => {
-                if (editorInstance && editorInstance.status === 'ready') {
-                    editorInstance.destroy();
+                // আমরা 'content' আইডি দিয়ে ইনস্ট্যান্স খুঁজবো
+                if (CKEDITOR.instances.content) {
+                    try {
+                        CKEDITOR.instances.content.destroy(true);
+                    } catch (e) {
+                        // console.warn('Error destroying CKEditor:', e);
+                    }
                 }
-
                 editorInstance = null;
-                editorState.hiddenField = null;
-                editorState.lastSetValue = '';
             };
 
             const initializeEditor = () => {
                 const container = document.querySelector('[data-post-description-editor]');
                 if (!container) {
+                    // কন্টেইনার নেই (যেমন 'ভিডিও' মোড), তাই প্রস্থান করুন
                     return;
                 }
 
-                const textarea = container.querySelector('#postDescription');
-                if (!textarea || textarea.dataset.initialized) {
+                // আমরা 'content' আইডি দিয়ে টেক্সটএরিয়া খুঁজবো
+                const textarea = container.querySelector('#content');
+
+                // যদি টেক্সটএরিয়া না থাকে বা এডিটর আগে থেকেই চালু থাকে, তবে প্রস্থান করুন
+                if (!textarea || CKEDITOR.instances.content) {
                     return;
                 }
 
@@ -338,110 +298,121 @@
                     return;
                 }
 
-                const hiddenField = document.getElementById('postDescriptionData');
-                const existingTextareaValue = textarea.value;
-                const initialHiddenValue = hiddenField?.value;
-                const hasHiddenValue = typeof initialHiddenValue === 'string' && initialHiddenValue.trim() !== '';
-                const initialValue = hasHiddenValue ? initialHiddenValue : existingTextareaValue || '';
-
-                textarea.dataset.initialized = 'true';
-
-                editorState.hiddenField = hiddenField || null;
-                editorState.lastSetValue = initialValue;
-
-                if (textarea.value !== initialValue) {
-                    textarea.value = initialValue;
-                }
-
                 editorInstance = CKEDITOR.replace(textarea.id, {
+                    mathJaxLib: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML',
                     height: 200,
                     uiColor: '',
                     removePlugins: 'easyimage,cloudservices',
+                    extraPlugins: 'mathjax,tableresize,wordcount,notification',
+                    wordcount: {
+                        showCharCount: true,
+                        showWordCount: true
+                    },
+                    toolbar: [
+                        {items: ['Undo', 'Redo']},
+                        { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                        { name: 'document', items: ['Source', '-', 'Preview'] },
+                        { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', ] },
+                        { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'RemoveFormat','CopyFormatting'] },
+                        { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'] },
+                        { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock','BidiLtr', 'BidiRtl'] },
+                        { name: 'links', items: ['Link', 'Unlink'] },
+                        { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'Mathjax', '-', 'ImageManager', 'Iframe','Smiley','direction'] },
+                        { name: 'colors', items: ['TextColor', 'BGColor', 'ShowBlocks'] },
+                        { name: 'tools', items: ['Maximize'] }
+                    ],
+                    allowedContent: true,
                     extraAllowedContent: '*(*){*}',
+
                 });
 
-                const emitChange = debounce(() => {
-                    if (!editorInstance) {
-                        return;
+                // Template থেকে মিডিয়া লাইব্রেরির লজিক
+                editorInstance.on('selectionChange', function () {
+                    const selection = editorInstance.getSelection();
+                    const ranges = selection ? selection.getRanges() : [];
+                    if (ranges.length) {
+                        savedSelection = ranges[0].clone();
                     }
-
-                    const data = editorInstance.getData();
-                    syncToLivewire(data);
                 });
 
-                editorInstance.on('change', emitChange);
-                editorInstance.on('instanceReady', () => {
-                    emitChange();
+                editorInstance.addCommand('openMediaModal', {
+                    exec: function () {
+                        imageToReplace = null;
+                        window.selectingThumbnail = false; // নিশ্চিত করুন থাম্বনেইল সিলেক্ট হচ্ছে না
+                        window.dispatchEvent(new CustomEvent('open-media-modal'));
+                    }
                 });
 
-                if (!window.__postDescriptionBeforeUnloadBound) {
-                    window.addEventListener('beforeunload', () => {
-                        const instance = CKEDITOR.instances.postDescription;
-                        if (instance && instance.status === 'ready') {
-                            instance.destroy();
+                editorInstance.ui.addButton('ImageManager', {
+                    label: 'Image',
+                    command: 'openMediaModal',
+                    toolbar: 'insert',
+                    icon: 'image'
+                });
+
+                editorInstance.on('doubleclick', function (evt) {
+                    const element = evt.data.element;
+                    if (element && element.is('img')) {
+                        imageToReplace = element;
+                        window.selectingThumbnail = false; // নিশ্চিত করুন থাম্বনেইল সিলেক্ট হচ্ছে না
+                        window.dispatchEvent(new CustomEvent('open-media-modal'));
+                    }
+                });
+
+                // ডেটা সিঙ্ক করার জন্য লিসেনার
+                editorInstance.on('change', function () {
+                    // Debounce ব্যবহার করা ভালো, কিন্তু @this.set() দ্রুত কাজ করে
+                @this.set('description', editorInstance.getData(), false);
+                });
+            };
+
+            // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
+            const imageSelectedHandler = (event) => {
+                if (window.selectingThumbnail) {
+                    // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
+                @this.set('cover_image', event.detail.url);
+                    window.selectingThumbnail = false;
+                } else {
+                    // CKEditor-এ ছবি ইনসার্ট করুন
+                    const url = event.detail.url;
+                    if (imageToReplace) {
+                        imageToReplace.setAttribute('src', url);
+                    } else {
+                        if (editorInstance) {
+                            editorInstance.focus();
+                            if (savedSelection) {
+                                editorInstance.getSelection().selectRanges([savedSelection]);
+                            }
+                            editorInstance.insertHtml('<img src="' + url + '" alt="" />');
                         }
-                    });
-                    window.__postDescriptionBeforeUnloadBound = true;
-                }
-            };
-
-            const handleSyncEvent = (content) => {
-                const normalized = content || '';
-
-                if (!editorInstance) {
-                    return;
-                }
-
-                if (editorInstance.status !== 'ready') {
-                    editorInstance.on('instanceReady', () => {
-                        handleSyncEvent(normalized);
-                    });
-                    return;
-                }
-
-                const currentData = editorInstance.getData();
-                if (currentData === normalized) {
-                    editorState.lastSetValue = normalized;
-                    syncHiddenField(normalized);
-                    return;
-                }
-
-                editorState.lastSetValue = normalized;
-                syncHiddenField(normalized);
-                editorInstance.setData(normalized);
-            };
-
-            if (!window.__postDescriptionSyncListener) {
-                Livewire.on('syncPostEditor', handleSyncEvent);
-                window.__postDescriptionSyncListener = true;
-            }
-
-            Livewire.hook('element.removed', ({ el }) => {
-                if (!el) {
-                    return;
-                }
-
-                let textarea = null;
-                if (el.id === 'postDescription') {
-                    textarea = el;
-                } else if (typeof el.querySelector === 'function') {
-                    textarea = el.querySelector('#postDescription');
-                }
-
-                if (textarea && textarea.dataset.initialized) {
-                    const instance = CKEDITOR.instances.postDescription;
-                    if (instance) {
-                        instance.destroy();
                     }
-                    delete textarea.dataset.initialized;
-                    destroyEditor();
+                    if (editorInstance) {
+                    @this.set('description', editorInstance.getData(), false);
+                    }
+                    imageToReplace = null;
+                    savedSelection = null;
                 }
-            });
+            };
 
+            // ইভেন্ট লিসেনারটি একবারই যোগ করুন
+            window.removeEventListener('image-selected', imageSelectedHandler);
+            window.addEventListener('image-selected', imageSelectedHandler);
+
+
+            // লাইভওয়্যার যখন DOM আপডেট করে (যেমন Post Type পরিবর্তন করলে)
             Livewire.hook('message.processed', () => {
+                // পুরানো এডিটর থাকলে তা ধ্বংস করুন
+                destroyEditor();
+                // নতুন এডিটর চালু করার চেষ্টা করুন (যদি 'Article' মোড চালু হয়)
                 initializeEditor();
             });
 
+            // লাইভওয়্যার যখন DOM থেকে এলিমেন্ট সরায়
+            Livewire.hook('element.removed', () => {
+                destroyEditor();
+            });
+
+            // পৃষ্ঠা লোড হলে প্রথমবার চালু করুন
             initializeEditor();
         });
     </script>
