@@ -367,68 +367,107 @@
             };
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
-            const extractEventDetail = (event) => {
-                if (!event) {
+            const normalizeSelectionDetail = (payload) => {
+                if (!payload) {
                     return {};
                 }
 
-                const { detail } = event;
+                const candidate = payload.detail !== undefined ? payload.detail : payload;
 
-                if (!detail) {
+                if (!candidate) {
                     return {};
                 }
 
-                if (Array.isArray(detail)) {
-                    return detail[0] || {};
-                }
-
-                if (typeof detail === 'object') {
-                    if (detail.params && typeof detail.params === 'object') {
-                        return detail.params;
+                if (Array.isArray(candidate)) {
+                    if (candidate.length === 0) {
+                        return {};
                     }
 
-                    return detail;
+                    if (candidate.length === 1) {
+                        return normalizeSelectionDetail(candidate[0]);
+                    }
+
+                    return candidate.reduce((accumulator, item) => ({
+                        ...accumulator,
+                        ...normalizeSelectionDetail(item),
+                    }), {});
+                }
+
+                if (typeof candidate === 'object') {
+                    if (candidate.params && typeof candidate.params === 'object') {
+                        return normalizeSelectionDetail(candidate.params);
+                    }
+
+                    return candidate;
                 }
 
                 return {};
             };
 
-            const imageSelectedHandler = (event) => {
-                const detail = extractEventDetail(event);
+            const handleImageSelection = (payload) => {
+                const detail = normalizeSelectionDetail(payload);
+
+                if (!detail || Object.keys(detail).length === 0) {
+                    return;
+                }
 
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
                 @this.call('setCoverImageFromLibrary', detail.path ?? null, detail.url ?? null);
                     window.selectingThumbnail = false;
-                } else {
-                    // CKEditor-এ ছবি ইনসার্ট করুন
-                    const url = detail.url || detail.full_url || detail.path;
-                    if (!url) {
+                    return;
+                }
+
+                // CKEditor-এ ছবি ইনসার্ট করুন
+                const url = detail.url || detail.full_url || detail.path;
+                if (!url) {
+                    return;
+                }
+
+                if (imageToReplace) {
+                    imageToReplace.setAttribute('src', url);
+                } else if (editorInstance) {
+                    editorInstance.focus();
+                    if (savedSelection) {
+                        editorInstance.getSelection().selectRanges([savedSelection]);
+                    }
+                    editorInstance.insertHtml('<img src="' + url + '" alt="" />');
+                }
+
+                if (editorInstance) {
+                @this.set('description', editorInstance.getData(), false);
+                }
+
+                imageToReplace = null;
+                savedSelection = null;
+            };
+
+            const browserImageSelectedHandler = (event) => {
+                handleImageSelection(event);
+            };
+
+            // ইভেন্ট লিসেনারটি একবারই যোগ করুন (উইন্ডো ও ডকুমেন্ট উভয় জায়গায়)
+            window.removeEventListener('image-selected', browserImageSelectedHandler);
+            window.addEventListener('image-selected', browserImageSelectedHandler);
+
+            document.removeEventListener('image-selected', browserImageSelectedHandler);
+            document.addEventListener('image-selected', browserImageSelectedHandler);
+
+            if (typeof Livewire !== 'undefined' && typeof Livewire.on === 'function') {
+                Livewire.on('image-selected', (...args) => {
+                    if (!args || args.length === 0) {
+                        handleImageSelection({});
                         return;
                     }
 
-                    if (imageToReplace) {
-                        imageToReplace.setAttribute('src', url);
-                    } else {
-                        if (editorInstance) {
-                            editorInstance.focus();
-                            if (savedSelection) {
-                                editorInstance.getSelection().selectRanges([savedSelection]);
-                            }
-                            editorInstance.insertHtml('<img src="' + url + '" alt="" />');
-                        }
+                    if (args.length === 1) {
+                        handleImageSelection(args[0]);
+                        return;
                     }
-                    if (editorInstance) {
-                    @this.set('description', editorInstance.getData(), false);
-                    }
-                    imageToReplace = null;
-                    savedSelection = null;
-                }
-            };
 
-            // ইভেন্ট লিসেনারটি একবারই যোগ করুন
-            window.removeEventListener('image-selected', imageSelectedHandler);
-            window.addEventListener('image-selected', imageSelectedHandler);
+                    handleImageSelection(args);
+                });
+            }
 
 
             // লাইভওয়্যার যখন DOM আপডেট করে (যেমন Post Type পরিবর্তন করলে)
