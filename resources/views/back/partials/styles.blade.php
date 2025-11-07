@@ -1,5 +1,6 @@
 <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600" rel="stylesheet"><!-- End GOOGLE FONT -->
 <!-- BEGIN PLUGINS STYLES -->
+<link href="stacked-menu/dist/css/stacked-menu.min.css" rel="stylesheet">র
 <link rel="stylesheet" href="{{ asset('assets/vendor/open-iconic/font/css/open-iconic-bootstrap.min.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/vendor/flatpickr/flatpickr.min.css')}}"><!-- END PLUGINS STYLES -->
 <!-- BEGIN THEME STYLES -->

@@ -1,254 +1,266 @@
 @php use App\Models\Post; @endphp
 <div>
-    <form wire:submit.prevent="save" class="card card-fluid">
-        <div class="card-body">
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="postTitle">Post Title <span class="text-danger">*</span></label>
-                    <input type="text" id="postTitle" class="form-control @error('title') is-invalid @enderror" wire:model.defer="title" placeholder="Enter post title">
-                    @error('title')
+    <form wire:submit.prevent="save" class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="postTitle">Post Title <span class="text-danger">*</span></label>
+                        <input type="text" id="postTitle" class="form-control @error('title') is-invalid @enderror" wire:model.defer="title" placeholder="Enter post title">
+                        @error('title')
                         <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="form-group col-md-3">
-                    <label class="d-flex justify-content-between align-items-center" for="postSlug">
-                        <span>Permalink</span>
-                        @if (! $autoGenerateSlug)
-                            <button type="button" class="btn btn-sm btn-link p-0" wire:click="resetSlugToAuto" wire:loading.attr="disabled">
-                                Reset to auto
-                            </button>
-                        @endif
-                    </label>
-                    <div class="border rounded px-3 py-2 bg-light">
-                        <p class="small mb-1 text-break">
-                            <span class="text-muted">{{ url('news') }}/</span>
-                            <span class="text-body font-weight-semibold">{{ $slug ?: 'your-slug' }}</span>
-                        </p>
-                        @if (! $isEditingSlug)
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" wire:click="startSlugEditing" wire:loading.attr="disabled">
-                                Edit permalink
-                            </button>
-                        @endif
+                        @enderror
                     </div>
-                    @if ($isEditingSlug)
-                        <div class="mt-2">
-                            <input type="text" id="postSlug" class="form-control @error('slug') is-invalid @enderror" wire:model.defer="slug" placeholder="custom-slug">
-                            <div class="d-flex flex-wrap gap-2 mt-2">
-                                <button type="button" class="btn btn-sm btn-primary" wire:click="saveSlugEdit" wire:loading.attr="disabled">Save</button>
-                                <button type="button" class="btn btn-sm btn-link text-danger" wire:click="cancelSlugEditing" wire:loading.attr="disabled">Cancel</button>
-                            </div>
-                        </div>
-                    @endif
-                    @error('slug')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="contentType">Post Type <span class="text-danger">*</span></label>
-                    <select id="contentType" class="form-control @error('content_type') is-invalid @enderror" wire:model.live="content_type">
-                        <option value="{{ Post::CONTENT_TYPE_ARTICLE }}">Article</option>
-                        <option value="{{ Post::CONTENT_TYPE_VIDEO }}">Video</option>
-                    </select>
-                    @error('content_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="postCategory">Category <span class="text-danger">*</span></label>
-                    <select id="postCategory" class="form-control @error('category_id') is-invalid @enderror" wire:model.live="category_id">
-                        <option value="">Select category</option>
-                        @foreach ($this->categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('category_id')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="postSubCategory">Sub Category</label>
-                    <select id="postSubCategory" class="form-control @error('sub_category_id') is-invalid @enderror" wire:model="sub_category_id">
-                        <option value="">None</option>
-                        @foreach ($this->availableSubCategories as $subCategory)
-                            <option value="{{ $subCategory->id }}">{{ $subCategory->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('sub_category_id')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            @if ($content_type === Post::CONTENT_TYPE_VIDEO)
-                <div class="card card-body border mb-4">
-                    <h5 class="card-title mb-3">Video Details</h5>
-                    <div class="form-row">
-                        <div class="form-group col-md-4">
-                            <label for="videoSource">Video Source <span class="text-danger">*</span></label>
-                            <select id="videoSource" class="form-control @error('video_source') is-invalid @enderror" wire:model.live="video_source">
-                                <option value="{{ Post::VIDEO_SOURCE_EMBED }}">Embed Code</option>
-                                <option value="{{ Post::VIDEO_SOURCE_UPLOAD }}">Direct Upload</option>
-                            </select>
-                            @error('video_source')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="videoDuration">Duration</label>
-                            <input type="text" id="videoDuration" class="form-control @error('video_duration') is-invalid @enderror" wire:model.defer="video_duration" placeholder="e.g. 12:45 or 8 min">
-                            <small class="form-text text-muted">Optional – helps viewers understand the runtime.</small>
-                            @error('video_duration')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="form-group col-md-4">
-                            <label for="videoPlaylist">Playlist / Series</label>
-                            <select id="videoPlaylist" class="form-control @error('video_playlist_id') is-invalid @enderror" wire:model="video_playlist_id">
-                                <option value="">None</option>
-                                @foreach ($this->videoPlaylists as $playlist)
-                                    <option value="{{ $playlist->id }}">{{ $playlist->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('video_playlist_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    @if ($video_source === Post::VIDEO_SOURCE_EMBED)
-                        <div class="form-group">
-                            <label for="videoEmbedCode">Embed Code</label>
-                            <textarea id="videoEmbedCode" rows="4" class="form-control @error('video_embed_code') is-invalid @enderror" wire:model.live.debounce.500ms="video_embed_code" placeholder="Paste the iframe embed code from YouTube, Vimeo, etc."></textarea>
-                            <small class="form-text text-muted">Embedding keeps your server fast and avoids heavy bandwidth usage.</small>
-                            @error('video_embed_code')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="form-group">
-                            <label for="videoUrl">Video URL</label>
-                            <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
-                            <small class="form-text text-muted">Optional fallback – we’ll detect the platform automatically.</small>
-                            @error('video_url')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            @if ($video_provider)
-                                <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
+                    <div class="form-group">
+                        <label class="d-flex justify-content-between align-items-center" for="postSlug">
+                            <span>Permalink</span>
+                            @if (! $autoGenerateSlug)
+                                <button type="button" class="btn btn-sm btn-link p-0" wire:click="resetSlugToAuto" wire:loading.attr="disabled">
+                                    Reset to auto
+                                </button>
+                            @endif
+                        </label>
+                        <div class="border rounded px-3 py-2 bg-light">
+                            <p class="small mb-1 text-break">
+                                <span class="text-muted">{{ url('news') }}/</span>
+                                <span class="text-body font-weight-semibold">{{ $slug ?: 'your-slug' }}</span>
+                            </p>
+                            @if (! $isEditingSlug)
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" wire:click="startSlugEditing" wire:loading.attr="disabled">
+                                    Edit permalink
+                                </button>
                             @endif
                         </div>
-                    @else
-                        <div class="form-group">
-                            <label for="videoUpload">Video File @if (! $existingVideoPath)<span class="text-danger">*</span>@endif</label>
-                            <input type="file" id="videoUpload" class="form-control-file @error('video_upload') is-invalid @enderror" wire:model="video_upload" accept="video/mp4,video/quicktime,video/webm">
-                            <small class="form-text text-muted">Upload MP4, MOV or WEBM files (max 200MB). Direct uploads use more storage and bandwidth.</small>
-                            @error('video_upload')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                            <div class="mt-3">
-                                @if ($existingVideoPath && ! $video_upload)
-                                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-                                        <span class="text-muted small">Current file: <code>{{ $existingVideoPath }}</code></span>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingVideo">Remove current video</button>
-                                    </div>
-                                @endif
+                        @if ($isEditingSlug)
+                            <div class="mt-2">
+                                <input type="text" id="postSlug" class="form-control @error('slug') is-invalid @enderror" wire:model.defer="slug" placeholder="custom-slug">
+                                <div class="d-flex flex-wrap gap-2 mt-2">
+                                    <button type="button" class="btn btn-sm btn-primary" wire:click="saveSlugEdit" wire:loading.attr="disabled">Save</button>
+                                    <button type="button" class="btn btn-sm btn-link text-danger" wire:click="cancelSlugEditing" wire:loading.attr="disabled">Cancel</button>
+                                </div>
                             </div>
-                        </div>
-                    @endif
-
-                    @if ($video_preview_html)
-                        <div class="mt-3">
-                            <p class="text-muted small mb-2">Preview</p>
-                            {!! $video_preview_html !!}
-                        </div>
-                    @endif
-                </div>
-            @endif
-
-            @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
-                <div class="form-group">
-                    <label for="postDescription">Post Description <span class="text-danger">*</span></label>
-                    <div wire:ignore data-post-description-editor>
-                        <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
-                    </div>
-                    <input type="hidden" id="postDescriptionData" wire:model="description">
-                    @error('description')
+                        @endif
+                        @error('slug')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-            @endif
-
-            <div class="form-row">
-                @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
-                    <div class="form-group col-md-6">
-                        <label for="thumbnail">Post Thumbnail</label>
-                        <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
-                        @error('thumbnail')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        <div class="mt-3">
-                            @if ($thumbnail)
-                                <p class="text-muted small mb-2">Preview:</p>
-                                <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
-                            @elseif ($existingThumbnail)
-                                <p class="text-muted small mb-2">Current thumbnail:</p>
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="{{ asset('storage/' . $existingThumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-height: 180px;">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingThumbnail">Remove</button>
+                    </div>
+
+                    {{--Post Description--}}
+                    @if ($content_type === Post::CONTENT_TYPE_VIDEO)
+                        <div class="card card-body border mb-4">
+                            <h5 class="card-title mb-3">Video Details</h5>
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="videoSource">Video Source <span class="text-danger">*</span></label>
+                                    <select id="videoSource" class="form-control @error('video_source') is-invalid @enderror" wire:model.live="video_source">
+                                        <option value="{{ Post::VIDEO_SOURCE_EMBED }}">Embed Code</option>
+                                        <option value="{{ Post::VIDEO_SOURCE_UPLOAD }}">Direct Upload</option>
+                                    </select>
+                                    @error('video_source')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="videoDuration">Duration</label>
+                                    <input type="text" id="videoDuration" class="form-control @error('video_duration') is-invalid @enderror" wire:model.defer="video_duration" placeholder="e.g. 12:45 or 8 min">
+                                    <small class="form-text text-muted">Optional – helps viewers understand the runtime.</small>
+                                    @error('video_duration')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="videoPlaylist">Playlist / Series</label>
+                                    <select id="videoPlaylist" class="form-control @error('video_playlist_id') is-invalid @enderror" wire:model="video_playlist_id">
+                                        <option value="">None</option>
+                                        @foreach ($this->videoPlaylists as $playlist)
+                                            <option value="{{ $playlist->id }}">{{ $playlist->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('video_playlist_id')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            @if ($video_source === Post::VIDEO_SOURCE_EMBED)
+                                <div class="form-group">
+                                    <label for="videoEmbedCode">Embed Code</label>
+                                    <textarea id="videoEmbedCode" rows="4" class="form-control @error('video_embed_code') is-invalid @enderror" wire:model.live.debounce.500ms="video_embed_code" placeholder="Paste the iframe embed code from YouTube, Vimeo, etc."></textarea>
+                                    <small class="form-text text-muted">Embedding keeps your server fast and avoids heavy bandwidth usage.</small>
+                                    @error('video_embed_code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="videoUrl">Video URL</label>
+                                    <input type="url" id="videoUrl" class="form-control @error('video_url') is-invalid @enderror" wire:model.live.debounce.500ms="video_url" placeholder="https://www.youtube.com/watch?v=...">
+                                    <small class="form-text text-muted">Optional fallback – we’ll detect the platform automatically.</small>
+                                    @error('video_url')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @if ($video_provider)
+                                        <p class="text-muted small mt-2 mb-0">Detected platform: {{ ucfirst($video_provider) }}</p>
+                                    @endif
+                                </div>
+                            @else
+                                <div class="form-group">
+                                    <label for="videoUpload">Video File @if (! $existingVideoPath)<span class="text-danger">*</span>@endif</label>
+                                    <input type="file" id="videoUpload" class="form-control-file @error('video_upload') is-invalid @enderror" wire:model="video_upload" accept="video/mp4,video/quicktime,video/webm">
+                                    <small class="form-text text-muted">Upload MP4, MOV or WEBM files (max 200MB). Direct uploads use more storage and bandwidth.</small>
+                                    @error('video_upload')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    <div class="mt-3">
+                                        @if ($existingVideoPath && ! $video_upload)
+                                            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+                                                <span class="text-muted small">Current file: <code>{{ $existingVideoPath }}</code></span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingVideo">Remove current video</button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($video_preview_html)
+                                <div class="mt-3">
+                                    <p class="text-muted small mb-2">Preview</p>
+                                    {!! $video_preview_html !!}
                                 </div>
                             @endif
                         </div>
-                    </div>
-                @endif
-                <div class="form-group {{ $content_type === Post::CONTENT_TYPE_ARTICLE ? 'col-md-6' : 'col-12' }}">
-                    <label>Post Options</label>
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="isFeatured" wire:model.defer="is_featured">
-                        <label class="custom-control-label" for="isFeatured">Mark as featured post</label>
-                    </div>
-                    <div class="custom-control custom-switch mt-2">
-                        <input type="checkbox" class="custom-control-input" id="allowComments" wire:model.defer="allow_comments">
-                        <label class="custom-control-label" for="allowComments">Allow comments on this post</label>
-                    </div>
-                    <div class="custom-control custom-switch mt-2">
-                        <input type="checkbox" class="custom-control-input" id="isIndexable" wire:model.defer="is_indexable">
-                        <label class="custom-control-label" for="isIndexable">Allow search engines to index</label>
-                    </div>
+                    @endif
+
+                    @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
+                        <div class="form-group">
+                            <label for="postDescription">Post Description <span class="text-danger">*</span></label>
+                            <div wire:ignore data-post-description-editor>
+                                <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
+                            </div>
+                            <input type="hidden" id="postDescriptionData" wire:model="description">
+                            @error('description')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endif
                 </div>
             </div>
-
             <div class="card card-body border mt-4">
                 <h5 class="card-title">Meta Information</h5>
                 <div class="form-group">
                     <label for="metaTitle">Meta Title</label>
                     <input type="text" id="metaTitle" class="form-control @error('meta_title') is-invalid @enderror" wire:model.defer="meta_title" placeholder="Custom meta title">
                     @error('meta_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="form-group">
                     <label for="metaDescription">Meta Description</label>
                     <textarea id="metaDescription" rows="3" class="form-control @error('meta_description') is-invalid @enderror" wire:model.defer="meta_description" placeholder="Short summary for search engines"></textarea>
                     @error('meta_description')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="form-group">
                     <label for="metaKeywords">Meta Keywords</label>
                     <input type="text" id="metaKeywords" class="form-control @error('meta_keywords') is-invalid @enderror" wire:model.defer="meta_keywords" placeholder="Comma separated keywords">
                     @error('meta_keywords')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
+
         </div>
-        <div class="card-footer d-flex justify-content-end">
-            <a href="{{ route('admin.posts.index') }}" class="btn btn-link">Cancel</a>
-            <button type="submit" class="btn btn-primary ml-2">
-                {{ $post ? 'Update Post' : 'Create Post' }}
-            </button>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="form-group d-flex justify-content-end">
+                        <a href="{{ route('admin.posts.index') }}" class="btn btn-link">Cancel</a>
+                        <button type="submit" class="btn btn-primary ml-2">
+                            {{ $post ? 'Update Post' : 'Create Post' }}
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label for="postCategory">Category <span class="text-danger">*</span></label>
+                        <select id="postCategory" class="form-control @error('category_id') is-invalid @enderror" wire:model.live="category_id">
+                            <option value="">Select category</option>
+                            @foreach ($this->categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('category_id')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{--sub category--}}
+                    <div class="form-group">
+                        <label for="postSubCategory">Sub Category</label>
+                        <select id="postSubCategory" class="form-control @error('sub_category_id') is-invalid @enderror" wire:model="sub_category_id">
+                            <option value="">None</option>
+                            @foreach ($this->availableSubCategories as $subCategory)
+                                <option value="{{ $subCategory->id }}">{{ $subCategory->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('sub_category_id')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{--Post Type--}}
+                    <div class="form-group">
+                        <label for="contentType">Post Type <span class="text-danger">*</span></label>
+                        <select id="contentType" class="form-control @error('content_type') is-invalid @enderror" wire:model.live="content_type">
+                            <option value="{{ Post::CONTENT_TYPE_ARTICLE }}">Article</option>
+                            <option value="{{ Post::CONTENT_TYPE_VIDEO }}">Video</option>
+                        </select>
+                        @error('content_type')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{--Post Thumbnail--}}
+                    @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
+                        <div class="form-group border p-2">
+                            <label for="thumbnail">Post Thumbnail</label>
+                            <input type="file" id="thumbnail" class="form-control-file @error('thumbnail') is-invalid @enderror" wire:model="thumbnail" accept="image/*">
+                            @error('thumbnail')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            <div class="mt-3">
+                                @if ($thumbnail)
+                                    <p class="text-muted small mb-2">Preview:</p>
+                                    <img src="{{ $thumbnail->temporaryUrl() }}" alt="Thumbnail preview" class="img-thumbnail" style="max-height: 180px;">
+                                @elseif ($existingThumbnail)
+                                    <p class="text-muted small mb-2">Current thumbnail:</p>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ asset('storage/' . $existingThumbnail) }}" alt="Current thumbnail" class="img-thumbnail" style="max-height: 180px;">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeExistingThumbnail">Remove</button>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    {{--Post Options--}}
+                    <div class="form-group">
+                        <label>Post Options</label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="isFeatured" wire:model.defer="is_featured">
+                            <label class="custom-control-label" for="isFeatured">Mark as featured post</label>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="allowComments" wire:model.defer="allow_comments">
+                            <label class="custom-control-label" for="allowComments">Allow comments on this post</label>
+                        </div>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" id="isIndexable" wire:model.defer="is_indexable">
+                            <label class="custom-control-label" for="isIndexable">Allow search engines to index</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </form>
 </div>
 
@@ -343,7 +355,7 @@
                 }
 
                 editorInstance = CKEDITOR.replace(textarea.id, {
-                    height: 360,
+                    height: 200,
                     removePlugins: 'easyimage,cloudservices',
                     extraAllowedContent: '*(*){*}',
                 });
