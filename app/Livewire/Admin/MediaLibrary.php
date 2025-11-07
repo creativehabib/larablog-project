@@ -31,6 +31,11 @@ class MediaLibrary extends Component
     public int $parentFolderId = 0;
     public string $newFolderName = '';
 
+    public bool $selectMode = false;
+    public ?int $selectedMediaId = null;
+    public array $selectedMediaDetails = [];
+    public string $selectEvent = 'image-selected';
+
     /**
      * @var array<int, \Livewire\TemporaryUploadedFile>
      */
@@ -57,14 +62,19 @@ class MediaLibrary extends Component
         'uploads.*.max' => 'Each file must be 15MB or less.',
     ];
 
-    public function mount(): void
+    public function mount(bool $selectMode = false, string $selectEvent = 'image-selected'): void
     {
+        $this->selectMode = $selectMode;
+        $this->selectEvent = $selectEvent !== '' ? $selectEvent : 'image-selected';
         $this->sanitizeCurrentFolder();
     }
 
     public function updatedCurrentFolderId(): void
     {
         $this->sanitizeCurrentFolder();
+        if ($this->selectMode) {
+            $this->clearSelection();
+        }
     }
 
     protected function sanitizeCurrentFolder(): void
@@ -88,6 +98,9 @@ class MediaLibrary extends Component
     public function updatingSearch(): void
     {
         $this->resetPage();
+        if ($this->selectMode) {
+            $this->clearSelection();
+        }
     }
 
     public function updatedSearch(): void
@@ -98,6 +111,9 @@ class MediaLibrary extends Component
     public function updatingTypeFilter(): void
     {
         $this->resetPage();
+        if ($this->selectMode) {
+            $this->clearSelection();
+        }
     }
 
     public function updatingSortDirection(): void
@@ -148,6 +164,9 @@ class MediaLibrary extends Component
             $this->currentFolderId = 0;
             $this->parentFolderId = 0;
             $this->resetPage();
+            if ($this->selectMode) {
+                $this->clearSelection();
+            }
             return;
         }
 
@@ -160,6 +179,9 @@ class MediaLibrary extends Component
         $this->currentFolderId = $folder->id;
         $this->parentFolderId = (int) ($folder->parent_id ?? 0);
         $this->resetPage();
+        if ($this->selectMode) {
+            $this->clearSelection();
+        }
     }
 
     public function goToParent(): void
@@ -207,6 +229,81 @@ class MediaLibrary extends Component
 
         $this->newFolderName = '';
         $this->dispatch('showToastr', type: 'success', message: 'Folder created successfully.');
+    }
+
+    #[On('mediaPickerOpened')]
+    public function handlePickerOpened(): void
+    {
+        if (! $this->selectMode) {
+            return;
+        }
+
+        $this->clearSelection();
+        $this->resetPage();
+    }
+
+    public function selectMedia(int $mediaId): void
+    {
+        if (! $this->selectMode) {
+            return;
+        }
+
+        $media = MediaFile::find($mediaId);
+
+        if (! $media) {
+            $this->dispatch('showToastr', type: 'error', message: 'The selected media file could not be found.');
+            return;
+        }
+
+        $this->selectedMediaId = $media->id;
+        $this->selectedMediaDetails = [
+            'id' => $media->id,
+            'name' => $media->displayName(),
+            'url' => $this->resolveUrl($media),
+            'path' => $media->path,
+            'type' => $media->type,
+            'mime_type' => $media->mime_type,
+            'size' => $media->sizeForHumans(1),
+            'dimensions' => $media->width && $media->height ? sprintf('%d×%d', $media->width, $media->height) : null,
+        ];
+    }
+
+    public function clearSelection(): void
+    {
+        $this->selectedMediaId = null;
+        $this->selectedMediaDetails = [];
+    }
+
+    public function confirmSelection(): void
+    {
+        if (! $this->selectMode || ! $this->selectedMediaId) {
+            return;
+        }
+
+        $details = $this->selectedMediaDetails;
+
+        if (empty($details)) {
+            $media = MediaFile::find($this->selectedMediaId);
+
+            if (! $media) {
+                $this->dispatch('showToastr', type: 'error', message: 'The selected media file could not be found.');
+                $this->clearSelection();
+                return;
+            }
+
+            $details = [
+                'id' => $media->id,
+                'name' => $media->displayName(),
+                'url' => $this->resolveUrl($media),
+                'path' => $media->path,
+                'type' => $media->type,
+                'mime_type' => $media->mime_type,
+            ];
+        }
+
+        $this->dispatch($this->selectEvent, id: $details['id'] ?? null, url: $details['url'] ?? null, path: $details['path'] ?? null, type: $details['type'] ?? null, name: $details['name'] ?? null, mimeType: $details['mime_type'] ?? null);
+        $this->dispatch('mediaPickerClosed');
+        $this->clearSelection();
     }
 
     public function renameFolder(int $folderId, string $newName): void

@@ -1,95 +1,70 @@
-@props(['id' => 'media-library-modal'])
+@props([
+    'id' => 'media-library-modal',
+    'selectEvent' => 'image-selected',
+])
 
-<div x-show="show"
-     x-data="{
-        show: false,
-        activeTab: 'library',
-        images: [],
-        selectedImage: null,
-        loading: true,
-        init() {
-            // Watch for the 'show' property change
-            this.$watch('show', value => {
-                if (value) {
-                    this.loadImages();
-                    document.body.classList.add('overflow-y-hidden'); // Prevent background scroll
-                } else {
-                    document.body.classList.remove('overflow-y-hidden');
-                }
-            });
-        },
-        // Fetch all images from the server
-        loadImages() {
-            this.loading = true;
-            fetch('{{ route('admin.media.all') }}')
-                .then(response => response.json())
-                .then(data => {
-                    this.images = data.map(item => ({
-                        ...item,
-                        full_url: item.full_url ?? item.path,
-                    }));
-                    this.loading = false;
-                }).catch(err => {
-                    console.error('Failed to load media:', err);
-                    this.loading = false;
-                });
-        },
-        // Set the selected image
-        selectImage(image) {
-            this.selectedImage = image;
-        },
-        // Dispatch the selected image URL to the editor
-        insertImage() {
-            if (this.selectedImage) {
-                window.dispatchEvent(new CustomEvent('image-selected', {
-                    detail: {
-                        url: this.selectedImage.full_url ?? this.selectedImage.path,
-                        path: this.selectedImage.path ?? null,
-                    }
-                }));
-                this.show = false;
-                this.selectedImage = null;
-            }
-        }
-     }"
-     x-on:open-media-modal.window="show = true"
-     x-transition
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+@php
+    $componentId = $id ?: 'media-library-modal';
+    $selectionEvent = $selectEvent ?: 'image-selected';
+@endphp
+
+<div x-data="mediaPickerModal('{{ $componentId }}')"
+     x-on:keydown.escape.window="if (show) closeModal()"
      x-cloak>
-
-    <div @click.outside="show = false" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl h-[90vh] flex flex-col">
-        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-white">Select Image</h3>
-            <button @click="show = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                <x-heroicon-o-x-mark class="w-6 h-6"/>
-            </button>
-        </div>
-
-        <div class="p-4 border-b dark:border-gray-700">
-            <nav class="flex space-x-4" aria-label="Tabs">
-                <button @click="activeTab = 'library'" :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'library' }" class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">Media Library</button>
-                <button @click="activeTab = 'upload'" :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'upload' }" class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">Upload Media</button>
-                <button @click="activeTab = 'url'" :class="{ 'border-indigo-500 text-indigo-600': activeTab === 'url' }" class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">Upload Form URL</button>
-            </nav>
-        </div>
-
-        <div class="flex-1 p-4 overflow-y-auto">
-            <div x-show="activeTab === 'library'">
-                <div x-show="loading" class="text-center text-gray-500 dark:text-gray-400">Loading media...</div>
-                <div x-show="!loading" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
-                    <template x-for="image in images" :key="image.id">
-                        <div @click="selectImage(image)" class="relative group aspect-square cursor-pointer">
-                            <img :src="image.full_url ?? image.path" :alt="image.name" class="w-full h-full object-cover rounded-lg">
-                            <div class="absolute inset-0 rounded-lg transition-all" :class="{ 'ring-4 ring-indigo-500 ring-inset': selectedImage && selectedImage.id === image.id }"></div>
-                        </div>
-                    </template>
+    <div class="modal fade"
+         :class="{ 'show d-block': show }"
+         x-show="show"
+         x-transition.opacity.duration.150ms
+         tabindex="-1"
+         role="dialog"
+         aria-modal="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-white border-0 border-bottom">
+                    <h5 class="modal-title">Media gallery</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @click="closeModal()"></button>
+                </div>
+                <div class="modal-body p-0 bg-light">
+                    <livewire:admin.media-library :select-mode="true" :select-event="'{{ $selectionEvent }}'" key="media-picker-{{ $componentId }}" />
                 </div>
             </div>
         </div>
-
-        <div class="p-4 border-t dark:border-gray-700 flex justify-end">
-            <button @click="show = false" type="button" class="btn btn-secondary mr-2">Cancel</button>
-            <button @click="insertImage()" :disabled="!selectedImage" type="button" class="btn btn-primary">Insert</button>
-        </div>
     </div>
+    <div class="modal-backdrop fade" :class="{ 'show': show }" x-show="show" x-transition.opacity.duration.150ms></div>
 </div>
+
+@pushOnce('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('mediaPickerModal', (id = null) => ({
+                show: false,
+                id,
+                init() {
+                    this.$watch('show', value => {
+                        document.body.classList.toggle('modal-open', value);
+                        if (!value) {
+                            document.body.style.removeProperty('padding-right');
+                        }
+                    });
+
+                    window.addEventListener('open-media-modal', () => {
+                        this.openModal();
+                    });
+
+                    window.addEventListener('mediaPickerClosed', () => {
+                        this.closeModal();
+                    });
+                },
+                openModal() {
+                    this.show = true;
+                    if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                        Livewire.dispatch('mediaPickerOpened');
+                    }
+                },
+                closeModal() {
+                    this.show = false;
+                }
+            }));
+        });
+    </script>
+@endpushOnce
