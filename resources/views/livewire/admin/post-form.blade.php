@@ -368,13 +368,21 @@
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
             const imageSelectedHandler = (event) => {
+                const detail = Array.isArray(event.detail)
+                    ? (event.detail[0] || {})
+                    : (event.detail || {});
+
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
-                @this.call('setCoverImageFromLibrary', event.detail.path ?? null, event.detail.url ?? null);
+                @this.call('setCoverImageFromLibrary', detail.path ?? null, detail.url ?? null);
                     window.selectingThumbnail = false;
                 } else {
                     // CKEditor-এ ছবি ইনসার্ট করুন
-                    const url = event.detail.url || event.detail.path;
+                    const url = detail.url || detail.path;
+                    if (!url) {
+                        return;
+                    }
+
                     if (imageToReplace) {
                         imageToReplace.setAttribute('src', url);
                     } else {
