@@ -24,7 +24,10 @@
             fetch('{{ route('admin.media.all') }}')
                 .then(response => response.json())
                 .then(data => {
-                    this.images = data;
+                    this.images = data.map(item => ({
+                        ...item,
+                        full_url: item.full_url ?? item.path,
+                    }));
                     this.loading = false;
                 }).catch(err => {
                     console.error('Failed to load media:', err);
@@ -38,7 +41,12 @@
         // Dispatch the selected image URL to the editor
         insertImage() {
             if (this.selectedImage) {
-                window.dispatchEvent(new CustomEvent('image-selected', { detail: { url: this.selectedImage.path } }));
+                window.dispatchEvent(new CustomEvent('image-selected', {
+                    detail: {
+                        url: this.selectedImage.full_url ?? this.selectedImage.path,
+                        path: this.selectedImage.path ?? null,
+                    }
+                }));
                 this.show = false;
                 this.selectedImage = null;
             }
@@ -71,7 +79,7 @@
                 <div x-show="!loading" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
                     <template x-for="image in images" :key="image.id">
                         <div @click="selectImage(image)" class="relative group aspect-square cursor-pointer">
-                            <img :src="image.path" :alt="image.name" class="w-full h-full object-cover rounded-lg">
+                            <img :src="image.full_url ?? image.path" :alt="image.name" class="w-full h-full object-cover rounded-lg">
                             <div class="absolute inset-0 rounded-lg transition-all" :class="{ 'ring-4 ring-indigo-500 ring-inset': selectedImage && selectedImage.id === image.id }"></div>
                         </div>
                     </template>

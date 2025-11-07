@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 class MediaFile extends Model
 {
     use HasFactory;
+
+    protected $appends = ['full_url'];
 
     public const TYPE_IMAGE = 'image';
     public const TYPE_VIDEO = 'video';
@@ -53,6 +56,11 @@ class MediaFile extends Model
     public function url(): string
     {
         return Storage::disk($this->disk)->url($this->path);
+    }
+
+    protected function fullUrl(): Attribute
+    {
+        return Attribute::get(fn () => $this->url());
     }
 
     public function sizeForHumans(int $precision = 2): string
