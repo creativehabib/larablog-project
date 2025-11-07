@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -52,7 +51,6 @@ class PostForm extends Component
     public bool $autoGenerateSlugBeforeEdit = true;
     public ?string $slugBeforeEdit = null;
 
-    #[Locked]
     public ?string $lastSyncedDescription = null;
 
     public function mount(?Post $post = null): void
