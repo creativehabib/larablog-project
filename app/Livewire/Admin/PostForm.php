@@ -301,6 +301,10 @@ class PostForm extends Component
     {
         $normalizedPath = $this->normalizeMediaLibraryPath($path);
 
+        if (! $normalizedPath && $url) {
+            $normalizedPath = $this->normalizeMediaLibraryPath($url);
+        }
+
         if ($this->existingThumbnail && $normalizedPath && $this->existingThumbnail !== $normalizedPath) {
             $this->scheduleThumbnailDeletion($this->existingThumbnail);
         }
