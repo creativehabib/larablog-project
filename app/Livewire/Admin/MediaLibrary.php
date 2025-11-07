@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\MediaItem;
+use App\Models\MediaFile;
+use App\Models\MediaFolder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -26,6 +27,9 @@ class MediaLibrary extends Component
     public string $typeFilter = 'all';
     public string $sortDirection = 'desc';
     public int $perPage = 20;
+    public int $currentFolderId = 0;
+    public int $parentFolderId = 0;
+    public string $newFolderName = '';
 
     /**
      * @var array<int, \Livewire\TemporaryUploadedFile>
@@ -42,6 +46,7 @@ class MediaLibrary extends Component
         'viewMode' => ['except' => 'grid'],
         'typeFilter' => ['except' => 'all'],
         'search' => ['except' => ''],
+        'currentFolderId' => ['except' => 0, 'as' => 'folder'],
     ];
 
     protected $rules = [
@@ -51,6 +56,34 @@ class MediaLibrary extends Component
     protected $messages = [
         'uploads.*.max' => 'Each file must be 15MB or less.',
     ];
+
+    public function mount(): void
+    {
+        $this->sanitizeCurrentFolder();
+    }
+
+    public function updatedCurrentFolderId(): void
+    {
+        $this->sanitizeCurrentFolder();
+    }
+
+    protected function sanitizeCurrentFolder(): void
+    {
+        if ($this->currentFolderId <= 0) {
+            $this->currentFolderId = 0;
+            $this->parentFolderId = 0;
+            return;
+        }
+
+        $folder = MediaFolder::find($this->currentFolderId);
+        if (! $folder) {
+            $this->currentFolderId = 0;
+            $this->parentFolderId = 0;
+            return;
+        }
+
+        $this->parentFolderId = (int) ($folder->parent_id ?? 0);
+    }
 
     public function updatingSearch(): void
     {
@@ -98,15 +131,141 @@ class MediaLibrary extends Component
     {
         $allowed = [
             'all',
-            MediaItem::TYPE_IMAGE,
-            MediaItem::TYPE_VIDEO,
-            MediaItem::TYPE_AUDIO,
-            MediaItem::TYPE_DOCUMENT,
-            MediaItem::TYPE_ARCHIVE,
-            MediaItem::TYPE_OTHER,
+            MediaFile::TYPE_IMAGE,
+            MediaFile::TYPE_VIDEO,
+            MediaFile::TYPE_AUDIO,
+            MediaFile::TYPE_DOCUMENT,
+            MediaFile::TYPE_ARCHIVE,
+            MediaFile::TYPE_OTHER,
         ];
 
         $this->typeFilter = in_array($filter, $allowed, true) ? $filter : 'all';
+    }
+
+    public function navigateToFolder(int $folderId): void
+    {
+        if ($folderId <= 0) {
+            $this->currentFolderId = 0;
+            $this->parentFolderId = 0;
+            $this->resetPage();
+            return;
+        }
+
+        $folder = MediaFolder::find($folderId);
+        if (! $folder) {
+            $this->dispatch('showToastr', type: 'error', message: 'Folder not found.');
+            return;
+        }
+
+        $this->currentFolderId = $folder->id;
+        $this->parentFolderId = (int) ($folder->parent_id ?? 0);
+        $this->resetPage();
+    }
+
+    public function goToParent(): void
+    {
+        if ($this->currentFolderId === 0) {
+            return;
+        }
+
+        $this->navigateToFolder($this->parentFolderId);
+    }
+
+    public function createFolder(): void
+    {
+        if (Auth::user()->cannot('media.create')) {
+            $this->dispatch('showToastr', type: 'error', message: 'You do not have permission to create folders.');
+            return;
+        }
+
+        $this->newFolderName = trim($this->newFolderName);
+
+        $this->validate([
+            'newFolderName' => 'required|string|max:120',
+        ], [
+            'newFolderName.required' => 'Folder name is required.',
+        ]);
+
+        $name = $this->newFolderName;
+
+        $duplicateExists = MediaFolder::where('parent_id', $this->currentFolderId)
+            ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+            ->exists();
+
+        if ($duplicateExists) {
+            $this->addError('newFolderName', 'A folder with this name already exists in this location.');
+            return;
+        }
+
+        $this->resetErrorBag('newFolderName');
+
+        MediaFolder::create([
+            'name' => $name,
+            'parent_id' => $this->currentFolderId,
+            'user_id' => Auth::id(),
+        ]);
+
+        $this->newFolderName = '';
+        $this->dispatch('showToastr', type: 'success', message: 'Folder created successfully.');
+    }
+
+    public function renameFolder(int $folderId, string $newName): void
+    {
+        if ($folderId <= 0) {
+            return;
+        }
+
+        if (Auth::user()->cannot('media.edit')) {
+            $this->dispatch('showToastr', type: 'error', message: 'You do not have permission to rename folders.');
+            return;
+        }
+
+        $newName = trim($newName);
+        if ($newName === '') {
+            $this->dispatch('showToastr', type: 'error', message: 'Folder name cannot be empty.');
+            return;
+        }
+
+        $folder = MediaFolder::findOrFail($folderId);
+
+        $duplicateExists = MediaFolder::where('parent_id', $folder->parent_id)
+            ->whereRaw('LOWER(name) = ?', [strtolower($newName)])
+            ->where('id', '!=', $folderId)
+            ->exists();
+
+        if ($duplicateExists) {
+            $this->dispatch('showToastr', type: 'error', message: 'Another folder with this name already exists.');
+            return;
+        }
+
+        $folder->update(['name' => $newName]);
+
+        $this->dispatch('showToastr', type: 'success', message: 'Folder renamed successfully.');
+    }
+
+    public function deleteFolder(int $folderId): void
+    {
+        if ($folderId <= 0) {
+            return;
+        }
+
+        if (Auth::user()->cannot('media.delete')) {
+            $this->dispatch('showToastr', type: 'error', message: 'You do not have permission to delete folders.');
+            return;
+        }
+
+        $folder = MediaFolder::findOrFail($folderId);
+        $parentId = (int) ($folder->parent_id ?? 0);
+
+        $this->removeFolder($folder);
+
+        if ($this->currentFolderId === $folderId) {
+            $this->navigateToFolder($parentId);
+        } else {
+            $this->resetPage();
+        }
+
+        $this->dispatch('showToastr', type: 'success', message: 'Folder deleted successfully.');
     }
 
     public function startEditing(int $mediaId): void
@@ -116,7 +275,7 @@ class MediaLibrary extends Component
             return;
         }
 
-        $media = MediaItem::findOrFail($mediaId);
+        $media = MediaFile::findOrFail($mediaId);
 
         $this->editingId = $media->id;
         $this->editingAltText = (string) ($media->alt_text ?? '');
@@ -128,7 +287,7 @@ class MediaLibrary extends Component
             'openMediaEditor',
             id: $media->id,
             url: $this->resolveUrl($media),
-            isImage: $media->type === MediaItem::TYPE_IMAGE,
+            isImage: $media->type === MediaFile::TYPE_IMAGE,
             width: $media->width,
             height: $media->height,
             altText: $this->editingAltText,
@@ -144,14 +303,8 @@ class MediaLibrary extends Component
             return;
         }
 
-        $media = MediaItem::findOrFail($mediaId);
-
-        $disk = Storage::disk($media->disk);
-        if ($disk->exists($media->path)) {
-            $disk->delete($media->path);
-        }
-
-        $media->delete();
+        $media = MediaFile::findOrFail($mediaId);
+        $this->deleteMediaFile($media);
         $this->dispatch('showToastr', type: 'success', message: 'Media item removed successfully.');
         $this->resetPage();
     }
@@ -179,7 +332,7 @@ class MediaLibrary extends Component
             return;
         }
 
-        $media = MediaItem::findOrFail($mediaId);
+        $media = MediaFile::findOrFail($mediaId);
         $altText = trim((string) Arr::get($payload, 'altText', ''));
         $caption = trim((string) Arr::get($payload, 'caption', ''));
 
@@ -188,7 +341,7 @@ class MediaLibrary extends Component
             'caption' => $caption !== '' ? $caption : null,
         ]);
 
-        if ($media->type === MediaItem::TYPE_IMAGE) {
+        if ($media->type === MediaFile::TYPE_IMAGE) {
             $cropData = Arr::get($payload, 'crop');
             $resizeData = Arr::get($payload, 'resize');
             $this->manipulateImage($media, $cropData, $resizeData);
@@ -201,14 +354,28 @@ class MediaLibrary extends Component
 
     public function render()
     {
-        $mediaItems = MediaItem::query()
+        $currentFolderId = max(0, $this->currentFolderId);
+
+        $folders = MediaFolder::query()
+            ->where('parent_id', $currentFolderId)
+            ->withCount(['files', 'children'])
+            ->when($this->search !== '', function ($query) {
+                $searchTerm = '%'.$this->search.'%';
+                $query->where('name', 'like', $searchTerm);
+            })
+            ->orderBy('name')
+            ->get();
+
+        $mediaItems = MediaFile::query()
+            ->where('folder_id', $currentFolderId)
             ->when($this->typeFilter !== 'all', function ($query) {
                 $query->where('type', $this->typeFilter);
             })
             ->when($this->search !== '', function ($query) {
                 $searchTerm = '%'.$this->search.'%';
                 $query->where(function ($nested) use ($searchTerm) {
-                    $nested->where('original_name', 'like', $searchTerm)
+                    $nested->where('name', 'like', $searchTerm)
+                        ->orWhere('original_name', 'like', $searchTerm)
                         ->orWhere('file_name', 'like', $searchTerm)
                         ->orWhere('alt_text', 'like', $searchTerm)
                         ->orWhere('caption', 'like', $searchTerm);
@@ -219,13 +386,48 @@ class MediaLibrary extends Component
 
         return view('livewire.admin.media-library', [
             'mediaItems' => $mediaItems,
+            'folders' => $folders,
         ]);
+    }
+
+    #[Computed]
+    public function breadcrumbs(): array
+    {
+        $trail = [
+            ['id' => 0, 'name' => 'Root'],
+        ];
+
+        if ($this->currentFolderId === 0) {
+            return $trail;
+        }
+
+        $stack = [];
+        $folder = MediaFolder::find($this->currentFolderId);
+
+        while ($folder) {
+            $stack[] = [
+                'id' => $folder->id,
+                'name' => $folder->name,
+            ];
+
+            if (! $folder->parent_id) {
+                break;
+            }
+
+            $folder = MediaFolder::find($folder->parent_id);
+        }
+
+        if (empty($stack)) {
+            return $trail;
+        }
+
+        return array_merge($trail, array_reverse($stack));
     }
 
     #[Computed]
     public function libraryStats(): array
     {
-        $totals = MediaItem::selectRaw('type, COUNT(*) as aggregate')
+        $totals = MediaFile::selectRaw('type, COUNT(*) as aggregate')
             ->groupBy('type')
             ->pluck('aggregate', 'type')
             ->all();
@@ -234,13 +436,38 @@ class MediaLibrary extends Component
 
         return [
             'total' => $totalCount,
-            'images' => $totals[MediaItem::TYPE_IMAGE] ?? 0,
-            'videos' => $totals[MediaItem::TYPE_VIDEO] ?? 0,
-            'documents' => $totals[MediaItem::TYPE_DOCUMENT] ?? 0,
-            'audio' => $totals[MediaItem::TYPE_AUDIO] ?? 0,
-            'archives' => $totals[MediaItem::TYPE_ARCHIVE] ?? 0,
-            'other' => $totals[MediaItem::TYPE_OTHER] ?? 0,
+            'images' => $totals[MediaFile::TYPE_IMAGE] ?? 0,
+            'videos' => $totals[MediaFile::TYPE_VIDEO] ?? 0,
+            'documents' => $totals[MediaFile::TYPE_DOCUMENT] ?? 0,
+            'audio' => $totals[MediaFile::TYPE_AUDIO] ?? 0,
+            'archives' => $totals[MediaFile::TYPE_ARCHIVE] ?? 0,
+            'other' => $totals[MediaFile::TYPE_OTHER] ?? 0,
         ];
+    }
+
+    protected function removeFolder(MediaFolder $folder): void
+    {
+        $folder->loadMissing('children', 'files');
+
+        foreach ($folder->children as $child) {
+            $this->removeFolder($child);
+        }
+
+        foreach ($folder->files as $file) {
+            $this->deleteMediaFile($file);
+        }
+
+        $folder->delete();
+    }
+
+    protected function deleteMediaFile(MediaFile $media): void
+    {
+        $disk = Storage::disk($media->disk);
+        if ($disk->exists($media->path)) {
+            $disk->delete($media->path);
+        }
+
+        $media->delete();
     }
 
     protected function handleUploads(): void
@@ -256,6 +483,8 @@ class MediaLibrary extends Component
         }
 
         $this->validate();
+
+        $this->sanitizeCurrentFolder();
 
         foreach ($this->uploads as $file) {
             $this->storeUploadedFile($file);
@@ -280,7 +509,7 @@ class MediaLibrary extends Component
 
         $width = null;
         $height = null;
-        if ($type === MediaItem::TYPE_IMAGE) {
+        if ($type === MediaFile::TYPE_IMAGE) {
             $dimensions = @getimagesize($file->getRealPath());
             if (is_array($dimensions)) {
                 $width = $dimensions[0] ?? null;
@@ -288,16 +517,19 @@ class MediaLibrary extends Component
             }
         }
 
-        MediaItem::create([
+        MediaFile::create([
             'disk' => $disk,
+            'folder_id' => $this->currentFolderId,
             'path' => $path,
             'file_name' => $fileName,
+            'name' => $originalName,
             'original_name' => $originalName,
             'mime_type' => $mimeType,
             'type' => $type,
             'size' => $size,
             'width' => $width,
             'height' => $height,
+            'user_id' => Auth::id(),
         ]);
     }
 
@@ -305,7 +537,7 @@ class MediaLibrary extends Component
     {
         $type = $this->determineTypeFromMime($mime);
 
-        if ($type !== MediaItem::TYPE_OTHER) {
+        if ($type !== MediaFile::TYPE_OTHER) {
             return $type;
         }
 
@@ -313,70 +545,70 @@ class MediaLibrary extends Component
             $extension = strtolower($extension);
             $typeFromExtension = $this->determineTypeFromExtension($extension);
 
-            if ($typeFromExtension !== MediaItem::TYPE_OTHER) {
+            if ($typeFromExtension !== MediaFile::TYPE_OTHER) {
                 return $typeFromExtension;
             }
         }
 
-        return MediaItem::TYPE_OTHER;
+        return MediaFile::TYPE_OTHER;
     }
 
     protected function determineTypeFromMime(?string $mime): string
     {
         if (! $mime) {
-            return MediaItem::TYPE_OTHER;
+            return MediaFile::TYPE_OTHER;
         }
 
         if (str_starts_with($mime, 'image/')) {
-            return MediaItem::TYPE_IMAGE;
+            return MediaFile::TYPE_IMAGE;
         }
 
         if (str_starts_with($mime, 'video/')) {
-            return MediaItem::TYPE_VIDEO;
+            return MediaFile::TYPE_VIDEO;
         }
 
         if (str_starts_with($mime, 'audio/')) {
-            return MediaItem::TYPE_AUDIO;
+            return MediaFile::TYPE_AUDIO;
         }
 
         if (Str::contains($mime, ['pdf', 'msword', 'spreadsheet', 'presentation']) ||
             str_contains($mime, 'text/')) {
-            return MediaItem::TYPE_DOCUMENT;
+            return MediaFile::TYPE_DOCUMENT;
         }
 
         if (Str::contains($mime, ['zip', 'rar', 'tar', 'gzip'])) {
-            return MediaItem::TYPE_ARCHIVE;
+            return MediaFile::TYPE_ARCHIVE;
         }
 
-        return MediaItem::TYPE_OTHER;
+        return MediaFile::TYPE_OTHER;
     }
 
     protected function determineTypeFromExtension(string $extension): string
     {
         if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'heic', 'heif'], true)) {
-            return MediaItem::TYPE_IMAGE;
+            return MediaFile::TYPE_IMAGE;
         }
 
         if (in_array($extension, ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv'], true)) {
-            return MediaItem::TYPE_VIDEO;
+            return MediaFile::TYPE_VIDEO;
         }
 
         if (in_array($extension, ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'], true)) {
-            return MediaItem::TYPE_AUDIO;
+            return MediaFile::TYPE_AUDIO;
         }
 
         if (in_array($extension, ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'csv'], true)) {
-            return MediaItem::TYPE_DOCUMENT;
+            return MediaFile::TYPE_DOCUMENT;
         }
 
         if (in_array($extension, ['zip', 'rar', 'tar', 'gz', 'gzip', '7z'], true)) {
-            return MediaItem::TYPE_ARCHIVE;
+            return MediaFile::TYPE_ARCHIVE;
         }
 
-        return MediaItem::TYPE_OTHER;
+        return MediaFile::TYPE_OTHER;
     }
 
-    protected function manipulateImage(MediaItem $media, $cropData, $resizeData): void
+    protected function manipulateImage(MediaFile $media, $cropData, $resizeData): void
     {
         $disk = Storage::disk($media->disk);
         if (! $disk->exists($media->path)) {
@@ -491,7 +723,7 @@ class MediaLibrary extends Component
         $this->resizeHeight = null;
     }
 
-    protected function resolveUrl(MediaItem $media): string
+    protected function resolveUrl(MediaFile $media): string
     {
         return $media->url();
     }

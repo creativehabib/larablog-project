@@ -98,7 +98,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::view('menus', 'back.pages.menus.index')
             ->name('menus.index')
             ->middleware('permission:menu.view');
-        Route::get('/media/all', function () { return \App\Models\MediaItem::latest()->get(); })->name('media.all');
+        Route::get('/media/all', function () { return \App\Models\MediaFile::latest()->get(); })->name('media.all');
     });
 });
 
