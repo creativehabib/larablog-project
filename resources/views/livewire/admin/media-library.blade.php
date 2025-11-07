@@ -8,6 +8,12 @@
     $hasMedia = $mediaItems->isNotEmpty();
 @endphp
 
+@php
+    $isSelecting = $selectMode ?? false;
+    $selectedId = $selectedMediaId ?? null;
+    $selectedDetails = $selectedMediaDetails ?? [];
+@endphp
+
 <div class="media-library" x-data="mediaLibraryComponent()" x-init="init()">
     <div class="card shadow-sm mb-4">
         <div class="card-body">
@@ -158,7 +164,13 @@
                             @endif
 
                             @foreach ($mediaItems as $media)
-                                <tr wire:key="media-row-{{ $media->id }}">
+                                @php $rowSelected = $isSelecting && $selectedId === $media->id; @endphp
+                                <tr wire:key="media-row-{{ $media->id }}"
+                                    @if ($isSelecting) wire:click="selectMedia({{ $media->id }})" style="cursor: pointer;" @endif
+                                    @class([
+                                        'media-selectable-row' => $isSelecting,
+                                        'table-primary' => $rowSelected,
+                                    ])>
                                     <td>
                                         @if ($media->type === MediaFile::TYPE_IMAGE)
                                             <img src="{{ $media->url() }}" alt="{{ $media->displayName() }}" class="rounded" style="width:48px;height:48px;object-fit:cover;">
@@ -182,8 +194,8 @@
                                     <td class="small text-muted">{{ $media->caption ? Str::limit($media->caption, 40) : '—' }}</td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button type="button" class="btn btn-outline-primary" wire:click="startEditing({{ $media->id }})">Edit</button>
-                                            <button type="button" class="btn btn-outline-danger" x-on:click.prevent="confirmDelete({{ $media->id }})">Delete</button>
+                                            <button type="button" class="btn btn-outline-primary" wire:click.stop="startEditing({{ $media->id }})">Edit</button>
+                                            <button type="button" class="btn btn-outline-danger" x-on:click.prevent.stop="confirmDelete({{ $media->id }})">Delete</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -219,8 +231,10 @@
                         @endif
 
                         @foreach ($mediaItems as $media)
+                            @php $cardSelected = $isSelecting && $selectedId === $media->id; @endphp
                             <div class="col-xl-3 col-lg-4 col-md-6" wire:key="media-card-{{ $media->id }}">
-                                <div class="card h-100 border-0 shadow-sm">
+                                <div class="card h-100 shadow-sm {{ $isSelecting ? 'media-selectable-card border' : 'border-0' }} {{ $cardSelected ? 'selected border-primary shadow-lg' : '' }}"
+                                     @if ($isSelecting) wire:click="selectMedia({{ $media->id }})" style="cursor: pointer;" @endif>
                                     <div class="ratio ratio-4x3 bg-light rounded-top position-relative overflow-hidden">
                                         @if ($media->type === MediaFile::TYPE_IMAGE)
                                             <img src="{{ $media->url() }}" alt="{{ $media->displayName() }}" class="w-100 h-100" style="object-fit: cover;">
@@ -230,13 +244,18 @@
                                                 <span class="badge bg-dark text-uppercase">{{ strtoupper($media->type) }}</span>
                                             </div>
                                         @endif
+                                        @if ($isSelecting)
+                                            <span class="position-absolute top-0 end-0 m-2 badge {{ $cardSelected ? 'bg-primary' : 'bg-light text-dark border' }}">
+                                                <i class="fas {{ $cardSelected ? 'fa-check' : 'fa-image' }}"></i>
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="card-body">
                                         <h6 class="card-title text-truncate" title="{{ $media->displayName() }}">{{ $media->displayName() }}</h6>
                                         <p class="small text-muted mb-3">{{ strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)) }} · {{ $media->sizeForHumans(1) }} @if($media->width && $media->height) · {{ $media->width }}×{{ $media->height }} @endif</p>
                                         <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click="startEditing({{ $media->id }})"><i class="fas fa-edit me-1"></i> Edit</button>
-                                            <button type="button" class="btn btn-outline-danger btn-sm" x-on:click.prevent="confirmDelete({{ $media->id }})"><i class="fas fa-trash"></i></button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click.stop="startEditing({{ $media->id }})"><i class="fas fa-edit me-1"></i> Edit</button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" x-on:click.prevent.stop="confirmDelete({{ $media->id }})"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -251,6 +270,50 @@
             @endif
         </div>
     </div>
+
+    @if ($isSelecting)
+        @php
+            $selectedType = $selectedDetails['type'] ?? null;
+            $selectedLabel = $selectedType ? Str::headline($selectedType) : null;
+        @endphp
+        <div class="card shadow-sm mt-4">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3 flex-grow-1">
+                    <div class="rounded border bg-light d-flex align-items-center justify-content-center" style="width:72px;height:72px;">
+                        @if ($selectedId && ($selectedDetails['type'] ?? null) === MediaFile::TYPE_IMAGE && ! empty($selectedDetails['url']))
+                            <img src="{{ $selectedDetails['url'] }}" alt="Selected media" class="img-fluid rounded" style="max-height:70px;max-width:70px;object-fit:cover;">
+                        @elseif($selectedId)
+                            <i class="fas fa-file fa-2x text-muted"></i>
+                        @else
+                            <i class="fas fa-images fa-2x text-muted"></i>
+                        @endif
+                    </div>
+                    <div class="min-w-0">
+                        <div class="fw-semibold text-truncate">
+                            {{ $selectedId ? ($selectedDetails['name'] ?? 'Selected media') : 'No media selected' }}
+                        </div>
+                        <div class="text-muted small">
+                            @if ($selectedId)
+                                {{ $selectedLabel ?? 'Media file' }}
+                                @if (! empty($selectedDetails['size']))
+                                    · {{ $selectedDetails['size'] }}
+                                @endif
+                                @if (! empty($selectedDetails['dimensions']))
+                                    · {{ $selectedDetails['dimensions'] }}
+                                @endif
+                            @else
+                                Choose a file from the library to insert into your post.
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button type="button" class="btn btn-outline-secondary" wire:click="clearSelection" @disabled(! $selectedId)>Clear selection</button>
+                    <button type="button" class="btn btn-primary" wire:click="confirmSelection" @disabled(! $selectedId)>Insert</button>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="modal fade" id="mediaEditorModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -348,6 +411,28 @@
 
             .upload-drop-zone input[type="file"] {
                 cursor: pointer;
+            }
+
+            .media-selectable-card {
+                transition: all .18s ease-in-out;
+                border-style: dashed;
+            }
+
+            .media-selectable-card:hover {
+                border-color: rgba(59, 130, 246, 0.5);
+                box-shadow: 0 0.75rem 1.5rem rgba(59, 130, 246, 0.18);
+            }
+
+            .media-selectable-card.selected {
+                border-style: solid;
+            }
+
+            .media-selectable-row {
+                transition: background-color .15s ease-in-out;
+            }
+
+            .media-selectable-row:hover {
+                background-color: rgba(59, 130, 246, 0.08);
             }
         </style>
     @endpush
