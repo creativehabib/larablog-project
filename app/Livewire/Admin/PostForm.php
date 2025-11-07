@@ -65,8 +65,8 @@ class PostForm extends Component
             $this->slug = $post->slug;
             $this->content_type = $post->content_type ?? Post::CONTENT_TYPE_ARTICLE;
             $this->description = $post->description;
-            $this->category_id = (string) $post->category_id;
-            $this->sub_category_id = $post->sub_category_id ? (string) $post->sub_category_id : '';
+            $this->category_id = (string)$post->category_id;
+            $this->sub_category_id = $post->sub_category_id ? (string)$post->sub_category_id : '';
             $this->video_url = $post->video_url;
             $this->video_provider = $post->video_provider;
             $this->video_id = $post->video_id;
@@ -74,21 +74,17 @@ class PostForm extends Component
             $this->video_embed_code = $post->video_embed_code;
             $this->existingVideoPath = $post->video_path;
             $this->video_duration = $post->video_duration;
-            $this->video_playlist_id = $post->video_playlist_id ? (string) $post->video_playlist_id : '';
+            $this->video_playlist_id = $post->video_playlist_id ? (string)$post->video_playlist_id : '';
             $this->video_preview_html = $post->video_embed_html?->toHtml();
-            $this->is_featured = (bool) $post->is_featured;
-            $this->allow_comments = (bool) $post->allow_comments;
-            $this->is_indexable = (bool) $post->is_indexable;
+            $this->is_featured = (bool)$post->is_featured;
+            $this->allow_comments = (bool)$post->allow_comments;
+            $this->is_indexable = (bool)$post->is_indexable;
             $this->meta_title = $post->meta_title;
             $this->meta_description = $post->meta_description;
             $this->meta_keywords = $post->meta_keywords;
             $this->existingThumbnail = $post->thumbnail_path;
             $this->autoGenerateSlug = false;
-        } else {
-            // Ensure new posts default to being indexable by search engines.
-            $this->is_indexable = true;
         }
-
         $this->lastSyncedDescription = $this->description;
         $this->autoGenerateSlugBeforeEdit = $this->autoGenerateSlug;
         $this->slugBeforeEdit = $this->slug;
@@ -318,11 +314,6 @@ class PostForm extends Component
 
         $data['is_featured'] = $this->is_featured;
         $data['allow_comments'] = $this->allow_comments;
-
-        if (! $this->isEditing) {
-            // Force newly created posts to be indexable for search engines.
-            $this->is_indexable = true;
-        }
 
         $data['is_indexable'] = $this->is_indexable;
         $data['description'] = $this->description;

@@ -355,6 +355,7 @@
 
                 editorInstance = CKEDITOR.replace(textarea.id, {
                     height: 200,
+                    uiColor: '',
                     removePlugins: 'easyimage,cloudservices',
                     extraAllowedContent: '*(*){*}',
                 });
