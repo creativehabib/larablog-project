@@ -367,10 +367,34 @@
             };
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
+            const extractEventDetail = (event) => {
+                if (!event) {
+                    return {};
+                }
+
+                const { detail } = event;
+
+                if (!detail) {
+                    return {};
+                }
+
+                if (Array.isArray(detail)) {
+                    return detail[0] || {};
+                }
+
+                if (typeof detail === 'object') {
+                    if (detail.params && typeof detail.params === 'object') {
+                        return detail.params;
+                    }
+
+                    return detail;
+                }
+
+                return {};
+            };
+
             const imageSelectedHandler = (event) => {
-                const detail = Array.isArray(event.detail)
-                    ? (event.detail[0] || {})
-                    : (event.detail || {});
+                const detail = extractEventDetail(event);
 
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
@@ -378,7 +402,7 @@
                     window.selectingThumbnail = false;
                 } else {
                     // CKEditor-এ ছবি ইনসার্ট করুন
-                    const url = detail.url || detail.path;
+                    const url = detail.url || detail.full_url || detail.path;
                     if (!url) {
                         return;
                     }
