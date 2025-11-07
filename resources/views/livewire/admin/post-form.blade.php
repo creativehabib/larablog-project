@@ -136,7 +136,7 @@
                             <div wire:ignore data-post-description-editor>
                                 <textarea id="postDescription" class="form-control">{!! $description !!}</textarea>
                             </div>
-                            <input type="hidden" id="postDescriptionData" wire:model="description">
+                            <input type="hidden" id="postDescriptionData" wire:model="description" value="{{ $description }}">
                             @error('description')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -341,17 +341,16 @@
                 const hiddenField = document.getElementById('postDescriptionData');
                 const existingTextareaValue = textarea.value;
                 const initialHiddenValue = hiddenField?.value;
+                const hasHiddenValue = typeof initialHiddenValue === 'string' && initialHiddenValue.trim() !== '';
+                const initialValue = hasHiddenValue ? initialHiddenValue : existingTextareaValue || '';
 
                 textarea.dataset.initialized = 'true';
 
                 editorState.hiddenField = hiddenField || null;
-                editorState.lastSetValue =
-                    initialHiddenValue !== undefined && initialHiddenValue !== null
-                        ? initialHiddenValue
-                        : existingTextareaValue || '';
+                editorState.lastSetValue = initialValue;
 
-                if (textarea.value !== editorState.lastSetValue) {
-                    textarea.value = editorState.lastSetValue;
+                if (textarea.value !== initialValue) {
+                    textarea.value = initialValue;
                 }
 
                 editorInstance = CKEDITOR.replace(textarea.id, {
