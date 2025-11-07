@@ -20,6 +20,7 @@ class PostForm extends Component
     use WithFileUploads;
 
     public ?Post $post = null;
+    public bool $isEditing = false;
 
     public ?string $title = '';
     public ?string $slug = '';
@@ -57,6 +58,7 @@ class PostForm extends Component
     {
 
         $this->post = $post;
+        $this->isEditing = (bool) ($post?->exists);
 
         if ($post) {
             $this->title = $post->title;
