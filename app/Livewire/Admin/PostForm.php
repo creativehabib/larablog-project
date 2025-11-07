@@ -84,6 +84,9 @@ class PostForm extends Component
             $this->meta_keywords = $post->meta_keywords;
             $this->existingThumbnail = $post->thumbnail_path;
             $this->autoGenerateSlug = false;
+        } else {
+            // Ensure new posts default to being indexable by search engines.
+            $this->is_indexable = true;
         }
 
         $this->lastSyncedDescription = $this->description;
@@ -315,6 +318,12 @@ class PostForm extends Component
 
         $data['is_featured'] = $this->is_featured;
         $data['allow_comments'] = $this->allow_comments;
+
+        if (! $this->isEditing) {
+            // Force newly created posts to be indexable for search engines.
+            $this->is_indexable = true;
+        }
+
         $data['is_indexable'] = $this->is_indexable;
         $data['description'] = $this->description;
         $data['meta_title'] = $this->meta_title;
