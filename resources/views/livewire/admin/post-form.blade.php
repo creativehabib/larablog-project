@@ -220,8 +220,8 @@
                                 <p class="text-muted small mb-2">Current thumbnail:</p>
                                 <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;" />
 
-                                {{-- এই বাটনটি আপনার JS-এর '@this.set('cover_image', null)' লজিকের সাথে মিলবে --}}
-                                <button type="button" @click="imageUrl = null; @this.call('clearCoverImage')" class="btn btn-sm btn-outline-danger mt-2">
+                                {{-- এই বাটনটি আপনার JS-এর '$wire.clearCoverImage()' লজিকের সাথে মিলবে --}}
+                                <button type="button" @click="imageUrl = null; $wire.clearCoverImage()" class="btn btn-sm btn-outline-danger mt-2">
                                     Remove
                                 </button>
                             </div>
@@ -260,6 +260,15 @@
     <script>
         {{-- আমরা 'livewire:init' ব্যবহার করছি --}}
         document.addEventListener('livewire:init', () => {
+
+            const componentId = '{{ $this->getId() }}';
+            const getComponent = () => {
+                if (typeof Livewire === 'undefined' || typeof Livewire.find !== 'function') {
+                    return null;
+                }
+
+                return Livewire.find(componentId);
+            };
 
             let editorInstance = null;
             let imageToReplace = null;
@@ -361,8 +370,11 @@
 
                 // ডেটা সিঙ্ক করার জন্য লিসেনার
                 editorInstance.on('change', function () {
-                    // Debounce ব্যবহার করা ভালো, কিন্তু @this.set() দ্রুত কাজ করে
-                @this.set('description', editorInstance.getData(), false);
+                    // Debounce ব্যবহার করা ভালো, কিন্তু দ্রুত আপডেটের জন্য সরাসরি Livewire প্রোপার্টি সেট করা হচ্ছে
+                    const component = getComponent();
+                    if (component) {
+                        component.set('description', editorInstance.getData());
+                    }
                 });
             };
 
@@ -411,7 +423,10 @@
 
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
-                @this.call('setCoverImageFromLibrary', detail.path ?? null, detail.url ?? null);
+                    const component = getComponent();
+                    if (component) {
+                        component.call('setCoverImageFromLibrary', detail.path ?? null, detail.url ?? null);
+                    }
                     window.selectingThumbnail = false;
                     return;
                 }
@@ -432,7 +447,10 @@
                 }
 
                 if (editorInstance) {
-                @this.set('description', editorInstance.getData(), false);
+                    const component = getComponent();
+                    if (component) {
+                        component.set('description', editorInstance.getData());
+                    }
                 }
 
                 imageToReplace = null;
