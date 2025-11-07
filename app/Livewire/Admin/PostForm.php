@@ -46,6 +46,10 @@ class PostForm extends Component
     public ?string $meta_keywords = null;
     public $thumbnail;
     public ?string $existingThumbnail = null;
+    public ?string $cover_image = null;
+    public ?string $cover_image_path = null;
+
+    protected array $thumbnailsPendingDeletion = [];
 
     public bool $autoGenerateSlug = true;
     public bool $isEditingSlug = false;
@@ -83,6 +87,10 @@ class PostForm extends Component
             $this->meta_description = $post->meta_description;
             $this->meta_keywords = $post->meta_keywords;
             $this->existingThumbnail = $post->thumbnail_path;
+            if ($this->existingThumbnail) {
+                $this->cover_image_path = $this->existingThumbnail;
+                $this->cover_image = $this->thumbnailUrlFromPath($this->existingThumbnail);
+            }
             $this->autoGenerateSlug = false;
         }
         $this->lastSyncedDescription = $this->description;
@@ -269,14 +277,57 @@ class PostForm extends Component
             return;
         }
 
-        Storage::disk('public')->delete($this->existingThumbnail);
+        $normalizedPath = $this->normalizeMediaLibraryPath($this->existingThumbnail);
+
+        if ($this->shouldDeleteStoredThumbnail($normalizedPath)) {
+            Storage::disk('public')->delete($normalizedPath);
+        }
+
+        if ($normalizedPath) {
+            unset($this->thumbnailsPendingDeletion[$normalizedPath]);
+        }
         $this->existingThumbnail = null;
+        $this->cover_image = null;
+        $this->cover_image_path = null;
 
         if ($this->post) {
             $this->post->update(['thumbnail_path' => null]);
         }
 
         $this->dispatch('showToastr', type: 'success', message: 'Thumbnail removed successfully.');
+    }
+
+    public function setCoverImageFromLibrary(?string $path, ?string $url = null): void
+    {
+        $normalizedPath = $this->normalizeMediaLibraryPath($path);
+
+        if ($this->existingThumbnail && $normalizedPath && $this->existingThumbnail !== $normalizedPath) {
+            $this->scheduleThumbnailDeletion($this->existingThumbnail);
+        }
+
+        if (! $normalizedPath) {
+            $this->cover_image_path = null;
+            $this->cover_image = $url ?: null;
+            $this->existingThumbnail = null;
+
+            return;
+        }
+
+        unset($this->thumbnailsPendingDeletion[$normalizedPath]);
+
+        $this->cover_image_path = $normalizedPath;
+        $this->existingThumbnail = $normalizedPath;
+        $this->cover_image = $url ?: $this->thumbnailUrlFromPath($normalizedPath);
+        $this->thumbnail = null;
+    }
+
+    public function clearCoverImage(): void
+    {
+        $this->scheduleThumbnailDeletion($this->existingThumbnail);
+
+        $this->cover_image = null;
+        $this->cover_image_path = null;
+        $this->existingThumbnail = null;
     }
 
     public function save(): mixed
@@ -405,16 +456,33 @@ class PostForm extends Component
 
         unset($data['video_upload']);
 
+        $thumbnailPath = null;
+
         if ($this->thumbnail) {
             if ($this->existingThumbnail) {
-                Storage::disk('public')->delete($this->existingThumbnail);
+                $this->scheduleThumbnailDeletion($this->existingThumbnail);
             }
 
-            $data['thumbnail_path'] = $this->thumbnail->store('posts', 'public');
+            $thumbnailPath = $this->thumbnail->store('posts', 'public');
+            $this->thumbnail = null;
+        } elseif ($this->cover_image_path) {
+            $thumbnailPath = $this->cover_image_path;
         } elseif ($autoThumbnailPath = $this->maybeFetchVideoThumbnail($data)) {
-            $data['thumbnail_path'] = $autoThumbnailPath;
-            $this->existingThumbnail = $autoThumbnailPath;
+            $thumbnailPath = $autoThumbnailPath;
+        } elseif ($this->existingThumbnail) {
+            $thumbnailPath = $this->existingThumbnail;
         }
+
+        if ($thumbnailPath) {
+            $data['thumbnail_path'] = $thumbnailPath;
+            unset($this->thumbnailsPendingDeletion[$thumbnailPath]);
+        } else {
+            $data['thumbnail_path'] = null;
+        }
+
+        $this->existingThumbnail = $thumbnailPath;
+        $this->cover_image_path = $thumbnailPath;
+        $this->cover_image = $this->thumbnailUrlFromPath($thumbnailPath);
 
         unset($data['thumbnail']);
 
@@ -432,6 +500,24 @@ class PostForm extends Component
 
             $this->post = Post::create($data);
             $message = 'Post created successfully.';
+        }
+
+        if (! empty($this->thumbnailsPendingDeletion)) {
+            $currentThumbnail = $this->existingThumbnail;
+
+            foreach ($this->thumbnailsPendingDeletion as $pendingPath) {
+                if (! $pendingPath) {
+                    continue;
+                }
+
+                if ($currentThumbnail && $pendingPath === $currentThumbnail) {
+                    continue;
+                }
+
+                Storage::disk('public')->delete($pendingPath);
+            }
+
+            $this->thumbnailsPendingDeletion = [];
         }
 
         $this->dispatch('showToastr', type: 'success', message: $message);
@@ -523,6 +609,87 @@ class PostForm extends Component
             'meta_keywords' => ['nullable', 'string'],
             'thumbnail' => ['nullable', 'image', 'max:4096'],
         ];
+    }
+
+    protected function scheduleThumbnailDeletion(?string $path): void
+    {
+        $normalizedPath = $this->normalizeMediaLibraryPath($path);
+
+        if (! $normalizedPath || ! $this->shouldDeleteStoredThumbnail($normalizedPath)) {
+            return;
+        }
+
+        $this->thumbnailsPendingDeletion[$normalizedPath] = $normalizedPath;
+    }
+
+    protected function shouldDeleteStoredThumbnail(?string $path): bool
+    {
+        if (! $path) {
+            return false;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        return Str::startsWith($normalized, 'posts/');
+    }
+
+    protected function normalizeMediaLibraryPath(?string $path): ?string
+    {
+        if ($path === null) {
+            return null;
+        }
+
+        $normalized = trim($path);
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (filter_var($normalized, FILTER_VALIDATE_URL)) {
+            $parsedPath = parse_url($normalized, PHP_URL_PATH) ?: '';
+            $parsedPath = ltrim((string) $parsedPath, '/');
+
+            if (Str::startsWith($parsedPath, 'storage/')) {
+                $parsedPath = substr($parsedPath, strlen('storage/')) ?: '';
+            }
+
+            return $parsedPath !== '' ? $parsedPath : null;
+        }
+
+        $normalized = ltrim($normalized, '/');
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            $normalized = substr($normalized, strlen('storage/')) ?: '';
+        }
+
+        return $normalized !== '' ? $normalized : null;
+    }
+
+    protected function thumbnailUrlFromPath(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            $normalized = substr($normalized, strlen('storage/')) ?: '';
+        }
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        try {
+            return Storage::disk('public')->url($normalized);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     protected function generateUniqueSlug(?string $value): string
