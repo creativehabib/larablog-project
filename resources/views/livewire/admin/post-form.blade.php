@@ -177,7 +177,7 @@
                     <div class="form-group d-flex justify-content-end">
                         <a href="{{ route('admin.posts.index') }}" class="btn btn-link">Cancel</a>
                         <button type="submit" class="btn btn-primary ml-2">
-                            {{ $post ? 'Update Post' : 'Create Post' }}
+                            {{ $isEditing ? 'Update Post' : 'Create Post' }}
                         </button>
                     </div>
                     <div class="form-group">
