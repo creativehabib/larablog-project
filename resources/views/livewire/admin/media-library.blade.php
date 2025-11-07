@@ -1,6 +1,11 @@
 @php
-    use App\Models\MediaItem;
+    use App\Models\MediaFile;
     use Illuminate\Support\Str;
+@endphp
+
+@php
+    $hasFolders = isset($folders) && $folders->isNotEmpty();
+    $hasMedia = $mediaItems->isNotEmpty();
 @endphp
 
 <div class="media-library" x-data="mediaLibraryComponent()" x-init="init()">
@@ -16,19 +21,19 @@
                     <label for="media-search" class="form-label mb-1 text-muted small text-uppercase">Search</label>
                     <div class="input-group">
                         <span class="input-group-text border-right-0"><i class="fas fa-search"></i></span>
-                        <input id="media-search" type="search" class="form-control border-left-0" placeholder="Search media..." wire:model.live.debounce.500ms="search">
+                        <input id="media-search" type="search" class="form-control border-left-0" placeholder="Search files or folders..." wire:model.live.debounce.500ms="search">
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-4">
                     <label for="media-type-filter" class="form-label mb-1 text-muted small text-uppercase">Filter</label>
                     <select id="media-type-filter" class="custom-select" wire:change="setTypeFilter($event.target.value)">
                         <option value="all" @selected($typeFilter === 'all')>All files</option>
-                        <option value="{{ MediaItem::TYPE_IMAGE }}" @selected($typeFilter === MediaItem::TYPE_IMAGE)>Images</option>
-                        <option value="{{ MediaItem::TYPE_VIDEO }}" @selected($typeFilter === MediaItem::TYPE_VIDEO)>Videos</option>
-                        <option value="{{ MediaItem::TYPE_DOCUMENT }}" @selected($typeFilter === MediaItem::TYPE_DOCUMENT)>Documents</option>
-                        <option value="{{ MediaItem::TYPE_AUDIO }}" @selected($typeFilter === MediaItem::TYPE_AUDIO)>Audio</option>
-                        <option value="{{ MediaItem::TYPE_ARCHIVE }}" @selected($typeFilter === MediaItem::TYPE_ARCHIVE)>Archives</option>
-                        <option value="{{ MediaItem::TYPE_OTHER }}" @selected($typeFilter === MediaItem::TYPE_OTHER)>Other</option>
+                        <option value="{{ MediaFile::TYPE_IMAGE }}" @selected($typeFilter === MediaFile::TYPE_IMAGE)>Images</option>
+                        <option value="{{ MediaFile::TYPE_VIDEO }}" @selected($typeFilter === MediaFile::TYPE_VIDEO)>Videos</option>
+                        <option value="{{ MediaFile::TYPE_DOCUMENT }}" @selected($typeFilter === MediaFile::TYPE_DOCUMENT)>Documents</option>
+                        <option value="{{ MediaFile::TYPE_AUDIO }}" @selected($typeFilter === MediaFile::TYPE_AUDIO)>Audio</option>
+                        <option value="{{ MediaFile::TYPE_ARCHIVE }}" @selected($typeFilter === MediaFile::TYPE_ARCHIVE)>Archives</option>
+                        <option value="{{ MediaFile::TYPE_OTHER }}" @selected($typeFilter === MediaFile::TYPE_OTHER)>Other</option>
                     </select>
                 </div>
                 <div class="col-xl-3 col-lg-12">
@@ -49,6 +54,40 @@
     </div>
 
     <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <nav aria-label="breadcrumb" class="flex-grow-1">
+                <ol class="breadcrumb mb-0">
+                    @foreach ($this->breadcrumbs as $crumb)
+                        @if ($loop->last)
+                            <li class="breadcrumb-item active" aria-current="page">{{ $crumb['name'] }}</li>
+                        @else
+                            <li class="breadcrumb-item"><a href="#" wire:click.prevent="navigateToFolder({{ $crumb['id'] }})">{{ $crumb['name'] }}</a></li>
+                        @endif
+                    @endforeach
+                </ol>
+            </nav>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" wire:click="goToParent" @disabled($this->currentFolderId === 0)>
+                    <i class="fas fa-level-up-alt me-1"></i> Up one level
+                </button>
+            </div>
+        </div>
+        <div class="card-footer bg-white">
+            <form class="d-flex flex-column flex-md-row gap-2" wire:submit.prevent="createFolder">
+                <div class="flex-grow-1">
+                    <input type="text" class="form-control" placeholder="New folder name" wire:model.defer="newFolderName">
+                    @error('newFolderName')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-folder-plus me-1"></i> Create Folder
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="border border-dashed rounded-3 p-4 position-relative text-center upload-drop-zone" :class="{ 'is-dropping': dropping }"
                  x-on:dragover.prevent="dropping = true" x-on:dragleave.prevent="dropping = false" x-on:drop.prevent="handleDrop($event)">
@@ -56,7 +95,7 @@
                 <div class="py-5">
                     <div class="display-6 text-primary mb-2"><i class="fas fa-cloud-upload-alt"></i></div>
                     <h5 class="mb-1">Drop files here or click to upload</h5>
-                    <p class="text-muted mb-0">You can upload multiple images, videos or documents up to 15MB each.</p>
+                    <p class="text-muted mb-0">Files will be uploaded to the current folder. Maximum size 15MB each.</p>
                 </div>
             </div>
             <div class="mt-3" wire:loading.flex wire:target="uploads">
@@ -70,11 +109,11 @@
 
     <div class="card shadow-sm">
         <div class="card-body p-0">
-            @if ($mediaItems->isEmpty())
+            @if (! $hasFolders && ! $hasMedia)
                 <div class="p-5 text-center text-muted">
-                    <i class="fas fa-images fa-2x mb-3"></i>
-                    <h5 class="mb-1">No media files found</h5>
-                    <p class="mb-0">Upload new files to build your media library.</p>
+                    <i class="fas fa-folder-open fa-2x mb-3"></i>
+                    <h5 class="mb-1">This folder is empty</h5>
+                    <p class="mb-0">Upload files or create a new folder to get started.</p>
                 </div>
             @else
                 @if ($viewMode === 'list')
@@ -91,17 +130,44 @@
                             </tr>
                             </thead>
                             <tbody>
+                            @if ($hasFolders)
+                                @foreach ($folders as $folder)
+                                    <tr wire:key="folder-row-{{ $folder->id }}">
+                                        <td>
+                                            <div class="d-flex align-items-center justify-content-center text-warning">
+                                                <i class="fas fa-folder fa-lg"></i>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-link p-0 fw-semibold text-start text-truncate" style="max-width: 220px" wire:click="navigateToFolder({{ $folder->id }})" title="{{ $folder->name }}">
+                                                <i class="fas fa-folder-open me-2"></i> {{ $folder->name }}
+                                            </button>
+                                            <div class="text-muted small">{{ $folder->children_count }} folders · {{ $folder->files_count }} files</div>
+                                        </td>
+                                        <td class="text-muted small">Folder</td>
+                                        <td class="small text-muted">—</td>
+                                        <td class="small text-muted">—</td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-secondary" x-on:click.prevent="promptRenameFolder({{ $folder->id }}, @js($folder->name))">Rename</button>
+                                                <button type="button" class="btn btn-outline-danger" x-on:click.prevent="deleteFolder({{ $folder->id }})">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+
                             @foreach ($mediaItems as $media)
                                 <tr wire:key="media-row-{{ $media->id }}">
                                     <td>
-                                        @if ($media->type === MediaItem::TYPE_IMAGE)
-                                            <img src="{{ $media->url() }}" alt="{{ $media->original_name }}" class="rounded" style="width:48px;height:48px;object-fit:cover;">
+                                        @if ($media->type === MediaFile::TYPE_IMAGE)
+                                            <img src="{{ $media->url() }}" alt="{{ $media->displayName() }}" class="rounded" style="width:48px;height:48px;object-fit:cover;">
                                         @else
                                             <span class="badge bg-secondary text-uppercase">{{ strtoupper($media->type) }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="fw-semibold text-truncate" style="max-width: 220px" title="{{ $media->original_name }}">{{ $media->original_name }}</div>
+                                        <div class="fw-semibold text-truncate" style="max-width: 220px" title="{{ $media->displayName() }}">{{ $media->displayName() }}</div>
                                         <div class="text-muted small">{{ $media->file_name }}</div>
                                     </td>
                                     <td>
@@ -127,12 +193,37 @@
                     </div>
                 @else
                     <div class="row g-3 p-3">
+                        @if ($hasFolders)
+                            @foreach ($folders as $folder)
+                                <div class="col-xl-3 col-lg-4 col-md-6" wire:key="folder-card-{{ $folder->id }}">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="ratio ratio-4x3 bg-light rounded-top position-relative overflow-hidden">
+                                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-warning">
+                                                <i class="fas fa-folder-open fa-3x"></i>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title text-truncate" title="{{ $folder->name }}">{{ $folder->name }}</h6>
+                                            <p class="small text-muted mb-3">{{ $folder->children_count }} folders · {{ $folder->files_count }} files</p>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click="navigateToFolder({{ $folder->id }})"><i class="fas fa-folder-open me-1"></i> Open</button>
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" x-on:click.prevent="promptRenameFolder({{ $folder->id }}, @js($folder->name))"><i class="fas fa-edit"></i></button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" x-on:click.prevent="deleteFolder({{ $folder->id }})"><i class="fas fa-trash"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+
                         @foreach ($mediaItems as $media)
                             <div class="col-xl-3 col-lg-4 col-md-6" wire:key="media-card-{{ $media->id }}">
                                 <div class="card h-100 border-0 shadow-sm">
                                     <div class="ratio ratio-4x3 bg-light rounded-top position-relative overflow-hidden">
-                                        @if ($media->type === MediaItem::TYPE_IMAGE)
-                                            <img src="{{ $media->url() }}" alt="{{ $media->original_name }}" class="w-100 h-100" style="object-fit: cover;">
+                                        @if ($media->type === MediaFile::TYPE_IMAGE)
+                                            <img src="{{ $media->url() }}" alt="{{ $media->displayName() }}" class="w-100 h-100" style="object-fit: cover;">
                                         @else
                                             <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
                                                 <i class="fas fa-file fa-2x mb-2"></i>
@@ -141,7 +232,7 @@
                                         @endif
                                     </div>
                                     <div class="card-body">
-                                        <h6 class="card-title text-truncate" title="{{ $media->original_name }}">{{ $media->original_name }}</h6>
+                                        <h6 class="card-title text-truncate" title="{{ $media->displayName() }}">{{ $media->displayName() }}</h6>
                                         <p class="small text-muted mb-3">{{ strtoupper(pathinfo($media->file_name, PATHINFO_EXTENSION)) }} · {{ $media->sizeForHumans(1) }} @if($media->width && $media->height) · {{ $media->width }}×{{ $media->height }} @endif</p>
                                         <div class="d-flex gap-2">
                                             <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1" wire:click="startEditing({{ $media->id }})"><i class="fas fa-edit me-1"></i> Edit</button>
@@ -501,6 +592,25 @@
                     confirmDelete(id) {
                         if (confirm('Are you sure you want to delete this media file?')) {
                             this.$wire.call('deleteMedia', id);
+                        }
+                    },
+
+                    promptRenameFolder(id, currentName) {
+                        const nextName = prompt('Enter a new folder name', currentName || '');
+                        if (nextName === null) {
+                            return;
+                        }
+                        const trimmed = nextName.trim();
+                        if (trimmed === '') {
+                            alert('Folder name cannot be empty.');
+                            return;
+                        }
+                        this.$wire.call('renameFolder', id, trimmed);
+                    },
+
+                    deleteFolder(id) {
+                        if (confirm('Deleting a folder will remove all nested folders and files. Continue?')) {
+                            this.$wire.call('deleteFolder', id);
                         }
                     }
                 }));

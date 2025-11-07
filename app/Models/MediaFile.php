@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
-class MediaItem extends Model
+class MediaFile extends Model
 {
     use HasFactory;
 
@@ -19,8 +20,10 @@ class MediaItem extends Model
 
     protected $fillable = [
         'disk',
+        'folder_id',
         'path',
         'file_name',
+        'name',
         'original_name',
         'mime_type',
         'type',
@@ -30,11 +33,22 @@ class MediaItem extends Model
         'alt_text',
         'caption',
         'meta',
+        'user_id',
     ];
 
     protected $casts = [
         'meta' => 'array',
     ];
+
+    public function folder(): BelongsTo
+    {
+        return $this->belongsTo(MediaFolder::class, 'folder_id');
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function url(): string
     {
@@ -53,5 +67,10 @@ class MediaItem extends Model
         $value = $bytes / (1024 ** $pow);
 
         return sprintf('%s %s', number_format($value, $precision), $units[$pow]);
+    }
+
+    public function displayName(): string
+    {
+        return (string) ($this->name ?: $this->original_name ?: $this->file_name);
     }
 }
