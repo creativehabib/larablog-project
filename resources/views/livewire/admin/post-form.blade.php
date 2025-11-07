@@ -367,45 +367,43 @@
             };
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
-            const normalizeSelectionDetail = (payload) => {
+            const extractSelectionPayload = (payload) => {
                 if (!payload) {
                     return {};
                 }
 
-                const candidate = payload.detail !== undefined ? payload.detail : payload;
-
-                if (!candidate) {
-                    return {};
+                if (payload instanceof CustomEvent) {
+                    return extractSelectionPayload(payload.detail);
                 }
 
-                if (Array.isArray(candidate)) {
-                    if (candidate.length === 0) {
+                if (payload.detail !== undefined && payload !== payload.detail) {
+                    return extractSelectionPayload(payload.detail);
+                }
+
+                if (payload.params !== undefined) {
+                    return extractSelectionPayload(payload.params);
+                }
+
+                if (Array.isArray(payload)) {
+                    if (payload.length === 0) {
                         return {};
                     }
 
-                    if (candidate.length === 1) {
-                        return normalizeSelectionDetail(candidate[0]);
-                    }
-
-                    return candidate.reduce((accumulator, item) => ({
+                    return payload.reduce((accumulator, item) => ({
                         ...accumulator,
-                        ...normalizeSelectionDetail(item),
+                        ...extractSelectionPayload(item),
                     }), {});
                 }
 
-                if (typeof candidate === 'object') {
-                    if (candidate.params && typeof candidate.params === 'object') {
-                        return normalizeSelectionDetail(candidate.params);
-                    }
-
-                    return candidate;
+                if (typeof payload === 'object') {
+                    return payload;
                 }
 
                 return {};
             };
 
             const handleImageSelection = (payload) => {
-                const detail = normalizeSelectionDetail(payload);
+                const detail = extractSelectionPayload(payload);
 
                 if (!detail || Object.keys(detail).length === 0) {
                     return;
@@ -418,8 +416,7 @@
                     return;
                 }
 
-                // CKEditor-এ ছবি ইনসার্ট করুন
-                const url = detail.url || detail.full_url || detail.path;
+                const url = detail.url || detail.full_url || detail.fullUrl || detail.path;
                 if (!url) {
                     return;
                 }
@@ -443,10 +440,9 @@
             };
 
             const browserImageSelectedHandler = (event) => {
-                handleImageSelection(event);
+                handleImageSelection(event?.detail ?? event);
             };
 
-            // ইভেন্ট লিসেনারটি একবারই যোগ করুন (উইন্ডো ও ডকুমেন্ট উভয় জায়গায়)
             window.removeEventListener('image-selected', browserImageSelectedHandler);
             window.addEventListener('image-selected', browserImageSelectedHandler);
 
@@ -456,7 +452,6 @@
             if (typeof Livewire !== 'undefined' && typeof Livewire.on === 'function') {
                 Livewire.on('image-selected', (...args) => {
                     if (!args || args.length === 0) {
-                        handleImageSelection({});
                         return;
                     }
 
