@@ -327,11 +327,20 @@
                 }
 
                 const hiddenField = document.getElementById('postDescriptionData');
+                const existingTextareaValue = textarea.value;
+                const initialHiddenValue = hiddenField?.value;
 
                 textarea.dataset.initialized = 'true';
 
                 editorState.hiddenField = hiddenField || null;
-                editorState.lastSetValue = hiddenField?.value || '';
+                editorState.lastSetValue =
+                    initialHiddenValue !== undefined && initialHiddenValue !== null
+                        ? initialHiddenValue
+                        : existingTextareaValue || '';
+
+                if (textarea.value !== editorState.lastSetValue) {
+                    textarea.value = editorState.lastSetValue;
+                }
 
                 editorInstance = CKEDITOR.replace(textarea.id, {
                     height: 360,
