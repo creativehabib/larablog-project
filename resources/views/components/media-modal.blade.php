@@ -125,39 +125,41 @@
     <div class="modal-backdrop fade" :class="{ 'show': show }" x-show="show" x-transition.opacity.duration.150ms></div>
 </div>
 
-@pushOnce('scripts')
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('mediaPickerModal', (id = null) => ({
-                show: false,
-                id,
-                init() {
-                    this.$watch('show', value => {
-                        document.body.classList.toggle('modal-open', value);
-                        if (!value) {
-                            document.body.style.removeProperty('padding-right');
+@push('scripts')
+    @once
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('mediaPickerModal', (id = null) => ({
+                    show: false,
+                    id,
+                    init() {
+                        this.$watch('show', value => {
+                            document.body.classList.toggle('modal-open', value);
+                            if (!value) {
+                                document.body.style.removeProperty('padding-right');
+                            }
+                        });
+
+                        window.addEventListener('open-media-modal', () => {
+                            this.openModal();
+                        });
+
+                        // এটি আর দরকার নেই, কারণ উপরের 'x-on' ইভেন্টটিই মডাল বন্ধ করবে
+                        // window.addEventListener('mediaPickerClosed', () => {
+                        //     this.closeModal();
+                        // });
+                    },
+                    openModal() {
+                        this.show = true;
+                        if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                            Livewire.dispatch('mediaPickerOpened');
                         }
-                    });
-
-                    window.addEventListener('open-media-modal', () => {
-                        this.openModal();
-                    });
-
-                    // এটি আর দরকার নেই, কারণ উপরের 'x-on' ইভেন্টটিই মডাল বন্ধ করবে
-                    // window.addEventListener('mediaPickerClosed', () => {
-                    //     this.closeModal();
-                    // });
-                },
-                openModal() {
-                    this.show = true;
-                    if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
-                        Livewire.dispatch('mediaPickerOpened');
+                    },
+                    closeModal() {
+                        this.show = false;
                     }
-                },
-                closeModal() {
-                    this.show = false;
-                }
-            }));
-        });
-    </script>
-@endpushOnce
+                }));
+            });
+        </script>
+    @endonce
+@endpush

@@ -259,13 +259,14 @@
     জাভাস্ক্রিপ্ট সমাধান (সংশোধিত এবং সম্পূর্ণ)
 ==================================================================
 --}}
-@pushOnce('scripts')
-    {{-- CKEditor সোর্স --}}
-    <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
+@push('scripts')
+    @once
+        {{-- CKEditor সোর্স --}}
+        <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 
-    {{-- Livewire এবং CKEditor ইন্টিগ্রেশন (সংশোধিত) --}}
-    <script>
-        document.addEventListener('livewire:init', () => {
+        {{-- Livewire এবং CKEditor ইন্টিগ্রেশন (সংশোধিত) --}}
+        <script>
+            document.addEventListener('livewire:init', () => {
 
             const componentId = '{{ $this->getId() }}';
             const getComponent = () => {
@@ -466,6 +467,7 @@
 
             // পৃষ্ঠা লোড হলে প্রথমবার চালু করুন
             initializeEditor();
-        });
-    </script>
-@endpushOnce
+            });
+        </script>
+    @endonce
+@endpush
