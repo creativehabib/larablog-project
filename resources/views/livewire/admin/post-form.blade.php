@@ -206,7 +206,7 @@
                     {{-- থাম্বনেইল সেকশন (মিডিয়া লাইব্রেরি টেমপ্লেট অনুযায়ী) --}}
                     @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
                         {{-- আপনার লাইভওয়্যার কম্পোনেন্টে $cover_image প্রপার্টি থাকতে হবে --}}
-                        <div class="form-group border p-2" x-data="{ imageUrl: @entangle('cover_image') }">
+                        <div class="form-group border p-2" x-data="{ imageUrl: @entangle('cover_image').live }">
                             <label class="d-block mb-1">Post Thumbnail</label>
 
                             {{-- এই ব্লকটি আপনার JS-এর 'window.selectingThumbnail = true' লজিকের সাথে মিলবে --}}
