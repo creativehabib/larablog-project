@@ -114,6 +114,11 @@
                     {{-- এই Livewire কম্পোনেন্টটি এখন Alpine শেলের সাথে সঠিকভাবে যোগাযোগ করবে --}}
                     <livewire:admin.media-library :select-mode="true" :select-event="'{{ $selectionEvent }}'" key="media-picker-{{ $componentId }}" />
                 </div>
+                <div class="modal-footer bg-white border-0 border-top">
+                    <button type="button" class="btn btn-outline-secondary" @click="closeModal()">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
