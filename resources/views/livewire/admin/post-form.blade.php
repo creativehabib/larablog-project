@@ -117,7 +117,7 @@
 
                             {{-- জাভাস্ক্রিপ্ট থেকে wire:model সেট করা হবে --}}
                             <div wire:ignore data-post-description-editor>
-                                {{-- ID টি "content" করা হয়েছে --}}
+                                {{-- ID টি "content" করা হয়েছে --}}
                                 <textarea id="content" class="form-control">{!! $description !!}</textarea>
                             </div>
 
@@ -199,13 +199,13 @@
                             <option value="{{ Post::CONTENT_TYPE_VIDEO }}">Video</option>
                         </select>
                         @error('content_type')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    {{-- থাম্বনেইল সেকশন (মিডিয়া লাইব্রেরি টেমপ্লেট অনুযায়ী) --}}
+                    {{-- থাম্বনেইল সেকশন (মিডিয়া লাইব্রেরি টেমপ্লেট অনুযায়ী) --}}
                     @if ($content_type === Post::CONTENT_TYPE_ARTICLE)
-                        {{-- আপনার লাইভওয়্যার কম্পোনেন্টে $cover_image প্রপার্টি থাকতে হবে --}}
+                        {{-- আপনার লাইভওয়্যার কম্পোনেন্টে $cover_image প্রপার্টি থাকতে হবে --}}
                         <div class="form-group border p-2" x-data="{ imageUrl: @entangle('cover_image') }">
                             <label class="d-block mb-1">Post Thumbnail</label>
 
@@ -220,8 +220,8 @@
                                 <p class="text-muted small mb-2">Current thumbnail:</p>
                                 <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;" />
 
-                                {{-- এই বাটনটি আপনার JS-এর '@this.set('cover_image', null)' লজিকের সাথে মিলবে --}}
-                                <button type="button" @click="imageUrl = null; @this.call('clearCoverImage')" class="btn btn-sm btn-outline-danger mt-2">
+                                {{-- এই বাটনটি আপনার JS-এর '$wire.clearCoverImage()' লজিকের সাথে মিলবে --}}
+                                <button type="button" @click="imageUrl = null; $wire.clearCoverImage()" class="btn btn-sm btn-outline-danger mt-2">
                                     Remove
                                 </button>
                             </div>
@@ -250,48 +250,51 @@
 
     </form>
 
-    {{-- মিডিয়া মডালটি এখানে কল করা হয়েছে --}}
+    {{-- মিডিয়া মডালটি এখানে কল করা হয়েছে --}}
     <x-media-modal />
 </div>
 
-{{-- জাভাস্ক্রিপ্ট (মিডিয়া লাইব্রেরি এবং CKEditor রিলোড লজিকসহ) --}}
+{{--
+==================================================================
+    জাভাস্ক্রিপ্ট সমাধান (সংশোধিত এবং সম্পূর্ণ)
+==================================================================
+--}}
 @pushOnce('scripts')
+    {{-- CKEditor সোর্স --}}
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
+
+    {{-- Livewire এবং CKEditor ইন্টিগ্রেশন (সংশোধিত) --}}
     <script>
-        {{-- আমরা 'livewire:init' ব্যবহার করছি --}}
         document.addEventListener('livewire:init', () => {
+
+            const componentId = '{{ $this->getId() }}';
+            const getComponent = () => {
+                if (typeof Livewire === 'undefined' || typeof Livewire.find !== 'function') {
+                    return null;
+                }
+                return Livewire.find(componentId);
+            };
 
             let editorInstance = null;
             let imageToReplace = null;
             let savedSelection = null;
-            window.selectingThumbnail = false;
+            window.selectingThumbnail = false; // গ্লোবাল ভেরিয়েবল
 
             const destroyEditor = () => {
-                // আমরা 'content' আইডি দিয়ে ইনস্ট্যান্স খুঁজবো
                 if (CKEDITOR.instances.content) {
                     try {
                         CKEDITOR.instances.content.destroy(true);
-                    } catch (e) {
-                        // console.warn('Error destroying CKEditor:', e);
-                    }
+                    } catch (e) { /* ইগনোর */ }
                 }
                 editorInstance = null;
             };
 
             const initializeEditor = () => {
                 const container = document.querySelector('[data-post-description-editor]');
-                if (!container) {
-                    // কন্টেইনার নেই (যেমন 'ভিডিও' মোড), তাই প্রস্থান করুন
-                    return;
-                }
+                if (!container) return; // 'ভিডিও' মোডে থাকলে কিছুই করবে না
 
-                // আমরা 'content' আইডি দিয়ে টেক্সটএরিয়া খুঁজবো
                 const textarea = container.querySelector('#content');
-
-                // যদি টেক্সটএরিয়া না থাকে বা এডিটর আগে থেকেই চালু থাকে, তবে প্রস্থান করুন
-                if (!textarea || CKEDITOR.instances.content) {
-                    return;
-                }
+                if (!textarea || CKEDITOR.instances.content) return; // যদি এডিটর আগে থেকেই চালু থাকে
 
                 if (typeof CKEDITOR === 'undefined') {
                     console.error('CKEditor 4 is not loaded.');
@@ -304,10 +307,7 @@
                     uiColor: '',
                     removePlugins: 'easyimage,cloudservices',
                     extraPlugins: 'mathjax,tableresize,wordcount,notification',
-                    wordcount: {
-                        showCharCount: true,
-                        showWordCount: true
-                    },
+                    wordcount: { showCharCount: true, showWordCount: true },
                     toolbar: [
                         {items: ['Undo', 'Redo']},
                         { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
@@ -323,10 +323,9 @@
                     ],
                     allowedContent: true,
                     extraAllowedContent: '*(*){*}',
-
                 });
 
-                // Template থেকে মিডিয়া লাইব্রেরির লজিক
+                // সিলেকশন সেভ করা
                 editorInstance.on('selectionChange', function () {
                     const selection = editorInstance.getSelection();
                     const ranges = selection ? selection.getRanges() : [];
@@ -335,14 +334,21 @@
                     }
                 });
 
+                //
+                // ================== মূল সমাধান (বাগ #২) ==================
+                //
+                // মডাল খোলার জন্য কাস্টম কমান্ড
                 editorInstance.addCommand('openMediaModal', {
                     exec: function () {
                         imageToReplace = null;
-                        window.selectingThumbnail = false; // নিশ্চিত করুন থাম্বনেইল সিলেক্ট হচ্ছে না
+                        // এই লাইনটিই মূল সমাধান।
+                        // এটি নিশ্চিত করে যে এডিটর থেকে ক্লিক করলে থাম্বনেইল সিলেক্ট হবে না।
+                        window.selectingThumbnail = false;
                         window.dispatchEvent(new CustomEvent('open-media-modal'));
                     }
                 });
 
+                // 'ImageManager' বাটন যোগ করা
                 editorInstance.ui.addButton('ImageManager', {
                     label: 'Image',
                     command: 'openMediaModal',
@@ -350,64 +356,110 @@
                     icon: 'image'
                 });
 
+                // ছবি রিপ্লেস করার জন্য ডাবল ক্লিক
                 editorInstance.on('doubleclick', function (evt) {
                     const element = evt.data.element;
                     if (element && element.is('img')) {
                         imageToReplace = element;
-                        window.selectingThumbnail = false; // নিশ্চিত করুন থাম্বনেইল সিলেক্ট হচ্ছে না
+                        // ডাবল ক্লিক করলেও থাম্বনেইল সিলেক্ট হবে না
+                        window.selectingThumbnail = false;
                         window.dispatchEvent(new CustomEvent('open-media-modal'));
                     }
                 });
+                // ================== সমাধান শেষ ==================
+                //
 
-                // ডেটা সিঙ্ক করার জন্য লিসেনার
+                // Livewire-এর সাথে ডেটা সিঙ্ক করা
                 editorInstance.on('change', function () {
-                    // Debounce ব্যবহার করা ভালো, কিন্তু @this.set() দ্রুত কাজ করে
-                @this.set('description', editorInstance.getData(), false);
+                    const component = getComponent();
+                    if (component) {
+                        component.set('description', editorInstance.getData());
+                    }
                 });
             };
 
-            // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
-            const imageSelectedHandler = (event) => {
-                if (window.selectingThumbnail) {
-                    // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
-                @this.call('setCoverImageFromLibrary', event.detail.path ?? null, event.detail.url ?? null);
-                    window.selectingThumbnail = false;
-                } else {
-                    // CKEditor-এ ছবি ইনসার্ট করুন
-                    const url = event.detail.url || event.detail.path;
-                    if (imageToReplace) {
-                        imageToReplace.setAttribute('src', url);
-                    } else {
-                        if (editorInstance) {
-                            editorInstance.focus();
-                            if (savedSelection) {
-                                editorInstance.getSelection().selectRanges([savedSelection]);
-                            }
-                            editorInstance.insertHtml('<img src="' + url + '" alt="" />');
-                        }
-                    }
-                    if (editorInstance) {
-                    @this.set('description', editorInstance.getData(), false);
-                    }
-                    imageToReplace = null;
-                    savedSelection = null;
+            // -----------------------------------------------------------------
+            // ইভেন্ট লিসেনার (এটি আপনার পাঠানো নোটিফিকেশন যোগ করবে)
+            // -----------------------------------------------------------------
+            const handleImageSelection = (event) => {
+                const component = getComponent();
+                if (!component) {
+                    console.error('POST-FORM: Livewire component not found.');
+                    alert('Error: Component not found. Image cannot be inserted.');
+                    return;
                 }
+
+                // ইভেন্ট থেকে 'detail' অবজেক্টটি বের করা
+                let detail = event.detail;
+                if (Array.isArray(detail) && detail.length > 0) {
+                    detail = detail[0]; // যদি Livewire ইভেন্ট অ্যারে হিসেবে আসে
+                }
+
+                if (typeof detail === 'string') {
+                    detail = { url: detail, path: detail }; // যদি শুধু URL স্ট্রিং আসে
+                }
+
+                if (typeof detail !== 'object' || detail === null) {
+                    // console.warn('POST-FORM: Invalid event detail received:', event.detail);
+                    // alert('Error: Invalid data received from media library.');
+                    // যদি কোনো detail না থাকে (যেমন Livewire ইভেন্ট), তাহলেও থামুন
+                    return;
+                }
+
+                const imageUrl = detail.url ?? detail.full_url ?? detail.path;
+                const imagePath = detail.path ?? detail.url;
+
+                if (!imageUrl) {
+                    console.error('POST-FORM: No URL found in event detail', detail);
+                    alert('Error: No URL found for the selected image.');
+                    return;
+                }
+
+                // --- URL ব্যবহার করুন ---
+
+                // ক) থাম্বনেইল সেট করুন
+                if (window.selectingThumbnail) {
+                    console.log('POST-FORM: Inserting as THUMBNAIL');
+                    component.call('setCoverImageFromLibrary', imagePath, imageUrl);
+                    window.selectingThumbnail = false; // ফ্ল্যাগ রিসেট করুন
+                    // alert('Thumbnail updated successfully!'); // নোটিফিকেশন
+                    return;
+                }
+
+                // খ) CKEditor-এ ছবি যুক্ত করুন
+                console.log('POST-FORM: Inserting into CKEDITOR');
+                if (imageToReplace) {
+                    imageToReplace.setAttribute('src', imageUrl);
+                } else if (editorInstance) {
+                    editorInstance.focus();
+                    if (savedSelection) editorInstance.getSelection().selectRanges([savedSelection]);
+                    editorInstance.insertHtml('<img src="' + imageUrl + '" alt="" />');
+                }
+
+                // গ) এডিটরের ডেটা লাইভওয়্যারের সাথে সিঙ্ক করুন
+                if (editorInstance) {
+                    component.set('description', editorInstance.getData());
+                }
+
+                // alert('Image inserted into description successfully!'); // নোটিফিকেশন
+
+                // ঘ) অবস্থা রিসেট করুন
+                imageToReplace = null;
+                savedSelection = null;
             };
 
-            // ইভেন্ট লিসেনারটি একবারই যোগ করুন
-            window.removeEventListener('image-selected', imageSelectedHandler);
-            window.addEventListener('image-selected', imageSelectedHandler);
+            // --- ব্রাউজার ইভেন্ট লিসেনার ---
+            // এটি 'image-selected-browser' নামের নতুন ইভেন্ট শুনবে
+            window.removeEventListener('image-selected-browser', handleImageSelection);
+            window.addEventListener('image-selected-browser', handleImageSelection);
 
 
-            // লাইভওয়্যার যখন DOM আপডেট করে (যেমন Post Type পরিবর্তন করলে)
+            // --- Livewire লাইফসাইকেল হুক ---
             Livewire.hook('message.processed', () => {
-                // পুরানো এডিটর থাকলে তা ধ্বংস করুন
                 destroyEditor();
-                // নতুন এডিটর চালু করার চেষ্টা করুন (যদি 'Article' মোড চালু হয়)
                 initializeEditor();
             });
 
-            // লাইভওয়্যার যখন DOM থেকে এলিমেন্ট সরায়
             Livewire.hook('element.removed', () => {
                 destroyEditor();
             });

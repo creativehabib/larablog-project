@@ -1,3 +1,8 @@
+{{--
+==================================================================
+    media-modal.blade.php (চূড়ান্ত সমাধান, ডিবাগিং লগ সহ)
+==================================================================
+--}}
 @props([
     'id' => 'media-library-modal',
     'selectEvent' => 'image-selected',
@@ -8,8 +13,56 @@
     $selectionEvent = $selectEvent ?: 'image-selected';
 @endphp
 
+{{--
+============================================================
+    মূল সমাধান: Livewire ইভেন্টটি শুনুন এবং কনসোলে লগ করুন
+============================================================
+--}}
 <div x-data="mediaPickerModal('{{ $componentId }}')"
      x-on:keydown.escape.window="if (show) closeModal()"
+
+     {{--
+        এই কোডটি Livewire-এর পাঠানো যেকোনো ইভেন্ট ধরবে।
+        এটি 'livewire:dispatch' নামক একটি ব্রাউজার ইভেন্ট শোনে।
+     --}}
+     x-on:livewire:dispatch.window="
+        console.log('Livewire ইভেন্ট পাওয়া গেছে:', $event.detail); // ধাপ ১: ইভেন্টটি কনসোলে দেখুন
+
+        // ধাপ ২: এটি কি আমাদের কাঙ্ক্ষিত 'image-selected' ইভেন্ট?
+        if ($event.detail.event === '{{ $selectionEvent }}') {
+
+            console.log('ইভেন্টটি মিলেছে! ({{ $selectionEvent }})');
+
+            // ধাপ ৩: ইভেন্ট থেকে ডেটা (payload) বের করুন
+            let payload = $event.detail.data[0] || $event.detail.data || $event.detail;
+            console.log('পাওয়া ডেটা (Payload):', payload);
+
+            let detailUrl = null;
+            let detailPath = null;
+
+            if (typeof payload === 'string') {
+                detailUrl = payload;
+                detailPath = payload;
+            } else if (typeof payload === 'object' && payload !== null) {
+                detailUrl = payload.url ?? payload.path;
+                detailPath = payload.path ?? payload.url;
+            }
+
+            // ধাপ ৪: একটি নতুন ব্রাউজার ইভেন্ট ফায়ার করুন (যাতে post-form এটি শুনতে পায়)
+            if (detailUrl) {
+                console.log('ব্রাউজার ইভেন্ট ফায়ার করা হচ্ছে URL সহ:', detailUrl);
+                window.dispatchEvent(new CustomEvent('image-selected', {
+                    detail: {
+                        url: detailUrl,
+                        path: detailPath
+                    }
+                }));
+                closeModal(); // মডালটি বন্ধ করুন
+            } else {
+                console.error('Livewire ইভেন্ট থেকে URL বের করা যায়নি।');
+            }
+        }
+     "
      x-cloak>
     <div class="modal fade"
          :class="{ 'show d-block': show }"
@@ -25,6 +78,7 @@
                     <button type="button" class="btn-close" aria-label="Close" @click="closeModal()"></button>
                 </div>
                 <div class="modal-body p-0 bg-light">
+                    {{-- এই Livewire কম্পোনেন্টটি এখন Alpine শেলের সাথে সঠিকভাবে যোগাযোগ করবে --}}
                     <livewire:admin.media-library :select-mode="true" :select-event="'{{ $selectionEvent }}'" key="media-picker-{{ $componentId }}" />
                 </div>
             </div>
@@ -51,9 +105,10 @@
                         this.openModal();
                     });
 
-                    window.addEventListener('mediaPickerClosed', () => {
-                        this.closeModal();
-                    });
+                    // এটি আর দরকার নেই, কারণ উপরের 'x-on' ইভেন্টটিই মডাল বন্ধ করবে
+                    // window.addEventListener('mediaPickerClosed', () => {
+                    //     this.closeModal();
+                    // });
                 },
                 openModal() {
                     this.show = true;
