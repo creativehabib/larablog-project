@@ -256,10 +256,13 @@ class MediaLibrary extends Component
         }
 
         $this->selectedMediaId = $media->id;
+        $resolvedUrl = $this->resolveUrl($media);
+
         $this->selectedMediaDetails = [
             'id' => $media->id,
             'name' => $media->displayName(),
-            'url' => $this->resolveUrl($media),
+            'url' => $resolvedUrl,
+            'full_url' => $resolvedUrl,
             'path' => $media->path,
             'type' => $media->type,
             'mime_type' => $media->mime_type,
@@ -291,17 +294,29 @@ class MediaLibrary extends Component
                 return;
             }
 
+            $resolvedUrl = $this->resolveUrl($media);
+
             $details = [
                 'id' => $media->id,
                 'name' => $media->displayName(),
-                'url' => $this->resolveUrl($media),
+                'url' => $resolvedUrl,
+                'full_url' => $resolvedUrl,
                 'path' => $media->path,
                 'type' => $media->type,
                 'mime_type' => $media->mime_type,
             ];
         }
 
-        $this->dispatch($this->selectEvent, id: $details['id'] ?? null, url: $details['url'] ?? null, path: $details['path'] ?? null, type: $details['type'] ?? null, name: $details['name'] ?? null, mimeType: $details['mime_type'] ?? null);
+        $this->dispatch(
+            $this->selectEvent,
+            id: $details['id'] ?? null,
+            url: $details['url'] ?? null,
+            full_url: $details['full_url'] ?? null,
+            path: $details['path'] ?? null,
+            type: $details['type'] ?? null,
+            name: $details['name'] ?? null,
+            mimeType: $details['mime_type'] ?? null
+        );
         $this->dispatch('mediaPickerClosed');
         $this->clearSelection();
     }

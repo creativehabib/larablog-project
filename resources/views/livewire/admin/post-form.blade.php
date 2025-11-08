@@ -379,39 +379,87 @@
             };
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
+            const MEDIA_DETAIL_KEYS = ['id', 'url', 'full_url', 'fullUrl', 'path', 'name', 'mimeType', 'mime_type'];
+
             const extractSelectionPayload = (payload) => {
                 if (!payload) {
-                    return {};
+                    return null;
                 }
 
                 if (payload instanceof CustomEvent) {
                     return extractSelectionPayload(payload.detail);
                 }
 
-                if (payload.detail !== undefined && payload !== payload.detail) {
-                    return extractSelectionPayload(payload.detail);
-                }
-
-                if (payload.params !== undefined) {
-                    return extractSelectionPayload(payload.params);
-                }
-
                 if (Array.isArray(payload)) {
-                    if (payload.length === 0) {
-                        return {};
+                    for (const item of payload) {
+                        const result = extractSelectionPayload(item);
+                        if (result) {
+                            return result;
+                        }
                     }
 
-                    return payload.reduce((accumulator, item) => ({
-                        ...accumulator,
-                        ...extractSelectionPayload(item),
-                    }), {});
+                    return null;
                 }
 
                 if (typeof payload === 'object') {
-                    return payload;
+                    // Livewire dispatches often wrap the useful payload inside params/detail
+                    if (payload.detail && payload !== payload.detail) {
+                        const nested = extractSelectionPayload(payload.detail);
+                        if (nested) {
+                            return nested;
+                        }
+                    }
+
+                    if (payload.params) {
+                        const nested = extractSelectionPayload(payload.params);
+                        if (nested) {
+                            return nested;
+                        }
+                    }
+
+                    // Some integrations send the media info inside a named key (e.g. { media: {...} })
+                    for (const key of Object.keys(payload)) {
+                        if (MEDIA_DETAIL_KEYS.includes(key) && payload[key] !== undefined) {
+                            return payload;
+                        }
+
+                        const value = payload[key];
+                        if (value && typeof value === 'object') {
+                            const nested = extractSelectionPayload(value);
+                            if (nested) {
+                                return nested;
+                            }
+                        }
+                    }
+
+                    return null;
                 }
 
-                return {};
+                return null;
+            };
+
+            const resolveMediaUrl = (detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return null;
+                }
+
+                if (detail.url) {
+                    return detail.url;
+                }
+
+                if (detail.full_url) {
+                    return detail.full_url;
+                }
+
+                if (detail.fullUrl) {
+                    return detail.fullUrl;
+                }
+
+                if (detail.path) {
+                    return detail.path;
+                }
+
+                return null;
             };
 
             const hasMediaDetail = (detail) => {
@@ -454,6 +502,12 @@
                     return;
                 }
 
+                const finalize = () => {
+                    window.selectingThumbnail = false;
+                    imageToReplace = null;
+                    savedSelection = null;
+                };
+
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
                     const component = getComponent();
@@ -464,12 +518,13 @@
                             detail.url ?? detail.full_url ?? detail.fullUrl ?? null
                         );
                     }
-                    window.selectingThumbnail = false;
+                    finalize();
                     return;
                 }
 
                 const url = resolveMediaUrl(detail);
                 if (!url) {
+                    finalize();
                     return;
                 }
 
@@ -490,8 +545,7 @@
                     }
                 }
 
-                imageToReplace = null;
-                savedSelection = null;
+                finalize();
             };
 
             const browserImageSelectedHandler = (event) => {
