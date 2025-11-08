@@ -414,10 +414,43 @@
                 return {};
             };
 
+            const hasMediaDetail = (detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return false;
+                }
+
+                const urlKeys = ['url', 'full_url', 'fullUrl', 'path'];
+                return urlKeys.some((key) => key in detail && detail[key]);
+            };
+
+            const resolveMediaUrl = (detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return null;
+                }
+
+                if (detail.url) {
+                    return detail.url;
+                }
+
+                if (detail.full_url) {
+                    return detail.full_url;
+                }
+
+                if (detail.fullUrl) {
+                    return detail.fullUrl;
+                }
+
+                if (detail.path) {
+                    return detail.path;
+                }
+
+                return null;
+            };
+
             const handleImageSelection = (payload) => {
                 const detail = extractSelectionPayload(payload);
 
-                if (!detail || Object.keys(detail).length === 0) {
+                if (!hasMediaDetail(detail)) {
                     return;
                 }
 
@@ -425,13 +458,17 @@
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
                     const component = getComponent();
                     if (component) {
-                        component.call('setCoverImageFromLibrary', detail.path ?? null, detail.url ?? null);
+                        component.call(
+                            'setCoverImageFromLibrary',
+                            detail.path ?? null,
+                            detail.url ?? detail.full_url ?? detail.fullUrl ?? null
+                        );
                     }
                     window.selectingThumbnail = false;
                     return;
                 }
 
-                const url = detail.url || detail.full_url || detail.fullUrl || detail.path;
+                const url = resolveMediaUrl(detail);
                 if (!url) {
                     return;
                 }
@@ -458,7 +495,8 @@
             };
 
             const browserImageSelectedHandler = (event) => {
-                handleImageSelection(event?.detail ?? event);
+                const payload = event?.detail ?? event;
+                handleImageSelection(payload);
             };
 
             window.removeEventListener('image-selected', browserImageSelectedHandler);
