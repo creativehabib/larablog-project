@@ -34,8 +34,25 @@
             console.log('ইভেন্টটি মিলেছে! ({{ $selectionEvent }})');
 
             // ধাপ ৩: ইভেন্ট থেকে ডেটা (payload) বের করুন
-            let payload = $event.detail.data[0] || $event.detail.data || $event.detail;
+            let payload = null;
+
+            if (Array.isArray($event.detail?.data) && $event.detail.data.length > 0) {
+                payload = $event.detail.data[0];
+            } else if ($event.detail?.data) {
+                payload = $event.detail.data;
+            } else if (Array.isArray($event.detail?.params) && $event.detail.params.length > 0) {
+                payload = $event.detail.params[0];
+            } else if ($event.detail?.params) {
+                payload = $event.detail.params;
+            } else {
+                payload = $event.detail;
+            }
+
             console.log('পাওয়া ডেটা (Payload):', payload);
+
+            if (Array.isArray(payload) && payload.length > 0) {
+                payload = payload[0];
+            }
 
             let detailData = {};
 
