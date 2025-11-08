@@ -37,25 +37,41 @@
             let payload = $event.detail.data[0] || $event.detail.data || $event.detail;
             console.log('পাওয়া ডেটা (Payload):', payload);
 
-            let detailUrl = null;
-            let detailPath = null;
+            let detailData = {};
 
             if (typeof payload === 'string') {
-                detailUrl = payload;
-                detailPath = payload;
+                detailData = {
+                    url: payload,
+                    path: payload,
+                };
             } else if (typeof payload === 'object' && payload !== null) {
-                detailUrl = payload.url ?? payload.path;
-                detailPath = payload.path ?? payload.url;
+                detailData = {
+                    ...payload,
+                };
+
+                const resolvedUrl = detailData.url ?? detailData.full_url ?? detailData.path ?? null;
+                const resolvedPath = detailData.path ?? resolvedUrl;
+
+                if (resolvedUrl) {
+                    detailData.url = resolvedUrl;
+                }
+
+                if (resolvedPath) {
+                    detailData.path = resolvedPath;
+                }
             }
+
+            const detailUrl = detailData.url ?? null;
 
             // ধাপ ৪: একটি নতুন ব্রাউজার ইভেন্ট ফায়ার করুন (যাতে post-form এটি শুনতে পায়)
             if (detailUrl) {
                 console.log('ব্রাউজার ইভেন্ট ফায়ার করা হচ্ছে URL সহ:', detailUrl);
+                window.dispatchEvent(new CustomEvent('image-selected-browser', {
+                    detail: detailData,
+                }));
+                // আগের লজিকের সাথে সামঞ্জস্য রাখতে পুরনো ইভেন্ট নামটিও পাঠানো হচ্ছে
                 window.dispatchEvent(new CustomEvent('image-selected', {
-                    detail: {
-                        url: detailUrl,
-                        path: detailPath
-                    }
+                    detail: detailData,
                 }));
                 closeModal(); // মডালটি বন্ধ করুন
             } else {
