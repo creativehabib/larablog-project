@@ -220,8 +220,8 @@
                                 <p class="text-muted small mb-2">Current thumbnail:</p>
                                 <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;" />
 
-                                {{-- এই বাটনটি আপনার JS-এর '$wire.clearCoverImage()' লজিকের সাথে মিলবে --}}
-                                <button type="button" @click="imageUrl = null; $wire.clearCoverImage()" class="btn btn-sm btn-outline-danger mt-2">
+                                {{-- এই বাটনটি আপনার JS-এর '@this.set('cover_image', null)' লজিকের সাথে মিলবে --}}
+                                <button type="button" @click="imageUrl = null; @this.call('clearCoverImage')" class="btn btn-sm btn-outline-danger mt-2">
                                     Remove
                                 </button>
                             </div>
@@ -260,15 +260,6 @@
     <script>
         {{-- আমরা 'livewire:init' ব্যবহার করছি --}}
         document.addEventListener('livewire:init', () => {
-
-            const componentId = '{{ $this->getId() }}';
-            const getComponent = () => {
-                if (typeof Livewire === 'undefined' || typeof Livewire.find !== 'function') {
-                    return null;
-                }
-
-                return Livewire.find(componentId);
-            };
 
             let editorInstance = null;
             let imageToReplace = null;
@@ -370,209 +361,42 @@
 
                 // ডেটা সিঙ্ক করার জন্য লিসেনার
                 editorInstance.on('change', function () {
-                    // Debounce ব্যবহার করা ভালো, কিন্তু দ্রুত আপডেটের জন্য সরাসরি Livewire প্রোপার্টি সেট করা হচ্ছে
-                    const component = getComponent();
-                    if (component) {
-                        component.set('description', editorInstance.getData());
-                    }
+                    // Debounce ব্যবহার করা ভালো, কিন্তু @this.set() দ্রুত কাজ করে
+                @this.set('description', editorInstance.getData(), false);
                 });
             };
 
             // Template থেকে 'image-selected' ইভেন্ট হ্যান্ডলার
-            const MEDIA_DETAIL_KEYS = ['id', 'url', 'full_url', 'fullUrl', 'path', 'name', 'mimeType', 'mime_type'];
-
-            const extractSelectionPayload = (payload) => {
-                if (!payload) {
-                    return null;
-                }
-
-                if (payload instanceof CustomEvent) {
-                    return extractSelectionPayload(payload.detail);
-                }
-
-                if (Array.isArray(payload)) {
-                    for (const item of payload) {
-                        const result = extractSelectionPayload(item);
-                        if (result) {
-                            return result;
-                        }
-                    }
-
-                    return null;
-                }
-
-                if (typeof payload === 'object') {
-                    // Livewire dispatches often wrap the useful payload inside params/detail
-                    if (payload.detail && payload !== payload.detail) {
-                        const nested = extractSelectionPayload(payload.detail);
-                        if (nested) {
-                            return nested;
-                        }
-                    }
-
-                    if (payload.params) {
-                        const nested = extractSelectionPayload(payload.params);
-                        if (nested) {
-                            return nested;
-                        }
-                    }
-
-                    // Some integrations send the media info inside a named key (e.g. { media: {...} })
-                    for (const key of Object.keys(payload)) {
-                        if (MEDIA_DETAIL_KEYS.includes(key) && payload[key] !== undefined) {
-                            return payload;
-                        }
-
-                        const value = payload[key];
-                        if (value && typeof value === 'object') {
-                            const nested = extractSelectionPayload(value);
-                            if (nested) {
-                                return nested;
-                            }
-                        }
-                    }
-
-                    return null;
-                }
-
-                return null;
-            };
-
-            const resolveMediaUrl = (detail) => {
-                if (!detail || typeof detail !== 'object') {
-                    return null;
-                }
-
-                if (detail.url) {
-                    return detail.url;
-                }
-
-                if (detail.full_url) {
-                    return detail.full_url;
-                }
-
-                if (detail.fullUrl) {
-                    return detail.fullUrl;
-                }
-
-                if (detail.path) {
-                    return detail.path;
-                }
-
-                return null;
-            };
-
-            const hasMediaDetail = (detail) => {
-                if (!detail || typeof detail !== 'object') {
-                    return false;
-                }
-
-                const urlKeys = ['url', 'full_url', 'fullUrl', 'path'];
-                return urlKeys.some((key) => key in detail && detail[key]);
-            };
-
-            const resolveMediaUrl = (detail) => {
-                if (!detail || typeof detail !== 'object') {
-                    return null;
-                }
-
-                if (detail.url) {
-                    return detail.url;
-                }
-
-                if (detail.full_url) {
-                    return detail.full_url;
-                }
-
-                if (detail.fullUrl) {
-                    return detail.fullUrl;
-                }
-
-                if (detail.path) {
-                    return detail.path;
-                }
-
-                return null;
-            };
-
-            const handleImageSelection = (payload) => {
-                const detail = extractSelectionPayload(payload);
-
-                if (!hasMediaDetail(detail)) {
-                    return;
-                }
-
-                const finalize = () => {
-                    window.selectingThumbnail = false;
-                    imageToReplace = null;
-                    savedSelection = null;
-                };
-
+            const imageSelectedHandler = (event) => {
                 if (window.selectingThumbnail) {
                     // থাম্বনেইল সেট করুন (HTML-এ @entangle('cover_image') ব্যবহার করা হয়েছে)
-                    const component = getComponent();
-                    if (component) {
-                        component.call(
-                            'setCoverImageFromLibrary',
-                            detail.path ?? null,
-                            detail.url ?? detail.full_url ?? detail.fullUrl ?? null
-                        );
+                @this.call('setCoverImageFromLibrary', event.detail.path ?? null, event.detail.url ?? null);
+                    window.selectingThumbnail = false;
+                } else {
+                    // CKEditor-এ ছবি ইনসার্ট করুন
+                    const url = event.detail.url || event.detail.path;
+                    if (imageToReplace) {
+                        imageToReplace.setAttribute('src', url);
+                    } else {
+                        if (editorInstance) {
+                            editorInstance.focus();
+                            if (savedSelection) {
+                                editorInstance.getSelection().selectRanges([savedSelection]);
+                            }
+                            editorInstance.insertHtml('<img src="' + url + '" alt="" />');
+                        }
                     }
-                    finalize();
-                    return;
-                }
-
-                const url = resolveMediaUrl(detail);
-                if (!url) {
-                    finalize();
-                    return;
-                }
-
-                if (imageToReplace) {
-                    imageToReplace.setAttribute('src', url);
-                } else if (editorInstance) {
-                    editorInstance.focus();
-                    if (savedSelection) {
-                        editorInstance.getSelection().selectRanges([savedSelection]);
+                    if (editorInstance) {
+                    @this.set('description', editorInstance.getData(), false);
                     }
-                    editorInstance.insertHtml('<img src="' + url + '" alt="" />');
+                    imageToReplace = null;
+                    savedSelection = null;
                 }
-
-                if (editorInstance) {
-                    const component = getComponent();
-                    if (component) {
-                        component.set('description', editorInstance.getData());
-                    }
-                }
-
-                finalize();
             };
 
-            const browserImageSelectedHandler = (event) => {
-                const payload = event?.detail ?? event;
-                handleImageSelection(payload);
-            };
-
-            window.removeEventListener('image-selected', browserImageSelectedHandler);
-            window.addEventListener('image-selected', browserImageSelectedHandler);
-
-            document.removeEventListener('image-selected', browserImageSelectedHandler);
-            document.addEventListener('image-selected', browserImageSelectedHandler);
-
-            if (typeof Livewire !== 'undefined' && typeof Livewire.on === 'function') {
-                Livewire.on('image-selected', (...args) => {
-                    if (!args || args.length === 0) {
-                        return;
-                    }
-
-                    if (args.length === 1) {
-                        handleImageSelection(args[0]);
-                        return;
-                    }
-
-                    handleImageSelection(args);
-                });
-            }
+            // ইভেন্ট লিসেনারটি একবারই যোগ করুন
+            window.removeEventListener('image-selected', imageSelectedHandler);
+            window.addEventListener('image-selected', imageSelectedHandler);
 
 
             // লাইভওয়্যার যখন DOM আপডেট করে (যেমন Post Type পরিবর্তন করলে)
