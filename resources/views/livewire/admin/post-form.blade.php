@@ -462,10 +462,43 @@
                 return null;
             };
 
+            const hasMediaDetail = (detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return false;
+                }
+
+                const urlKeys = ['url', 'full_url', 'fullUrl', 'path'];
+                return urlKeys.some((key) => key in detail && detail[key]);
+            };
+
+            const resolveMediaUrl = (detail) => {
+                if (!detail || typeof detail !== 'object') {
+                    return null;
+                }
+
+                if (detail.url) {
+                    return detail.url;
+                }
+
+                if (detail.full_url) {
+                    return detail.full_url;
+                }
+
+                if (detail.fullUrl) {
+                    return detail.fullUrl;
+                }
+
+                if (detail.path) {
+                    return detail.path;
+                }
+
+                return null;
+            };
+
             const handleImageSelection = (payload) => {
                 const detail = extractSelectionPayload(payload);
 
-                if (!detail) {
+                if (!hasMediaDetail(detail)) {
                     return;
                 }
 
