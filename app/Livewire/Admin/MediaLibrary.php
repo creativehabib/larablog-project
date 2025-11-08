@@ -307,16 +307,11 @@ class MediaLibrary extends Component
             ];
         }
 
-        $this->dispatch(
-            $this->selectEvent,
-            id: $details['id'] ?? null,
-            url: $details['url'] ?? null,
-            full_url: $details['full_url'] ?? null,
-            path: $details['path'] ?? null,
-            type: $details['type'] ?? null,
-            name: $details['name'] ?? null,
-            mimeType: $details['mime_type'] ?? null
-        );
+        if (! isset($details['mimeType']) && isset($details['mime_type'])) {
+            $details['mimeType'] = $details['mime_type'];
+        }
+
+        $this->dispatch($this->selectEvent, $details);
         $this->dispatch('mediaPickerClosed');
         $this->clearSelection();
     }
