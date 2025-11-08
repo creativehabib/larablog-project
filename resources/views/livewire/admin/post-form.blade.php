@@ -382,7 +382,40 @@
             // -----------------------------------------------------------------
             // ইভেন্ট লিসেনার (এটি আপনার পাঠানো নোটিফিকেশন যোগ করবে)
             // -----------------------------------------------------------------
-            const handleImageSelection = (event) => {
+            const normalizeMediaDetail = (detail) => {
+                let payload = detail;
+
+                if (Array.isArray(payload) && payload.length > 0) {
+                    payload = payload[0];
+                }
+
+                if (typeof payload === 'string') {
+                    return {
+                        url: payload,
+                        path: payload,
+                    };
+                }
+
+                if (typeof payload === 'object' && payload !== null) {
+                    const resolvedUrl = payload.url ?? payload.full_url ?? payload.path ?? null;
+                    const resolvedPath = payload.path ?? resolvedUrl ?? null;
+
+                    return {
+                        ...payload,
+                        ...(resolvedUrl ? { url: resolvedUrl } : {}),
+                        ...(resolvedPath ? { path: resolvedPath } : {}),
+                    };
+                }
+
+                return null;
+            };
+
+            const processImageSelection = (detail) => {
+                const normalizedDetail = normalizeMediaDetail(detail);
+                if (!normalizedDetail) {
+                    return;
+                }
+
                 const component = getComponent();
                 if (!component) {
                     console.error('POST-FORM: Livewire component not found.');
@@ -390,44 +423,22 @@
                     return;
                 }
 
-                // ইভেন্ট থেকে 'detail' অবজেক্টটি বের করা
-                let detail = event.detail;
-                if (Array.isArray(detail) && detail.length > 0) {
-                    detail = detail[0]; // যদি Livewire ইভেন্ট অ্যারে হিসেবে আসে
-                }
-
-                if (typeof detail === 'string') {
-                    detail = { url: detail, path: detail }; // যদি শুধু URL স্ট্রিং আসে
-                }
-
-                if (typeof detail !== 'object' || detail === null) {
-                    // console.warn('POST-FORM: Invalid event detail received:', event.detail);
-                    // alert('Error: Invalid data received from media library.');
-                    // যদি কোনো detail না থাকে (যেমন Livewire ইভেন্ট), তাহলেও থামুন
-                    return;
-                }
-
-                const imageUrl = detail.url ?? detail.full_url ?? detail.path;
-                const imagePath = detail.path ?? detail.url;
+                const imageUrl = normalizedDetail.url ?? normalizedDetail.full_url ?? normalizedDetail.path;
+                const imagePath = normalizedDetail.path ?? normalizedDetail.url ?? normalizedDetail.full_url;
 
                 if (!imageUrl) {
-                    console.error('POST-FORM: No URL found in event detail', detail);
+                    console.error('POST-FORM: No URL found in event detail', normalizedDetail);
                     alert('Error: No URL found for the selected image.');
                     return;
                 }
 
-                // --- URL ব্যবহার করুন ---
-
-                // ক) থাম্বনেইল সেট করুন
                 if (window.selectingThumbnail) {
                     console.log('POST-FORM: Inserting as THUMBNAIL');
                     component.call('setCoverImageFromLibrary', imagePath, imageUrl);
-                    window.selectingThumbnail = false; // ফ্ল্যাগ রিসেট করুন
-                    // alert('Thumbnail updated successfully!'); // নোটিফিকেশন
+                    window.selectingThumbnail = false;
                     return;
                 }
 
-                // খ) CKEditor-এ ছবি যুক্ত করুন
                 console.log('POST-FORM: Inserting into CKEDITOR');
                 if (imageToReplace) {
                     imageToReplace.setAttribute('src', imageUrl);
@@ -437,22 +448,25 @@
                     editorInstance.insertHtml('<img src="' + imageUrl + '" alt="" />');
                 }
 
-                // গ) এডিটরের ডেটা লাইভওয়্যারের সাথে সিঙ্ক করুন
                 if (editorInstance) {
                     component.set('description', editorInstance.getData());
                 }
 
-                // alert('Image inserted into description successfully!'); // নোটিফিকেশন
-
-                // ঘ) অবস্থা রিসেট করুন
                 imageToReplace = null;
                 savedSelection = null;
             };
 
-            // --- ব্রাউজার ইভেন্ট লিসেনার ---
-            // এটি 'image-selected-browser' নামের নতুন ইভেন্ট শুনবে
-            window.removeEventListener('image-selected-browser', handleImageSelection);
-            window.addEventListener('image-selected-browser', handleImageSelection);
+            const handleBrowserImageSelection = (event) => {
+                processImageSelection(event.detail);
+            };
+
+            window.removeEventListener('image-selected-browser', handleBrowserImageSelection);
+            window.addEventListener('image-selected-browser', handleBrowserImageSelection);
+
+            Livewire.on('image-selected', (...args) => {
+                const payload = args.length <= 1 ? args[0] ?? null : args;
+                processImageSelection(payload);
+            });
 
 
             // --- Livewire লাইফসাইকেল হুক ---
