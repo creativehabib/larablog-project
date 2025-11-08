@@ -311,6 +311,8 @@ class MediaLibrary extends Component
             $details['mimeType'] = $details['mime_type'];
         }
 
+        $details['__eventToken'] = $details['__eventToken'] ?? (string) Str::uuid();
+
         $this->dispatch($this->selectEvent, $details);
         $this->dispatch('mediaPickerClosed');
         $this->clearSelection();

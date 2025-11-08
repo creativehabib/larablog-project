@@ -22,79 +22,61 @@
      x-on:keydown.escape.window="if (show) closeModal()"
 
      {{--
-        এই কোডটি Livewire-এর পাঠানো যেকোনো ইভেন্ট ধরবে।
-        এটি 'livewire:dispatch' নামক একটি ব্রাউজার ইভেন্ট শোনে।
+        Livewire যখন নির্বাচিত মিডিয়ার ইভেন্ট পাঠায়, তখন সেটিকে সরাসরি শুনে ফেলুন।
+        ইভেন্টের নাম কনফিগারযোগ্য হওয়ায় ডাইনামিক্যালি বাইন্ড করা হচ্ছে।
      --}}
-     x-on:livewire:dispatch.window="
-        console.log('Livewire ইভেন্ট পাওয়া গেছে:', $event.detail); // ধাপ ১: ইভেন্টটি কনসোলে দেখুন
+     x-on:{{ $selectionEvent }}.window="
+        if ($event?.detail?.__dispatchedFrom === 'media-picker-browser') {
+            return;
+        }
 
-        // ধাপ ২: এটি কি আমাদের কাঙ্ক্ষিত 'image-selected' ইভেন্ট?
-        if ($event.detail.event === '{{ $selectionEvent }}') {
+        console.log('Livewire ইভেন্ট পাওয়া গেছে:', $event.detail);
 
-            console.log('ইভেন্টটি মিলেছে! ({{ $selectionEvent }})');
+        let payload = Array.isArray($event.detail) && $event.detail.length > 0
+            ? $event.detail[0]
+            : $event.detail;
 
-            // ধাপ ৩: ইভেন্ট থেকে ডেটা (payload) বের করুন
-            let payload = null;
+        console.log('পাওয়া ডেটা (Payload):', payload);
 
-            if (Array.isArray($event.detail?.data) && $event.detail.data.length > 0) {
-                payload = $event.detail.data[0];
-            } else if ($event.detail?.data) {
-                payload = $event.detail.data;
-            } else if (Array.isArray($event.detail?.params) && $event.detail.params.length > 0) {
-                payload = $event.detail.params[0];
-            } else if ($event.detail?.params) {
-                payload = $event.detail.params;
-            } else {
-                payload = $event.detail;
+        let detailData = {};
+
+        if (typeof payload === 'string') {
+            detailData = {
+                url: payload,
+                path: payload,
+            };
+        } else if (typeof payload === 'object' && payload !== null) {
+            detailData = {
+                ...payload,
+            };
+
+            const resolvedUrl = detailData.url ?? detailData.full_url ?? detailData.path ?? null;
+            const resolvedPath = detailData.path ?? resolvedUrl ?? null;
+
+            if (resolvedUrl) {
+                detailData.url = resolvedUrl;
             }
 
-            console.log('পাওয়া ডেটা (Payload):', payload);
-
-            if (Array.isArray(payload) && payload.length > 0) {
-                payload = payload[0];
-            }
-
-            let detailData = {};
-
-            if (typeof payload === 'string') {
-                detailData = {
-                    url: payload,
-                    path: payload,
-                };
-            } else if (typeof payload === 'object' && payload !== null) {
-                detailData = {
-                    ...payload,
-                };
-
-                const resolvedUrl = detailData.url ?? detailData.full_url ?? detailData.path ?? null;
-                const resolvedPath = detailData.path ?? resolvedUrl;
-
-                if (resolvedUrl) {
-                    detailData.url = resolvedUrl;
-                }
-
-                if (resolvedPath) {
-                    detailData.path = resolvedPath;
-                }
-            }
-
-            const detailUrl = detailData.url ?? null;
-
-            // ধাপ ৪: একটি নতুন ব্রাউজার ইভেন্ট ফায়ার করুন (যাতে post-form এটি শুনতে পায়)
-            if (detailUrl) {
-                console.log('ব্রাউজার ইভেন্ট ফায়ার করা হচ্ছে URL সহ:', detailUrl);
-                window.dispatchEvent(new CustomEvent('image-selected-browser', {
-                    detail: detailData,
-                }));
-                // আগের লজিকের সাথে সামঞ্জস্য রাখতে পুরনো ইভেন্ট নামটিও পাঠানো হচ্ছে
-                window.dispatchEvent(new CustomEvent('image-selected', {
-                    detail: detailData,
-                }));
-                closeModal(); // মডালটি বন্ধ করুন
-            } else {
-                console.error('Livewire ইভেন্ট থেকে URL বের করা যায়নি।');
+            if (resolvedPath) {
+                detailData.path = resolvedPath;
             }
         }
+
+        const detailUrl = detailData.url ?? null;
+
+        if (!detailUrl) {
+            console.error('Livewire ইভেন্ট থেকে URL বের করা যায়নি।');
+            return;
+        }
+
+        detailData.__dispatchedFrom = 'media-picker-browser';
+
+        console.log('ব্রাউজার ইভেন্ট ফায়ার করা হচ্ছে URL সহ:', detailUrl);
+        window.dispatchEvent(new CustomEvent('image-selected-browser', {
+            detail: detailData,
+        }));
+
+        closeModal();
      "
      x-cloak>
     <div class="modal fade"

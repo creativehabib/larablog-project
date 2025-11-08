@@ -279,6 +279,7 @@
             let editorInstance = null;
             let imageToReplace = null;
             let savedSelection = null;
+            let lastProcessedEventToken = null;
             window.selectingThumbnail = false; // গ্লোবাল ভেরিয়েবল
 
             const destroyEditor = () => {
@@ -414,6 +415,15 @@
                 const normalizedDetail = normalizeMediaDetail(detail);
                 if (!normalizedDetail) {
                     return;
+                }
+
+                const eventToken = normalizedDetail.__eventToken ?? null;
+                if (eventToken && eventToken === lastProcessedEventToken) {
+                    return;
+                }
+
+                if (eventToken) {
+                    lastProcessedEventToken = eventToken;
                 }
 
                 const component = getComponent();
