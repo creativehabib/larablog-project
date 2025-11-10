@@ -4,6 +4,7 @@ import 'pace-progress';
 import '@fortawesome/fontawesome-free/js/all.js';
 import feather from 'feather-icons';
 import "toastr";
+import './media-manager';
 // পেজ প্রথমবার লোড হওয়ার জন্য
 document.addEventListener('DOMContentLoaded', () => {
     feather.replace();

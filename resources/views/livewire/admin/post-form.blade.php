@@ -241,11 +241,11 @@
                             <input type="checkbox" class="custom-control-input" id="isIndexable" wire:model.defer="is_indexable">
                             <label class="custom-control-label" for="isIndexable">Allow search engines to index</label>
                         </div>
-                        <input type="text" id="profile-photo">
-                        <img src="" id="profile-photo-preview">
-                        <button onclick="filemanager.selectFile('profile-photo')">Choose</button>
+                        <input type="text" id="profile-photo" class="form-control mb-2">
+                        <img src="" id="profile-photo-preview" class="img-thumbnail d-none mb-2" data-filemanager-preview-for="profile-photo" alt="Selected media preview">
+                        <button type="button" class="btn btn-outline-primary" onclick="return filemanager.selectFile('profile-photo');">Choose</button>
                     </div>
-                    <button onclick="filemanager.bulkSelectFile('myBulkSelectCallback')">Choose Images</button>
+                    <button type="button" class="btn btn-outline-secondary mt-3" onclick="return filemanager.bulkSelectFile('myBulkSelectCallback');">Choose Images</button>
                 </div>
             </div>
         </div>

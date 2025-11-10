@@ -126,19 +126,34 @@
                             this.openModal();
                         });
 
-                        // এটি আর দরকার নেই, কারণ উপরের 'x-on' ইভেন্টটিই মডাল বন্ধ করবে
-                        // window.addEventListener('mediaPickerClosed', () => {
-                        //     this.closeModal();
-                        // });
+                        window.addEventListener('mediaPickerClosed', () => {
+                            this.closeModal();
+                        });
                     },
                     openModal() {
                         this.show = true;
+                        window.dispatchEvent(new CustomEvent('media-modal:opened', {
+                            detail: {
+                                id: this.id,
+                                source: 'media-picker-modal',
+                            }
+                        }));
                         if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
                             Livewire.dispatch('mediaPickerOpened');
                         }
                     },
                     closeModal() {
+                        if (!this.show) {
+                            return;
+                        }
+
                         this.show = false;
+                        window.dispatchEvent(new CustomEvent('media-modal:closed', {
+                            detail: {
+                                id: this.id,
+                                source: 'media-picker-modal',
+                            }
+                        }));
                     }
                 }));
             });
