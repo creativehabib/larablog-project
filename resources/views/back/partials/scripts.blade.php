@@ -16,4 +16,5 @@
 <x-toastr></x-toastr>
 @kropifyScripts
 @livewireScripts
+@mediaSelectorStyles
 @stack('scripts')

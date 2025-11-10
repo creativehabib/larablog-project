@@ -228,6 +228,13 @@
                         </div>
                     @endif
 
+                    <livewire:media-selector
+                        wire:model="media"
+                        :multiple="true"
+                        :canUpload="true"
+                        :restrictToCurrentUser="true"
+                    />
+
                     {{--Post Options--}}
                     <div class="form-group">
                         <label>Post Options</label>
@@ -243,7 +250,11 @@
                             <input type="checkbox" class="custom-control-input" id="isIndexable" wire:model.defer="is_indexable">
                             <label class="custom-control-label" for="isIndexable">Allow search engines to index</label>
                         </div>
+                        <input type="text" id="profile-photo">
+                        <img src="" id="profile-photo-preview">
+                        <button onclick="filemanager.selectFile('profile-photo')">Choose</button>
                     </div>
+                    <button onclick="filemanager.bulkSelectFile('myBulkSelectCallback')">Choose Images</button>
                 </div>
             </div>
         </div>
@@ -304,6 +315,7 @@
                 }
 
                 editorInstance = CKEDITOR.replace(textarea.id, {
+                    filebrowserBrowseUrl: filemanager.ckBrowseUrl,
                     mathJaxLib: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML',
                     height: 200,
                     uiColor: '',

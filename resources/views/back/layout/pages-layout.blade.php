@@ -21,6 +21,9 @@
     <meta name="theme-color" content="#3063A0"><!-- End FAVICONS -->
     <!-- GOOGLE FONT -->
    @include('back.partials.styles')
+    @FilemanagerScript
+    @livewireStyles
+</head>
 </head>
 <body>
     <!-- .app -->
