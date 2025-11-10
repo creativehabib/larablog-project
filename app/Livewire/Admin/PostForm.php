@@ -235,6 +235,17 @@ class PostForm extends Component
         }
     }
 
+    public function updatedCoverImagePath($value): void
+    {
+        $normalized = $this->normalizeMediaLibraryPath($value);
+
+        if ($normalized === $value) {
+            return;
+        }
+
+        $this->cover_image_path = $normalized;
+    }
+
     public function removeExistingVideo(): void
     {
         if (! $this->existingVideoPath) {
@@ -342,6 +353,9 @@ class PostForm extends Component
         if (blank($data['slug'])) {
             $data['slug'] = $this->generateUniqueSlug($this->title);
         }
+
+        $this->cover_image_path = $this->normalizeMediaLibraryPath($this->cover_image_path);
+        $this->existingThumbnail = $this->normalizeMediaLibraryPath($this->existingThumbnail);
 
         if ($this->content_type === Post::CONTENT_TYPE_VIDEO && ! in_array($this->video_source, [Post::VIDEO_SOURCE_EMBED, Post::VIDEO_SOURCE_UPLOAD], true)) {
             $this->video_source = Post::VIDEO_SOURCE_EMBED;
