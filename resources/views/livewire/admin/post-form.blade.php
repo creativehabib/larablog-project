@@ -305,8 +305,7 @@
                     return;
                 }
 
-                editorInstance = CKEDITOR.replace(textarea.id, {
-                    filebrowserBrowseUrl: filemanager.ckBrowseUrl,
+                const editorConfig = {
                     mathJaxLib: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_HTML',
                     height: 200,
                     uiColor: '',
@@ -328,7 +327,19 @@
                     ],
                     allowedContent: true,
                     extraAllowedContent: '*(*){*}',
-                });
+                };
+
+                const filemanagerBrowseUrl = typeof window !== 'undefined'
+                    && window.filemanager
+                    && typeof window.filemanager.ckBrowseUrl === 'string'
+                    ? window.filemanager.ckBrowseUrl
+                    : null;
+
+                if (filemanagerBrowseUrl) {
+                    editorConfig.filebrowserBrowseUrl = filemanagerBrowseUrl;
+                }
+
+                editorInstance = CKEDITOR.replace(textarea.id, editorConfig);
 
                 // সিলেকশন সেভ করা
                 editorInstance.on('selectionChange', function () {
