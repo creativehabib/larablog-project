@@ -404,6 +404,16 @@
                     payload = payload[0];
                 }
 
+                if (
+                    !Array.isArray(payload)
+                    && typeof payload === 'object'
+                    && payload !== null
+                    && !('url' in payload || 'full_url' in payload || 'path' in payload)
+                    && Object.prototype.hasOwnProperty.call(payload, 0)
+                ) {
+                    payload = payload[0];
+                }
+
                 if (typeof payload === 'string') {
                     return {
                         url: payload,
