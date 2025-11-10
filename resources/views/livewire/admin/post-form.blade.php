@@ -447,6 +447,11 @@
 
                 if (window.selectingThumbnail) {
                     console.log('POST-FORM: Inserting as THUMBNAIL');
+
+                    // Update the Livewire state immediately so Alpine can react
+                    component.set('cover_image', imageUrl);
+                    component.set('cover_image_path', imagePath ?? null);
+
                     component.call('setCoverImageFromLibrary', imagePath, imageUrl);
                     window.selectingThumbnail = false;
                     return;
