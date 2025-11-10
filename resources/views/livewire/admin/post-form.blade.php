@@ -218,22 +218,13 @@
 
                             <div x-show="imageUrl" class="mt-2">
                                 <p class="text-muted small mb-2">Current thumbnail:</p>
-                                <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;" />
-
-                                {{-- এই বাটনটি আপনার JS-এর '$wire.clearCoverImage()' লজিকের সাথে মিলবে --}}
+                                <img :src="imageUrl" class="img-thumbnail" style="max-height: 180px;"  alt="thumbnail"/>
                                 <button type="button" @click="imageUrl = null; $wire.clearCoverImage()" class="btn btn-sm btn-outline-danger mt-2">
                                     Remove
                                 </button>
                             </div>
                         </div>
                     @endif
-
-                    <livewire:media-selector
-                        wire:model="media"
-                        :multiple="true"
-                        :canUpload="true"
-                        :restrictToCurrentUser="true"
-                    />
 
                     {{--Post Options--}}
                     <div class="form-group">
