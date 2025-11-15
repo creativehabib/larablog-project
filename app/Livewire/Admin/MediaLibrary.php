@@ -313,7 +313,7 @@ class MediaLibrary extends Component
 
         $details['__eventToken'] = $details['__eventToken'] ?? (string) Str::uuid();
 
-        $this->dispatch($this->selectEvent, $details);
+        $this->dispatch($this->selectEvent, detail: $details);
         $this->dispatch('mediaPickerClosed');
         $this->clearSelection();
     }
