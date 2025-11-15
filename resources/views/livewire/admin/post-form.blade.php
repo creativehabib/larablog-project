@@ -435,6 +435,35 @@
                 return null;
             };
 
+            const showMediaDetailsAlert = (detail) => {
+                if (!detail || typeof alert !== 'function') {
+                    return;
+                }
+
+                const messageParts = [];
+                const append = (label, value) => {
+                    if (value === null || value === undefined || value === '') {
+                        return;
+                    }
+                    messageParts.push(`${label}: ${value}`);
+                };
+
+                append('ID', detail.id);
+                append('Name', detail.name);
+                append('URL', detail.url ?? detail.full_url ?? detail.path);
+                append('Path', detail.path);
+                append('Type', detail.type);
+                append('MIME Type', detail.mime_type ?? detail.mimeType);
+                append('Size', detail.size);
+                append('Dimensions', detail.dimensions);
+
+                const finalMessage = messageParts.length
+                    ? `Selected media details:\n\n${messageParts.join('\n')}`
+                    : 'Selected media details could not be determined.';
+
+                alert(finalMessage);
+            };
+
             const processImageSelection = (detail) => {
                 const normalizedDetail = normalizeMediaDetail(detail);
                 if (!normalizedDetail) {
@@ -449,6 +478,8 @@
                 if (eventToken) {
                     lastProcessedEventToken = eventToken;
                 }
+
+                showMediaDetailsAlert(normalizedDetail);
 
                 const component = getComponent();
                 if (!component) {
