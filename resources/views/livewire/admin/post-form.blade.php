@@ -282,6 +282,7 @@
             let imageToReplace = null;
             let savedSelection = null;
             let lastProcessedEventToken = null;
+            let pendingEditorInsertion = null;
             window.selectingThumbnail = false; // গ্লোবাল ভেরিয়েবল
 
             const destroyEditor = () => {
@@ -341,6 +342,10 @@
 
                 editorInstance = CKEDITOR.replace(textarea.id, editorConfig);
 
+                editorInstance.on('instanceReady', () => {
+                    flushPendingEditorInsertion();
+                });
+
                 // সিলেকশন সেভ করা
                 editorInstance.on('selectionChange', function () {
                     const selection = editorInstance.getSelection();
@@ -392,42 +397,99 @@
                         component.set('description', editorInstance.getData());
                     }
                 });
+
+                flushPendingEditorInsertion();
             };
 
             // -----------------------------------------------------------------
             // ইভেন্ট লিসেনার (এটি আপনার পাঠানো নোটিফিকেশন যোগ করবে)
             // -----------------------------------------------------------------
             const normalizeMediaDetail = (detail) => {
-                let payload = detail;
+                const hasMediaProps = (value) => (
+                    value
+                    && typeof value === 'object'
+                    && (
+                        'url' in value
+                        || 'full_url' in value
+                        || 'fullUrl' in value
+                        || 'path' in value
+                        || 'storage_path' in value
+                        || 'location' in value
+                        || 'src' in value
+                    )
+                );
 
-                if (Array.isArray(payload) && payload.length > 0) {
-                    payload = payload[0];
-                }
+                const unwrapPayload = (value) => {
+                    let current = value;
+                    const visited = new Set();
+                    const nestedKeys = ['detail', 'data', 'media', 'item', 'payload', 'value'];
 
-                if (
-                    !Array.isArray(payload)
-                    && typeof payload === 'object'
-                    && payload !== null
-                    && !('url' in payload || 'full_url' in payload || 'path' in payload)
-                    && Object.prototype.hasOwnProperty.call(payload, 0)
-                ) {
-                    payload = payload[0];
-                }
+                    while (current) {
+                        if (Array.isArray(current) && current.length > 0) {
+                            current = current[0];
+                            continue;
+                        }
+
+                        if (
+                            typeof current === 'object'
+                            && current !== null
+                            && !Array.isArray(current)
+                            && !hasMediaProps(current)
+                        ) {
+                            let next = null;
+
+                            for (const key of nestedKeys) {
+                                if (Object.prototype.hasOwnProperty.call(current, key)) {
+                                    next = current[key];
+                                    break;
+                                }
+                            }
+
+                            if (next === null && Object.prototype.hasOwnProperty.call(current, 0)) {
+                                next = current[0];
+                            }
+
+                            if (next !== null && !visited.has(next)) {
+                                visited.add(next);
+                                current = next;
+                                continue;
+                            }
+                        }
+
+                        break;
+                    }
+
+                    return current;
+                };
+
+                let payload = unwrapPayload(detail);
 
                 if (typeof payload === 'string') {
                     return {
                         url: payload,
+                        full_url: payload,
+                        fullUrl: payload,
                         path: payload,
                     };
                 }
 
                 if (typeof payload === 'object' && payload !== null) {
-                    const resolvedUrl = payload.url ?? payload.full_url ?? payload.path ?? null;
-                    const resolvedPath = payload.path ?? resolvedUrl ?? null;
+                    const resolvedUrl = payload.url
+                        ?? payload.full_url
+                        ?? payload.fullUrl
+                        ?? payload.location
+                        ?? payload.src
+                        ?? payload.path
+                        ?? null;
+                    const resolvedPath = payload.path
+                        ?? payload.full_path
+                        ?? payload.storage_path
+                        ?? resolvedUrl
+                        ?? null;
 
                     return {
                         ...payload,
-                        ...(resolvedUrl ? { url: resolvedUrl } : {}),
+                        ...(resolvedUrl ? { url: resolvedUrl, full_url: resolvedUrl, fullUrl: resolvedUrl } : {}),
                         ...(resolvedPath ? { path: resolvedPath } : {}),
                     };
                 }
@@ -435,38 +497,52 @@
                 return null;
             };
 
-            const showMediaDetailsAlert = (detail) => {
-                if (!detail || typeof alert !== 'function') {
-                    return;
+            const flushPendingEditorInsertion = (component = null) => {
+                if (!pendingEditorInsertion) {
+                    return false;
                 }
 
-                const messageParts = [];
-                const append = (label, value) => {
-                    if (value === null || value === undefined || value === '') {
-                        return;
+                const resolvedComponent = component ?? getComponent();
+                if (!resolvedComponent) {
+                    console.error('POST-FORM: Unable to resolve Livewire component during deferred insertion.');
+                    return false;
+                }
+
+                if (!editorInstance || editorInstance.status !== 'ready') {
+                    return false;
+                }
+
+                const { imageUrl } = pendingEditorInsertion;
+
+                if (!imageUrl) {
+                    pendingEditorInsertion = null;
+                    return false;
+                }
+
+                console.log('POST-FORM: Inserting into CKEDITOR');
+                if (imageToReplace) {
+                    imageToReplace.setAttribute('src', imageUrl);
+                } else {
+                    editorInstance.focus();
+                    if (savedSelection) {
+                        editorInstance.getSelection().selectRanges([savedSelection]);
                     }
-                    messageParts.push(`${label}: ${value}`);
-                };
+                    editorInstance.insertHtml('<img src="' + imageUrl + '" alt="" />');
+                }
 
-                append('ID', detail.id);
-                append('Name', detail.name);
-                append('URL', detail.url ?? detail.full_url ?? detail.path);
-                append('Path', detail.path);
-                append('Type', detail.type);
-                append('MIME Type', detail.mime_type ?? detail.mimeType);
-                append('Size', detail.size);
-                append('Dimensions', detail.dimensions);
+                resolvedComponent.set('description', editorInstance.getData());
 
-                const finalMessage = messageParts.length
-                    ? `Selected media details:\n\n${messageParts.join('\n')}`
-                    : 'Selected media details could not be determined.';
+                imageToReplace = null;
+                savedSelection = null;
+                pendingEditorInsertion = null;
 
-                alert(finalMessage);
+                return true;
             };
 
             const processImageSelection = (detail) => {
                 const normalizedDetail = normalizeMediaDetail(detail);
                 if (!normalizedDetail) {
+                    console.warn('POST-FORM: Unable to normalize media detail.', detail);
                     return;
                 }
 
@@ -479,8 +555,6 @@
                     lastProcessedEventToken = eventToken;
                 }
 
-                showMediaDetailsAlert(normalizedDetail);
-
                 const component = getComponent();
                 if (!component) {
                     console.error('POST-FORM: Livewire component not found.');
@@ -488,8 +562,16 @@
                     return;
                 }
 
-                const imageUrl = normalizedDetail.url ?? normalizedDetail.full_url ?? normalizedDetail.path;
-                const imagePath = normalizedDetail.path ?? normalizedDetail.url ?? normalizedDetail.full_url;
+                const imageUrl = normalizedDetail.url
+                    ?? normalizedDetail.full_url
+                    ?? normalizedDetail.fullUrl
+                    ?? normalizedDetail.location
+                    ?? normalizedDetail.path;
+                const imagePath = normalizedDetail.path
+                    ?? normalizedDetail.storage_path
+                    ?? normalizedDetail.url
+                    ?? normalizedDetail.full_url
+                    ?? normalizedDetail.fullUrl;
 
                 if (!imageUrl) {
                     console.error('POST-FORM: No URL found in event detail', normalizedDetail);
@@ -509,21 +591,11 @@
                     return;
                 }
 
-                console.log('POST-FORM: Inserting into CKEDITOR');
-                if (imageToReplace) {
-                    imageToReplace.setAttribute('src', imageUrl);
-                } else if (editorInstance) {
-                    editorInstance.focus();
-                    if (savedSelection) editorInstance.getSelection().selectRanges([savedSelection]);
-                    editorInstance.insertHtml('<img src="' + imageUrl + '" alt="" />');
-                }
+                pendingEditorInsertion = { imageUrl };
 
-                if (editorInstance) {
-                    component.set('description', editorInstance.getData());
+                if (!flushPendingEditorInsertion(component)) {
+                    console.log('POST-FORM: Editor not ready. Deferring image insertion.');
                 }
-
-                imageToReplace = null;
-                savedSelection = null;
             };
 
             const handleBrowserImageSelection = (event) => {
