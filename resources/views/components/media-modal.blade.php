@@ -30,12 +30,60 @@
             return;
         }
 
+        const unwrapPayload = (value) => {
+            let current = value;
+            const visited = new Set();
+            const nestedKeys = ['detail', 'data', 'media', 'payload', 'value', 'item'];
+
+            while (current) {
+                if (Array.isArray(current) && current.length > 0) {
+                    current = current[0];
+                    continue;
+                }
+
+                if (
+                    typeof current === 'object'
+                    && current !== null
+                    && !Array.isArray(current)
+                ) {
+                    if (
+                        'url' in current
+                        || 'full_url' in current
+                        || 'fullUrl' in current
+                        || 'path' in current
+                    ) {
+                        break;
+                    }
+
+                    let next = null;
+
+                    for (const key of nestedKeys) {
+                        if (Object.prototype.hasOwnProperty.call(current, key)) {
+                            next = current[key];
+                            break;
+                        }
+                    }
+
+                    if (next === null && Object.prototype.hasOwnProperty.call(current, 0)) {
+                        next = current[0];
+                    }
+
+                    if (next !== null && !visited.has(next)) {
+                        visited.add(next);
+                        current = next;
+                        continue;
+                    }
+                }
+
+                break;
+            }
+
+            return current;
+        };
+
+        let payload = unwrapPayload($event.detail);
+
         console.log('Livewire ইভেন্ট পাওয়া গেছে:', $event.detail);
-
-        let payload = Array.isArray($event.detail) && $event.detail.length > 0
-            ? $event.detail[0]
-            : $event.detail;
-
         console.log('পাওয়া ডেটা (Payload):', payload);
 
         let detailData = {};
@@ -50,11 +98,17 @@
                 ...payload,
             };
 
-            const resolvedUrl = detailData.url ?? detailData.full_url ?? detailData.path ?? null;
+            const resolvedUrl = detailData.url
+                ?? detailData.full_url
+                ?? detailData.fullUrl
+                ?? detailData.path
+                ?? null;
             const resolvedPath = detailData.path ?? resolvedUrl ?? null;
 
             if (resolvedUrl) {
                 detailData.url = resolvedUrl;
+                detailData.full_url = resolvedUrl;
+                detailData.fullUrl = resolvedUrl;
             }
 
             if (resolvedPath) {
