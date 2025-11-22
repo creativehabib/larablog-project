@@ -10,6 +10,7 @@ use App\Support\BanglaFormatter;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
@@ -44,10 +45,14 @@ class AppServiceProvider extends ServiceProvider
         // $settings, $logoUrl, $navCategories, $currentDateBangla এই ভেরিয়েবলগুলো টার্গেট করা হয়েছে।
         View::composer(['front.partials.header', 'front.partials.footer', 'front.partials.sidebar', 'layouts.frontend'], function ($view) {
 
-            // সেটিংস ডেটা (ক্যাশিং সহ)
-            $settings = Cache::remember('general_settings', now()->addHour(), function () {
-                return GeneralSetting::query()->first();
-            });
+            // সেটিংস ডেটা (ক্যাশিং সহ) — টেবিল না থাকলে বা কনসোলে চললে স্কিপ
+            $settings = null;
+
+            if (! $this->app->runningInConsole() && Schema::hasTable('general_settings')) {
+                $settings = Cache::remember('general_settings', now()->addHour(), function () {
+                    return GeneralSetting::query()->first();
+                });
+            }
 
             $logoUrl = null;
             if ($settings?->site_logo) {

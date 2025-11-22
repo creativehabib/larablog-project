@@ -5,6 +5,7 @@ use App\Models\Post;
 use App\Models\Setting;
 use App\Support\PermalinkManager;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 if (!function_exists('settings')) {
     function settings($key = null) {
@@ -28,6 +29,10 @@ if (!function_exists('general_settings')) {
     {
         // 1 day cache duration
         $duration = 60 * 60 * 24;
+
+        if (! Schema::hasTable('general_settings')) {
+            return null;
+        }
 
         $settings = Cache::remember('general_settings', $duration, function () {
             return GeneralSetting::first();
